@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Me Dejó en Visto</title>
+<meta name="description" content="Descubre cómo ha cambiado la comunicación en tu relación. Análisis privado de tu chat de WhatsApp, hecho en tu propio teléfono.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root{--bg:#faf7f5;--card:#fff;--ink:#1d1b20;--mute:#6b6570;--line:#ebe5e2;--accent:#c2185b;--accent-ink:#fff;--soft:#fce4ec;--a:#3f51b5;--b:#c2185b;--ok:#2e7d32;--okbg:#e8f5e9;--warn:#b45309;--warnbg:#fff3e0;--bad:#c62828;--badbg:#ffebee;--up:#1565c0;--upbg:#e3f2fd}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#141216;--card:#1f1c22;--ink:#f2eef4;--mute:#a59fab;--line:#2f2b34;--accent:#f06292;--accent-ink:#1d1b20;--soft:#3a1d2a;--a:#8c9eff;--b:#f06292;--ok:#81c784;--okbg:#1b2e1d;--warn:#ffb74d;--warnbg:#33260f;--bad:#ef9a9a;--badbg:#3a1a1a;--up:#90caf9;--upbg:#13283d}}
+:root[data-theme=dark]{--bg:#141216;--card:#1f1c22;--ink:#f2eef4;--mute:#a59fab;--line:#2f2b34;--accent:#f06292;--accent-ink:#1d1b20;--soft:#3a1d2a;--a:#8c9eff;--b:#f06292;--ok:#81c784;--okbg:#1b2e1d;--warn:#ffb74d;--warnbg:#33260f;--bad:#ef9a9a;--badbg:#3a1a1a;--up:#90caf9;--upbg:#13283d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px 48px}
+.hero{padding:40px 0 20px;text-align:center}
+.brand{font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px;color:var(--accent)}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.1;margin:10px 0 12px;font-weight:800}
+.lead{color:var(--mute);font-size:17px;max-width:600px;margin:0 auto}
+.badge{display:inline-flex;gap:8px;align-items:center;margin-top:16px;padding:8px 14px;border-radius:999px;background:var(--okbg);color:var(--ok);font-weight:600;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin:16px 0}
+h2{font-size:20px;margin:0 0 4px}
+.sub{color:var(--mute);font-size:14px;margin:0 0 14px}
+.steps{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 16px}
+.step{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:14px}
+.step b{display:block;margin-bottom:4px}
+.drop{display:block;border:2px dashed var(--accent);border-radius:16px;padding:28px 16px;text-align:center;cursor:pointer;background:var(--soft);transition:transform .15s}
+.drop:hover{transform:translateY(-1px)}
+.drop strong{display:block;font-size:18px;color:var(--accent)}
+.drop span{color:var(--mute);font-size:14px}
+.drop input{display:none}
+.err{color:var(--bad);font-weight:600;margin-top:10px}
+.who{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{appearance:none;border:0;border-radius:12px;padding:14px 16px;font:600 16px Inter,system-ui,sans-serif;cursor:pointer;background:var(--accent);color:var(--accent-ink);text-decoration:none;display:inline-block;text-align:center}
+.btn.ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kpi{background:var(--bg);border-radius:12px;padding:12px}
+.kpi .v{font-size:22px;font-weight:800}
+.kpi .l{font-size:13px;color:var(--mute)}
+.split{display:flex;height:14px;border-radius:999px;overflow:hidden;margin:8px 0 6px}
+.split div:first-child{background:var(--a)}.split div:last-child{background:var(--b)}
+.legend{display:flex;justify-content:space-between;font-size:14px;font-weight:600}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.index{display:flex;gap:20px;align-items:center}
+.ring{flex:0 0 auto;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;position:relative}
+.ring b{font-size:34px;font-weight:800}
+.ring small{display:block;font-size:12px;color:var(--mute);text-align:center;margin-top:-6px}
+.sig{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card);position:relative}
+.sig h3{margin:0 0 2px;font-size:16px}
+.sig p{margin:0 0 10px;color:var(--mute);font-size:13px}
+.ba{display:flex;gap:10px}
+.ba div{flex:1;background:var(--bg);border-radius:10px;padding:8px 10px}
+.ba small{display:block;color:var(--mute);font-size:12px}
+.ba b{font-size:17px}
+.pill{position:absolute;top:12px;right:12px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+.p-estable{background:var(--okbg);color:var(--ok)}.p-moderado{background:var(--warnbg);color:var(--warn)}.p-fuerte{background:var(--badbg);color:var(--bad)}.p-mejora{background:var(--upbg);color:var(--up)}.p-nd{background:var(--bg);color:var(--mute)}
+.chart{position:relative;height:230px}
+.tl{list-style:none;margin:0;padding:0;border-left:3px solid var(--line);margin-left:6px}
+.tl li{position:relative;padding:0 0 16px 18px}
+.tl li::before{content:"";position:absolute;left:-8px;top:5px;width:13px;height:13px;border-radius:50%;background:var(--card);border:3px solid var(--accent)}
+.tl li.good::before{border-color:var(--ok)}
+.tl .m{font-weight:700;font-size:14px;text-transform:capitalize}
+.tl .t{font-size:14px;color:var(--ink)}
+.locked{position:relative;overflow:hidden;border-radius:14px}
+.locked .blur{filter:blur(6px);pointer-events:none;user-select:none;opacity:.7}
+.lockcta{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;background:linear-gradient(180deg,transparent,var(--card) 55%)}
+.lockcta p{margin:6px 0 12px;font-size:14px;color:var(--mute);max-width:420px}
+.paywall{background:var(--soft);border:1px solid var(--accent)}
+.paywall ul{margin:8px 0 14px;padding-left:20px}
+.note{font-size:14px;color:var(--mute)}
+.close{border-left:4px solid var(--accent)}
+footer{text-align:center;color:var(--mute);font-size:13px;padding:24px 0}
+[hidden]{display:none!important}
+.pdfhead{display:none}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:right;font-weight:700;padding:6px 4px;border-bottom:2px solid var(--line)}
+.tbl th:first-child,.tbl td:first-child{text-align:left;color:var(--mute);font-weight:500}
+.tbl td{text-align:right;padding:8px 4px;border-bottom:1px solid var(--line);font-weight:700}
+.chips span{display:inline-block;background:var(--bg);border-radius:999px;padding:4px 10px;margin:3px 2px;font-size:13px}
+.chips small{color:var(--mute);margin-left:4px}
+.emo{font-size:22px;margin-right:10px;white-space:nowrap}.emo small{font-size:12px;color:var(--mute)}
+.pl{display:grid;grid-template-columns:minmax(90px,38%) 1fr 34px;gap:8px;align-items:center;font-size:14px;margin:6px 0}
+.pl .bar{display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--line)}
+.pl .bar i:first-child{background:var(--a)}.pl .bar i:last-child{background:var(--b)}
+.pl b{text-align:right}
+body.pdfmode .noprint{display:none!important}
+body.pdfmode .pdfhead{display:block;text-align:center;margin:0 0 8px}
+body.pdfmode .pdfhead b{font-size:22px}
+body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
+@media (max-width:640px){.steps,.grid2,.who{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}.index{flex-direction:column;text-align:center}}
+@media print{.noprint{display:none!important}body{background:#fff;color:#000}.card,.sig{break-inside:avoid;border-color:#ddd}.hero{padding-top:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="brand">✓✓ Me Dejó en Visto</div>
+    <h1>Lo que tu chat dice de tu relación</h1>
+    <p class="lead">Carga tu chat de WhatsApp con tu pareja y mira la comunicación con datos: quién busca a quién, cuánto tardan en responder y cómo ha cambiado el afecto con el tiempo.</p>
+    <div class="badge">🔒 Tu chat se analiza en tu teléfono. Nunca se sube a ningún servidor.</div>
+  </header>
+
+  <section class="card noprint" id="gate" hidden></section>
+
+  <section class="card noprint" id="cargar">
+    <h2>1. Exporta tu chat</h2>
+    <p class="sub">Toma menos de un minuto. Elige <b>Sin archivos</b> para un análisis rápido, o <b>Incluir archivos</b> si quieres saber cuánto duran los audios y separar fotos, stickers y videos (el archivo pesa más).</p>
+    <div class="steps">
+      <div class="step"><b>Android</b>Abre el chat, toca los tres puntos, luego Más y Exportar chat. Guárdalo en tu teléfono.</div>
+      <div class="step"><b>iPhone</b>Abre el chat, toca el nombre del contacto y luego Exportar chat. Guárdalo en Archivos.</div>
+    </div>
+    <h2>2. Cárgalo aquí</h2>
+    <label class="drop">
+      <input type="file" id="file" accept=".txt,.zip,text/plain,application/zip">
+      <strong>Toca para elegir el archivo</strong>
+      <span>Acepta el .zip o el .txt que exporta WhatsApp</span>
+    </label>
+    <div class="note" id="status"></div>
+    <div class="err" id="err" hidden></div>
+  </section>
+
+  <section class="card noprint" id="quien" hidden>
+    <h2>¿Quién eres tú en este chat?</h2>
+    <p class="sub" id="quienSub"></p>
+    <div class="who" id="whoBtns"></div>
+  </section>
+
+  <div id="res" hidden></div>
+
+  <footer>
+    Solo para mayores de 18 años. Me Dejó en Visto muestra patrones de comunicación. No determina infidelidad ni intenciones, y no reemplaza una conversación honesta ni el acompañamiento de un profesional.
+  </footer>
+</div>
+
+<script>
+/* ========= CONFIGURACIÓN DE LA EDICIÓN ========= */
+const EDICION = 'gratis';           // 'gratis' o 'completa'
+const PAY_URL = 'https://checkout.nequi.wompi.co/l/MMzJgS';
+const PRECIO  = '$19.900';
+const WOMPI_API = 'https://production.wompi.co/v1/transactions/';
+const MONTO_MIN = 1990000;            // en centavos: 19.900 pesos
+const LINK_ID   = '';                 // opcional: id del link de pago de Wompi, para aceptar solo ese link
+const DIAS_VALIDEZ = 7;               // días que dura el acceso después del pago
+const AYUDA_URL = '';                // opcional: correo (mailto:...) o Instagram de la marca; vacío oculta el botón de ayuda
+/* =============================================== */
+
+// <logic>
+const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESL = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const TS = '(\\d{1,2})[\\/.\\-](\\d{1,2})[\\/.\\-](\\d{2,4}),?\\s+(\\d{1,2}):(\\d{2})(?::(\\d{2}))?\\s*((?:a|p)\\.?\\s?m\\.?)?';
+const RE_IOS = new RegExp('^\\[' + TS + '\\]\\s*([\\s\\S]*)$', 'i');
+const RE_AND = new RegExp('^' + TS + '\\s*[-\\u2013]\\s*([\\s\\S]*)$', 'i');
+const RE_NAME = /^([^:]{1,60}?):\s?([\s\S]*)$/;
+const RE_DEL = /^(se eliminó este mensaje|eliminaste este mensaje|este mensaje fue eliminado|this message was deleted|you deleted this message)\.?$/i;
+const RE_MEDIA = /(<multimedia omitido>|<media omitted>|<archivo omitido>|(imagen|video|audio|sticker|gif|documento) omitid[oa]|(image|video|audio|sticker|gif|document) omitted|^null$)/i;
+const RE_AFF = /(te amo|te quiero|te adoro|te extraño|te extrano|mi amor|amor\b|amorcito|mi vida|mi cielo|cariño|carino|bebé|bebe\b|\bbb\b|mi rey|mi reina|princesa|besos|besito|beso|abrazo|❤|♥|💕|💖|💗|💓|💞|💘|😘|🥰|😍|😚|😙)/i;
+
+const RE_SEX = /(\bsexo\b|sexual|hacer el amor|hacerlo\b|te deseo|ganas de ti|tengo ganas|excitad[oa]|cachond[oa]|arrech[oa]|calient(e|ita|ito)\b|desnud[oa]|encuerad[oa]|\bnudes?\b|\bpack\b|foto hot|\bhot\b|lencer[ií]a|\btanga\b|sin ropa|en la cama|orgasmo|🍆|🍑|💦|😈|🥵)/i;
+
+const RE_ATT_AND = /^([A-Z]{3}-\d{8}-WA\d+\.[a-z0-9]+)\s*\((archivo adjunto|file attached)\)/i;
+const RE_ATT_IOS = /<(?:adjunto|attached):\s*([^>]+)>/i;
+function classify(text){
+  const t = text.trim(); let f = null, m;
+  if ((m = RE_ATT_AND.exec(t))) f = m[1]; else if ((m = RE_ATT_IOS.exec(t))) f = m[1].trim();
+  if (f){ const u = f.toUpperCase();
+    if (/^PTT-|^AUD-|AUDIO|\.OPUS$|\.M4A$|\.AAC$/.test(u)) return {kind:'audio', file:f};
+    if (/^STK-|STICKER|\.WEBP$/.test(u)) return {kind:'sticker', file:f};
+    if (/GIF/.test(u)) return {kind:'gif', file:f};
+    if (/^IMG-|PHOTO|\.JPE?G$|\.PNG$|\.HEIC$/.test(u)) return {kind:'image', file:f};
+    if (/^VID-|VIDEO|\.MP4$|\.MOV$/.test(u)) return {kind:'video', file:f};
+    return {kind:'doc', file:f}; }
+  if (/^<?(audio omitido|audio omitted)/i.test(t)) return {kind:'audio'};
+  if (/^<?(sticker omitido|sticker omitted)/i.test(t)) return {kind:'sticker'};
+  if (/^<?(gif omitido|gif omitted)/i.test(t)) return {kind:'gif'};
+  if (/^<?(imagen omitida|image omitted|foto omitida)/i.test(t)) return {kind:'image'};
+  if (/^<?(video omitido|video omitted)/i.test(t)) return {kind:'video'};
+  if (/^<?(documento omitido|document omitted)/i.test(t)) return {kind:'doc'};
+  if (/^<(multimedia omitido|media omitted)>$/i.test(t) || /^null$/i.test(t)) return {kind:'media'};
+  if (/^(ubicación|ubicacion|location)( en tiempo real)?:|maps\.google\.com\/\?q=/i.test(t)) return {kind:'location'};
+  if (/^(llamada|videollamada|missed (voice|video) call|(voice|video) call)/i.test(t)) return {kind:'call'};
+  return {kind:'text'};
+}
+function callSeconds(t){ let s = 0, m;
+  if ((m = /(\d+)\s*h/i.exec(t))) s += 3600*m[1];
+  if ((m = /(\d+)\s*min/i.exec(t))) s += 60*m[1];
+  if ((m = /(\d+)\s*s(eg)?\b/i.exec(t))) s += +m[1];
+  return s; }
+function oggSeconds(u8){
+  for (let i = u8.length-27; i >= 0; i--){
+    if (u8[i]===0x4f && u8[i+1]===0x67 && u8[i+2]===0x67 && u8[i+3]===0x53){ let g = 0; for (let b = 7; b >= 0; b--) g = g*256 + u8[i+6+b]; return g > 0 ? g/48000 : null; } }
+  return null; }
+const STOP = new Set(('que de la el en y a los se no me te lo le por un una con para es mi tu ya si sí pero más mas muy eso esto esta este está estas estás estoy como cómo qué bueno bien pues porque por qué cuando donde dónde yo tú usted ella él nos les del al las son fue ser hay así asi solo sólo también tambien todo toda todos todas nada algo ahí ahi aquí aqui allá hoy ayer mañana ahora luego entonces vez van voy vas va tengo tienes tiene hace hacer dice dijo sea era eres soy están estaba había has han he ha mis tus sus su unos unas otro otra ese esa esos esas aunque mientras hasta desde sin sobre entre tan tanto cual quien quién mucho mucha poco cosa cosas dia día ok okey sii siii xq pq tmb pa uy ay ah eh oh mmm vale listo claro omitido omitida multimedia mensaje eliminó elimino null https http www com sticker imagen audio video estar tener puedo puede creo sabes vamos verdad tal sería tienes estamos dale nada tampoco ella ellos esté mismo misma cada ver').split(' '));
+const NOPLACE = new Set('dios enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre lunes martes miércoles miercoles jueves viernes sábado sabado domingo navidad whatsapp instagram facebook tiktok google netflix youtube spotify chatgpt'.split(' '));
+const PLACE_NOUNS = /\b(?:la|el|mi|tu|su|al|del)\s+(casa|apartamento|apto|oficina|trabajo|universidad|gym|gimnasio|playa|centro comercial|mall|hotel|motel|finca|restaurante|bar|discoteca|iglesia|cl[ií]nica|hospital|colegio|aeropuerto|parque|supermercado|tienda|cancha|piscina|peluquer[ií]a)\b/gi;
+const RE_PLC = /\b(?:en|al|del|desde|hasta|para)\s+(?:el\s+|la\s+|los\s+|las\s+)?([A-ZÁÉÍÓÚÑ][a-záéíóúñü]{2,}(?:\s+(?:de\s+|del\s+|la\s+)?[A-ZÁÉÍÓÚÑ][a-záéíóúñü]+){0,2})/g;
+const cap = x=>x.charAt(0).toUpperCase()+x.slice(1);
+function habits(msgs, me, pa, dur){
+  const P = {}; [me,pa].forEach(w=>P[w] = {audios:0,audioSec:[],stk:0,gif:0,img:0,vid:0,media:0,calls:0,missed:0,callSec:0,loc:0,words:new Map(),emo:new Map(),places:new Map()});
+  const names = new Set([me,pa].flatMap(n=>n.toLowerCase().split(/\s+/)));
+  const inc = (map,k)=>map.set(k,(map.get(k)||0)+1);
+  for (const m of msgs){
+    const p = P[m.who]; if (!p || m.del) continue;
+    if (m.kind === 'audio'){ p.audios++; if (m.file){ const sec = dur[m.file.toLowerCase()]; if (sec) p.audioSec.push(sec); } }
+    else if (m.kind === 'sticker') p.stk++; else if (m.kind === 'gif') p.gif++; else if (m.kind === 'image') p.img++;
+    else if (m.kind === 'video') p.vid++; else if (m.kind === 'media') p.media++; else if (m.kind === 'location') p.loc++;
+    else if (m.kind === 'call'){ p.calls++; if (/perdida|missed|no contest/i.test(m.text)) p.missed++; else p.callSec += callSeconds(m.text); }
+    else if (m.kind === 'text'){
+      const clean = m.text.replace(/https?:\/\/\S+/g,' ');
+      for (const e of clean.match(/\p{Extended_Pictographic}/gu)||[]) inc(p.emo, e);
+      for (let w of clean.toLowerCase().split(/[^\p{L}]+/u)){
+        if (w.length < 3) continue;
+        if (/^(j+[aeiou]+)+j*$/.test(w) || /^(ha){2,}h?$/.test(w)) w = 'jajaja';
+        if (STOP.has(w) || names.has(w)) continue; inc(p.words, w); }
+      let mm; const found = [];
+      RE_PLC.lastIndex = 0; while ((mm = RE_PLC.exec(clean))){ const pl = mm[1].trim(), lw = pl.toLowerCase();
+        if (NOPLACE.has(lw) || STOP.has(lw) || names.has(lw.split(' ')[0])) continue; inc(p.places, pl); found.push(lw); }
+      PLACE_NOUNS.lastIndex = 0; while ((mm = PLACE_NOUNS.exec(clean))){ const nl = mm[1].toLowerCase(); if (!found.some(f=>f.includes(nl))) inc(p.places, cap(nl)); }
+    }
+  }
+  const weeks = Math.max(1, (msgs[msgs.length-1].t - msgs[0].t)/(7*86400000));
+  const top = (map,n)=>[...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,n);
+  const out = {weeks};
+  for (const w of [me,pa]){ const p = P[w];
+    out[w] = {audios:p.audios, audiosWeek:p.audios/weeks, audioAvg:p.audioSec.length ? p.audioSec.reduce((a,b)=>a+b,0)/p.audioSec.length : null, audioTot:p.audioSec.reduce((a,b)=>a+b,0), audioN:p.audioSec.length,
+      stk:p.stk, gif:p.gif, img:p.img, vid:p.vid, media:p.media, calls:p.calls, missed:p.missed, callSec:p.callSec, loc:p.loc, topWords:top(p.words,15), topEmo:top(p.emo,8)}; }
+  const pl = new Map();
+  [me,pa].forEach((w,i)=>P[w].places.forEach((v,k)=>{ const o = pl.get(k)||{a:0,b:0}; if (i===0) o.a += v; else o.b += v; pl.set(k,o); }));
+  out.places = [...pl.entries()].map(([k,o])=>({k, a:o.a, b:o.b, t:o.a+o.b})).filter(x=>x.t>=2).sort((x,y)=>y.t-x.t).slice(0,10);
+  return out;
+}
+
+const EMO = [
+  {k:'alegria', n:'Alegría', i:'😄', pos:1, re:/(\bj+[aeiou]+j[aeiou]+|\b(ha){2,}|feliz|felicidad|content[oa]|alegr|genial|ch[eé]vere|bacan|qu[eé] bueno|excelente|incre[ií]ble|me encanta|divertid|emocionad|😂|🤣|😄|😁|😃|😊|🙌|🎉|🥳|😆)/i},
+  {k:'carino', n:'Cariño', i:'🥰', pos:1, re:RE_AFF},
+  {k:'deseo', n:'Deseo y erotismo', i:'🔥', pos:1, re:RE_SEX},
+  {k:'enojo', n:'Enojo', i:'😠', neg:1, re:/(rabia|brav[oa]\b|molest|enojad|\bira\b|hart[oa]|me cans[eé]|odio|maldit|mierda|\bjod(a|er|ido|ida)\b|carajo|\bhpta\b|\bhp\b|gonorrea|malparid|idiota|est[uú]pid|imb[eé]cil|c[aá]llate|no me hables|qu[eé] te pasa|😡|😠|🤬|😤|🖕)/i},
+  {k:'tristeza', n:'Tristeza', i:'😢', neg:1, re:/(triste|llor|dolid|me duele|decepci|desilusi|me siento mal|deprim|😢|😭|😞|😔|💔|🥺)/i},
+  {k:'ansiedad', n:'Ansiedad y miedo', i:'😰', neg:1, re:/(preocupad|ansios|ansiedad|nervios|miedo|asustad|angusti|estr[eé]s|no s[eé] qu[eé] hacer|😰|😟|😨|😥)/i},
+  {k:'celos', n:'Celos y desconfianza', i:'🙄', neg:1, re:/(con qui[eé]n (estabas|est[aá]s|andas|hablas)|d[oó]nde estabas|qui[eé]n es (ella|[eé]l|esa|ese)|por ?qu[eé] no (contestas|respondes)|no me contestas|celos|celos[oa]|me mientes|mentir[oa]s[oa]|mentira|me enga[ñn]as|enga[ñn]|infiel|otra vieja|otro man|no te creo|🙄|🤨)/i},
+  {k:'frialdad', n:'Respuestas secas', i:'😐', neg:1, re:/^(ok|oki|okey|okay|aj[aá]|ah ok|ya|s[ií]|no|dale|bueno|m+|k|👍|vale|bn|nada)\.?$/i}
+];
+
+function norm(s){ return s.replace(/[  ]/g,' ').replace(/[‎‏﻿]/g,''); }
+
+function parseChat(raw){
+  const lines = norm(raw).split(/\r?\n/);
+  const recs = []; let cur = null; let dmy = 0, mdy = 0;
+  for (const line of lines){
+    let m = RE_IOS.exec(line) || RE_AND.exec(line);
+    if (m){
+      const a=+m[1], b=+m[2];
+      if (a>12) dmy++; if (b>12) mdy++;
+      const rest = m[8];
+      const nm = RE_NAME.exec(rest);
+      if (nm && !/^https?$/i.test(nm[1].trim())){
+        cur = {a, b, y:+m[3], h:+m[4], mi:+m[5], s:m[6]?+m[6]:0, ap:m[7]||'', who:nm[1].trim(), text:nm[2]};
+        recs.push(cur);
+      } else cur = null; // mensaje del sistema
+    } else if (cur){ cur.text += '\n' + line; }
+  }
+  const dayFirst = !(mdy>0 && dmy===0);
+  const msgs = [];
+  for (const r of recs){
+    let y = r.y < 100 ? 2000 + r.y : r.y;
+    let d = dayFirst ? r.a : r.b, mo = dayFirst ? r.b : r.a;
+    let h = r.h; const ap = r.ap.toLowerCase();
+    if (ap.startsWith('p') && h < 12) h += 12;
+    if (ap.startsWith('a') && h === 12) h = 0;
+    const t = new Date(y, mo-1, d, h, r.mi, r.s);
+    if (isNaN(t)) continue;
+    const text = r.text.trim();
+    const c = classify(text);
+    msgs.push({t, who:r.who, text, del:RE_DEL.test(text), media:RE_MEDIA.test(text) || c.kind !== 'text', kind:c.kind, file:c.file});
+  }
+  msgs.sort((x,y)=>x.t-y.t);
+  const count = {};
+  msgs.forEach(m=>count[m.who]=(count[m.who]||0)+1);
+  const people = Object.entries(count).sort((x,y)=>y[1]-x[1]);
+  return {msgs, people};
+}
+
+function median(arr){ if(!arr.length) return null; const s=[...arr].sort((a,b)=>a-b); const k=Math.floor(s.length/2); return s.length%2?s[k]:(s[k-1]+s[k])/2; }
+function mk(t){ return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0'); }
+
+function annotate(msgs){
+  let prev = null;
+  for (const m of msgs){
+    const gap = prev ? (m.t-prev.t)/60000 : Infinity;
+    m.init = !prev || gap >= 360;
+    m.resp = (prev && prev.who !== m.who && gap <= 720) ? gap : null;
+    m.aff = !m.del && RE_AFF.test(m.text);
+    m.sex = !m.del && RE_SEX.test(m.text);
+    m.emo = (!m.del && m.kind === 'text') ? EMO.filter(e=>e.re.test(m.text.trim())).map(e=>e.k) : [];
+    const h = m.t.getHours(); m.night = h >= 23 || h < 5;
+    prev = m;
+  }
+}
+
+function agg(list, who){
+  const mine = list.filter(m=>m.who===who);
+  const n = mine.length;
+  if (!list.length) return {n:0};
+  const days = Math.max(1, (list[list.length-1].t - list[0].t)/86400000);
+  const inits = list.filter(m=>m.init).length;
+  const del = mine.filter(m=>m.del).length;
+  const live = n - del;
+  const txt = mine.filter(m=>!m.del && !m.media);
+  return {
+    n, perDay: n/days,
+    resp: median(mine.map(m=>m.resp).filter(v=>v!==null)),
+    respN: mine.filter(m=>m.resp!==null).length,
+    initShare: inits ? 100*mine.filter(m=>m.init).length/inits : null, initsN: inits,
+    affRate: live ? 100*mine.filter(m=>m.aff).length/live : null,
+    sexRate: live ? 100*mine.filter(m=>m.sex).length/live : null,
+    nightShare: n ? 100*mine.filter(m=>m.night).length/n : null,
+    delRate: n ? 100*del/n : 0, del,
+    ...(()=>{ const tx = mine.filter(m=>m.kind==='text' && !m.del); const N = tx.length; const emo = {}; EMO.forEach(e=>emo[e.k] = N ? 100*tx.filter(m=>m.emo.includes(e.k)).length/N : null);
+      const pos = N ? 100*tx.filter(m=>m.emo.some(k=>EMO.find(e=>e.k===k).pos)).length/N : null;
+      const neg = N ? 100*tx.filter(m=>m.emo.some(k=>EMO.find(e=>e.k===k).neg && k!=='frialdad')).length/N : null;
+      return {textN:N, emo, posRate:pos, negRate:neg, balance: N ? pos-neg : null}; })(),
+    audios: mine.filter(m=>m.kind==='audio').length, memes: mine.filter(m=>m.kind==='sticker'||m.kind==='gif').length,
+    len: txt.length ? txt.reduce((s,m)=>s+m.text.length,0)/txt.length : null
+  };
+}
+
+function level(adverse, mag, t1, t2){
+  if (mag === null || isNaN(mag)) return 'nd';
+  if (!adverse) return mag >= t1 ? 'mejora' : 'estable';
+  return mag >= t2 ? 'fuerte' : mag >= t1 ? 'moderado' : 'estable';
+}
+
+function analyze(all, me, pa, dur){
+  const msgs = all.filter(m=>m.who===me || m.who===pa);
+  annotate(msgs);
+  const first = msgs[0].t, last = msgs[msgs.length-1].t;
+  const spanDays = (last-first)/86400000;
+  let cut = spanDays >= 150 ? new Date(last - 90*86400000) : new Date(first.getTime() + (last-first)/2);
+  const base = msgs.filter(m=>m.t < cut), rec = msgs.filter(m=>m.t >= cut);
+  const enough = base.filter(m=>m.who===pa).length >= 20 && rec.filter(m=>m.who===pa).length >= 20;
+  const B = agg(base, pa), R = agg(rec, pa);
+  const pct = (b,r)=> (b && b>0 && r!==null) ? 100*(r-b)/b : null;
+  const S = [];
+  // 1 volumen
+  { const p = pct(B.perDay, R.perDay); S.push({k:'vol', t:'Volumen de mensajes', d:'Mensajes por día de '+pa, b:B.perDay, r:R.perDay, fmt:'num', lv: enough&&p!==null ? level(p<0, Math.abs(p), 15, 40) : 'nd', chg:p}); }
+  // 2 iniciativa
+  { const dp = (B.initsN>=5&&R.initsN>=5) ? R.initShare-B.initShare : null; S.push({k:'ini', t:'Iniciativa', d:'Conversaciones que empieza '+pa, b:B.initShare, r:R.initShare, fmt:'pct', lv: enough&&dp!==null ? level(dp<0, Math.abs(dp), 8, 18) : 'nd', chg:dp, pts:true}); }
+  // 3 respuesta
+  { const ok = enough && B.respN>=5 && R.respN>=5; const p = ok ? pct(B.resp, R.resp) : null; const absd = ok ? R.resp-B.resp : 0;
+    S.push({k:'resp', t:'Tiempo de respuesta', d:'Lo que tarda '+pa+' en contestarte (mediana)', b:B.resp, r:R.resp, fmt:'min', lv: p===null ? 'nd' : (Math.abs(absd)<3 ? 'estable' : level(p>0, Math.abs(p), 50, 150)), chg:p}); }
+  // 4 afecto
+  { const ok = enough && B.affRate!==null && B.affRate>=1; const p = ok ? pct(B.affRate, R.affRate) : null; S.push({k:'aff', t:'Expresiones de afecto', d:'Mensajes cariñosos de '+pa+' por cada 100', b:B.affRate, r:R.affRate, fmt:'rate', lv: p===null ? 'nd' : level(p<0, Math.abs(p), 25, 50), chg:p}); }
+  // 5 nocturna
+  { const dp = enough ? R.nightShare-B.nightShare : null; S.push({k:'night', t:'Actividad nocturna', d:'Mensajes de '+pa+' entre 11 p. m. y 5 a. m.', b:B.nightShare, r:R.nightShare, fmt:'pct', lv: dp===null ? 'nd' : level(dp>0, Math.abs(dp), 5, 12), chg:dp, pts:true}); }
+  // 6 eliminados
+  { const dp = enough ? R.delRate-B.delRate : null; let lv='nd'; if (dp!==null){ lv = dp>0 ? (R.del>=2 ? (dp>=1.5?'fuerte':dp>=0.5?'moderado':'estable') : 'estable') : 'estable'; } S.push({k:'del', t:'Mensajes eliminados', d:'Mensajes que '+pa+' borró, por cada 100', b:B.delRate, r:R.delRate, fmt:'rate', lv, chg:dp, pts:true}); }
+  // 7 intimidad
+  { const ok = enough && B.sexRate!==null && B.sexRate>=0.5; const p = ok ? pct(B.sexRate, R.sexRate) : null; S.push({k:'sex', t:'Intimidad', d:'Mensajes de contexto íntimo o sexual de '+pa+' por cada 100', b:B.sexRate, r:R.sexRate, fmt:'rate', lv: p===null ? 'nd' : level(p<0, Math.abs(p), 30, 60), chg:p}); }
+  // 8 tono negativo
+  { const dp = (enough && B.negRate!==null && R.negRate!==null) ? R.negRate-B.negRate : null; S.push({k:'neg', t:'Tono negativo', d:'Mensajes de '+pa+' con enojo, tristeza, celos o ansiedad, por cada 100', b:B.negRate, r:R.negRate, fmt:'rate', lv: dp===null ? 'nd' : level(dp>0, Math.abs(dp), 2, 5), chg:dp, pts:true}); }
+  const score = S.reduce((s,x)=>s+(x.lv==='fuerte'?2:x.lv==='moderado'?1:0),0);
+  const index = Math.round(100*score/16);
+
+  // series mensuales
+  const months = []; { let d = new Date(first.getFullYear(), first.getMonth(), 1); const end = new Date(last.getFullYear(), last.getMonth(), 1); while (d <= end){ months.push(mk(d)); d = new Date(d.getFullYear(), d.getMonth()+1, 1); } }
+  const byM = {}; months.forEach(k=>byM[k]=[]); msgs.forEach(m=>byM[mk(m.t)].push(m));
+  const series = months.map(k=>{ const L = byM[k]; return {k, me:agg(L,me), pa:agg(L,pa)}; });
+
+  // línea de tiempo
+  const ev = [];
+  ev.push({k:mk(first), good:true, t:'Empieza el registro del chat entre '+me+' y '+pa+'.'});
+  const fm = v=>fmtMin(v);
+  for (let i=0;i<series.length;i++){
+    const cur = series[i].pa; if (cur.n < 15) continue;
+    const prev = series.slice(Math.max(0,i-3), i).map(s=>s.pa).filter(s=>s.n>=15);
+    if (!prev.length) continue;
+    const avg = f => { const v = prev.map(f).filter(x=>x!==null&&x!==undefined); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; };
+    const k = series[i].k;
+    const pn = avg(s=>s.n);
+    if (pn && cur.n < pn*0.65) ev.push({k, t:'Los mensajes de '+pa+' bajaron '+Math.round(100*(1-cur.n/pn))+'% frente a los meses anteriores.'});
+    else if (pn && cur.n > pn*1.5) ev.push({k, good:true, t:'Los mensajes de '+pa+' subieron '+Math.round(100*(cur.n/pn-1))+'% frente a los meses anteriores.'});
+    const pr = avg(s=>s.respN>=3?s.resp:null);
+    if (pr && cur.respN>=3 && cur.resp >= 2*pr && cur.resp-pr >= 5) ev.push({k, t:pa+' pasó a tardar '+fm(cur.resp)+' en responder (antes '+fm(pr)+').'});
+    const pa_ = avg(s=>s.affRate);
+    if (pa_ && pa_ >= 2 && cur.affRate !== null && cur.affRate < pa_*0.6) ev.push({k, t:'Las expresiones de afecto de '+pa+' cayeron '+Math.round(100*(1-cur.affRate/pa_))+'%.'});
+    const pnight = avg(s=>s.nightShare);
+    if (pnight!==null && cur.nightShare - pnight >= 12) ev.push({k, t:'Aumentó la actividad nocturna de '+pa+': '+Math.round(cur.nightShare)+'% de sus mensajes entre 11 p. m. y 5 a. m.'});
+    const psx = avg(s=>s.sexRate);
+    if (psx && psx >= 1 && cur.sexRate !== null && cur.sexRate < psx*0.5) ev.push({k, t:'La intimidad en los mensajes de '+pa+' cayó '+Math.round(100*(1-cur.sexRate/psx))+'%.'});
+    const pneg = avg(s=>s.negRate);
+    if (pneg!==null && cur.negRate!==null && cur.textN>=20 && cur.negRate >= Math.max(4, 2*pneg)) ev.push({k, t:'Se disparó el tono negativo de '+pa+': '+Math.round(cur.negRate)+' de cada 100 mensajes con enojo, tristeza, celos o ansiedad.'});
+    if (cur.del >= 3) ev.push({k, t:pa+' eliminó '+cur.del+' mensajes este mes.'});
+    const pi = avg(s=>s.initShare);
+    if (pi!==null && cur.initShare!==null && pi - cur.initShare >= 20) ev.push({k, t:pa+' inició menos conversaciones: pasó de '+Math.round(pi)+'% a '+Math.round(cur.initShare)+'%.'});
+  }
+  const best = series.filter(s=>s.pa.n>=30 && s.pa.affRate!==null).sort((x,y)=>y.pa.affRate-x.pa.affRate)[0];
+  if (best) ev.push({k:best.k, good:true, best:true, t:'El mes con más afecto de '+pa+': '+best.pa.affRate.toFixed(1).replace('.',',')+' mensajes cariñosos por cada 100.'});
+  ev.sort((x,y)=>x.k<y.k?-1:x.k>y.k?1:(x.best?1:0)-(y.best?1:0));
+
+  return {me, pa, first, last, total:msgs.length, nMe:msgs.filter(m=>m.who===me).length, nPa:msgs.filter(m=>m.who===pa).length, cut, enough, S, index, series, ev, spanDays, H:habits(msgs, me, pa, dur||{}), E:{[me]:agg(msgs,me), [pa]:agg(msgs,pa)}};
+}
+
+function fmtMin(v){ if (v===null||v===undefined||isNaN(v)) return 'sin datos'; if (v<1) return 'menos de 1 min'; if (v<60) return Math.round(v)+' min'; if (v<1440) return (v/60).toFixed(1).replace('.',',')+' h'; return (v/1440).toFixed(1).replace('.',',')+' días'; }
+function monthLabel(k, long){ const [y,m]=k.split('-'); return long ? MESL[+m-1]+' de '+y : MES[+m-1]+' '+y.slice(2); }
+if (typeof module !== 'undefined') module.exports = {parseChat, analyze, fmtMin, oggSeconds, classify};
+// </logic>
+
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let DATA = null, DUR = {}, charts = [];
+
+$('#file').addEventListener('change', async e=>{
+  const f = e.target.files[0]; if (!f) return;
+  $('#err').hidden = true; DUR = {}; $('#status').textContent = 'Leyendo el chat...';
+  try{
+    let text, zip = null;
+    if (/\.zip$/i.test(f.name) || f.type.includes('zip')){
+      zip = await JSZip.loadAsync(f);
+      const txts = Object.values(zip.files).filter(z=>!z.dir && /\.txt$/i.test(z.name));
+      if (!txts.length) throw new Error('El .zip no trae el archivo de texto del chat.');
+      txts.sort((a,b)=>(/chat/i.test(b.name)?1:0)-(/chat/i.test(a.name)?1:0));
+      text = await txts[0].async('string');
+    } else text = await f.text();
+    DATA = parseChat(text);
+    if (zip){
+      const need = new Set(DATA.msgs.filter(m=>m.kind==='audio' && m.file).map(m=>m.file.toLowerCase()));
+      const ents = Object.values(zip.files).filter(z=>!z.dir && /\.opus$/i.test(z.name) && need.has(z.name.split('/').pop().toLowerCase()));
+      let i = 0;
+      for (const z of ents){
+        const sec = oggSeconds(await z.async('uint8array')); if (sec) DUR[z.name.split('/').pop().toLowerCase()] = sec;
+        if (++i % 20 === 0) $('#status').textContent = 'Midiendo audios: '+i+' de '+ents.length;
+      }
+    }
+    $('#status').textContent = '';
+    if (DATA.people.length < 2 || DATA.msgs.length < 50) throw new Error('No encontramos suficientes mensajes entre dos personas. Revisa que sea el chat exportado de WhatsApp con al menos 50 mensajes.');
+    const [p1,p2] = DATA.people;
+    const third = DATA.people[2];
+    $('#quienSub').textContent = third && third[1] > 0.05*DATA.msgs.length
+      ? 'Parece un chat de grupo. Analizaremos a las dos personas que más escriben.'
+      : 'Encontramos '+DATA.msgs.length.toLocaleString('es-CO')+' mensajes. Elige tu nombre para comparar contigo a tu pareja.';
+    $('#whoBtns').innerHTML = [p1,p2].map((p,i)=>'<button class="btn '+(i?'ghost':'')+'" data-i="'+i+'">'+esc(p[0])+'</button>').join('');
+    document.querySelectorAll('#whoBtns button').forEach(b=>b.onclick=()=>{
+      const i = +b.dataset.i; const me = [p1,p2][i][0], pa = [p1,p2][1-i][0];
+      render(analyze(DATA.msgs, me, pa, DUR));
+    });
+    $('#quien').hidden = false; $('#quien').scrollIntoView({behavior:'smooth'});
+  } catch(x){ $('#status').textContent = ''; $('#err').textContent = x.message || 'No pudimos leer el archivo.'; $('#err').hidden = false; }
+});
+
+async function descargarPDF(btn){
+  const txt = btn.textContent; btn.disabled = true; btn.textContent = 'Generando PDF...';
+  document.body.classList.add('pdfmode');
+  try{
+    if (typeof html2pdf === 'undefined') throw new Error('sin librería');
+    await html2pdf().set({margin:[10,8,10,8], filename:'me-dejo-en-visto-informe.pdf', image:{type:'jpeg',quality:0.95},
+      html2canvas:{scale:2, backgroundColor:getComputedStyle(document.body).backgroundColor},
+      jsPDF:{unit:'mm', format:'a4', orientation:'portrait'}, pagebreak:{mode:['css','legacy'], avoid:['.card','.sig','li']}}).from(document.querySelector('#res')).save();
+  } catch(e){ window.print(); }
+  document.body.classList.remove('pdfmode'); btn.disabled = false; btn.textContent = txt;
+}
+
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+const LV = {estable:'Estable', moderado:'Cambio moderado', fuerte:'Cambio marcado', mejora:'Mejoró', nd:'Sin datos suficientes'};
+function fmtV(v, f){ if (v===null||v===undefined||isNaN(v)) return 'sin datos'; if (f==='min') return fmtMin(v); if (f==='pct') return Math.round(v)+'%'; if (f==='rate') return v.toFixed(1).replace('.',','); return v.toFixed(1).replace('.',','); }
+
+function fmtSec(v){ if (!v) return 'sin datos'; v = Math.round(v); if (v < 60) return v+' s'; if (v < 3600) return Math.floor(v/60)+' min '+(v%60 ? (v%60)+' s' : ''); return Math.floor(v/3600)+' h '+Math.round((v%3600)/60)+' min'; }
+const nfmt = v=>Math.round(v).toLocaleString('es-CO');
+function habitsHTML(A){
+  const a = A.H[A.me], b = A.H[A.pa];
+  const rows = [['Audios enviados',a.audios,b.audios,nfmt],['Audios por semana',a.audiosWeek,b.audiosWeek,v=>v.toFixed(1).replace('.',',')],
+    ['Duración promedio de un audio',a.audioAvg,b.audioAvg,fmtSec],['Tiempo total en audios medidos',a.audioTot,b.audioTot,fmtSec],
+    ['Llamadas',a.calls,b.calls,nfmt],['Llamadas perdidas',a.missed,b.missed,nfmt],['Tiempo en llamadas',a.callSec,b.callSec,fmtSec],
+    ['Stickers y GIF (memes)',a.stk+a.gif,b.stk+b.gif,nfmt],['Fotos',a.img,b.img,nfmt],['Videos',a.vid,b.vid,nfmt],
+    ['Multimedia sin detalle',a.media,b.media,nfmt],['Ubicaciones compartidas',a.loc,b.loc,nfmt]].filter(r=>(r[1]||0)+(r[2]||0)>0);
+  let h = '<section class="card"><h2>Hábitos del chat</h2><p class="sub">Audios, llamadas, memes y más, de cada uno.</p>';
+  if (rows.length) h += '<table class="tbl"><tr><th></th><th><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+'</th><th><i class="dot" style="background:var(--b)"></i>'+esc(A.pa)+'</th></tr>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+(r[1]?r[3](r[1]):'0')+'</td><td>'+(r[2]?r[3](r[2]):'0')+'</td></tr>').join('')+'</table>';
+  const notes = [];
+  if (a.media + b.media > 0) notes.push('Tu archivo agrupa audios, fotos y stickers como multimedia. Para separarlos y medir la duración de los audios, exporta el chat eligiendo Incluir archivos.');
+  else if (a.audios + b.audios > 0 && a.audioN + b.audioN === 0) notes.push('Para medir cuánto duran los audios, exporta el chat eligiendo Incluir archivos.');
+  if (a.calls + b.calls === 0) notes.push('WhatsApp no incluyó el registro de llamadas en este archivo.');
+  if (notes.length) h += '<p class="note" style="margin-top:12px">'+notes.join(' ')+'</p>';
+  return h + '</section>';
+}
+function wordsHTML(A, n){
+  const col = w=>{ const H = A.H[w]; return '<div><h3 style="margin:0 0 6px;font-size:15px"><i class="dot" style="background:'+(w===A.me?'var(--a)':'var(--b)')+'"></i>'+esc(w)+'</h3><div class="chips">'+H.topWords.slice(0,n).map(([k,v])=>'<span>'+esc(k)+'<small>'+nfmt(v)+'</small></span>').join('')+'</div><div style="margin-top:8px">'+H.topEmo.slice(0,Math.min(n,8)).map(([k,v])=>'<span class="emo">'+k+'<small> '+nfmt(v)+'</small></span>').join('')+'</div></div>'; };
+  return '<section class="card"><h2>Las palabras de cada uno</h2><p class="sub">Lo que más escriben y sus emojis favoritos.</p><div class="grid2">'+col(A.me)+col(A.pa)+'</div></section>';
+}
+function placesHTML(A){
+  const L = A.H.places;
+  let h = '<section class="card"><h2>Lugares más mencionados</h2><p class="sub">Detección aproximada: sitios como casa, oficina u hotel, y nombres de lugares escritos con mayúscula inicial.</p>';
+  if (!L.length) return h + '<p class="note">No encontramos lugares que se repitan en este chat.</p></section>';
+  const max = L[0].t;
+  return h + L.map(x=>'<div class="pl"><span>'+esc(x.k)+'</span><div class="bar" style="width:'+Math.max(8,100*x.t/max)+'%"><i style="width:'+(100*x.a/x.t)+'%"></i><i style="width:'+(100*x.b/x.t)+'%"></i></div><b>'+x.t+'</b></div>').join('') + '</section>';
+}
+
+function dominant(E){ const c = EMO.filter(e=>e.k!=='frialdad' && E.emo[e.k]>0).sort((a,b)=>E.emo[b.k]-E.emo[a.k])[0]; return c ? c.i+' '+c.n : 'Neutral'; }
+function emoTeaser(A){ return '<section class="card"><h2>La emoción que domina</h2><p class="sub">Según las palabras y emojis de cada uno.</p><div class="grid2"><div class="kpi"><div class="l"><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+'</div><div class="v">'+dominant(A.E[A.me])+'</div></div><div class="kpi"><div class="l"><i class="dot" style="background:var(--b)"></i>'+esc(A.pa)+'</div><div class="v">'+dominant(A.E[A.pa])+'</div></div></div></section>'; }
+function emotionsHTML(A){
+  const a = A.E[A.me], b = A.E[A.pa];
+  const max = Math.max(1, ...EMO.map(e=>Math.max(a.emo[e.k]||0, b.emo[e.k]||0)));
+  const bar = (v,c)=>'<div style="display:flex;align-items:center;gap:6px"><div style="height:10px;border-radius:999px;background:'+c+';width:'+Math.max(2,100*(v||0)/max)+'%"></div><small>'+(v||0).toFixed(1).replace('.',',')+'%</small></div>';
+  let h = '<section class="card"><h2>Las emociones de cada uno</h2><p class="sub">Porcentaje de mensajes que expresan cada emoción. Detección automática por palabras y emojis: no capta sarcasmo ni contexto.</p>';
+  h += '<div class="legend" style="justify-content:flex-start;gap:16px;margin-bottom:8px"><span><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+'</span><span><i class="dot" style="background:var(--b)"></i>'+esc(A.pa)+'</span></div>';
+  h += EMO.map(e=>'<div style="display:grid;grid-template-columns:minmax(110px,36%) 1fr;gap:10px;align-items:center;margin:10px 0"><span style="font-size:14px">'+e.i+' '+e.n+'</span><div style="display:grid;gap:4px">'+bar(a.emo[e.k],'var(--a)')+bar(b.emo[e.k],'var(--b)')+'</div></div>').join('');
+  h += '<div class="grid2" style="margin-top:12px"><div class="kpi"><div class="l">Balance emocional de '+esc(A.me)+'</div><div class="v">'+(a.balance>=0?'+':'')+Math.round(a.balance||0)+'</div></div><div class="kpi"><div class="l">Balance emocional de '+esc(A.pa)+'</div><div class="v">'+(b.balance>=0?'+':'')+Math.round(b.balance||0)+'</div></div></div><p class="note">El balance resta los mensajes negativos a los positivos por cada 100. Por encima de cero domina el tono positivo.</p></section>';
+  return h;
+}
+
+function sigCard(s){
+  return '<div class="sig"><span class="pill p-'+s.lv+'">'+LV[s.lv]+'</span><h3>'+s.t+'</h3><p>'+esc(s.d)+'</p><div class="ba"><div><small>Antes</small><b>'+fmtV(s.b,s.fmt)+'</b></div><div><small>Ahora</small><b>'+fmtV(s.r,s.fmt)+'</b></div></div></div>';
+}
+function fakeSig(t){ return '<div class="sig"><span class="pill p-moderado">Cambio ?</span><h3>'+t+'</h3><p>Disponible en el informe completo</p><div class="ba"><div><small>Antes</small><b>00,0</b></div><div><small>Ahora</small><b>00,0</b></div></div></div>'; }
+function lock(inner, msg){ return '<div class="locked"><div class="blur">'+inner+'</div><div class="lockcta"><b>🔒 '+msg+'</b><p>Inclúyelo en tu informe completo por '+PRECIO+'.</p><a class="btn" href="'+PAY_URL+'" target="_blank" rel="noopener">Desbloquear informe</a></div></div>'; }
+function chartBox(id, title, sub){ return '<div class="card"><h2>'+title+'</h2><p class="sub">'+sub+'</p><div class="chart"><canvas id="'+id+'"></canvas></div></div>'; }
+
+function render(A){
+  const full = EDICION === 'completa';
+  const d = t=>t.getDate()+' '+MES[t.getMonth()]+' '+t.getFullYear();
+  const pMe = Math.round(100*A.nMe/A.total);
+  const idxLabel = A.index < 20 ? 'Comunicación estable' : A.index < 45 ? 'Cambios moderados' : 'Cambios marcados';
+  const idxColor = A.index < 20 ? css('--ok') : A.index < 45 ? css('--warn') : css('--bad');
+  const cutTxt = A.spanDays >= 150 ? 'los últimos 3 meses frente a todo lo anterior' : 'la segunda mitad del chat frente a la primera';
+  const sig = A.S;
+  let h = '<div class="pdfhead"><b>✓✓ Me Dejó en Visto</b><div class="note">Informe de '+esc(A.me)+' y '+esc(A.pa)+'</div></div>';
+  h += '<section class="card"><h2>Resumen</h2><p class="sub">Del '+d(A.first)+' al '+d(A.last)+'</p>';
+  h += '<div class="grid3"><div class="kpi"><div class="v">'+A.total.toLocaleString('es-CO')+'</div><div class="l">mensajes</div></div><div class="kpi"><div class="v">'+Math.max(1,Math.round(A.spanDays)).toLocaleString('es-CO')+'</div><div class="l">días de conversación</div></div><div class="kpi"><div class="v">'+Math.round(A.total/Math.max(1,A.spanDays))+'</div><div class="l">mensajes por día</div></div></div>';
+  h += '<div class="split"><div style="width:'+pMe+'%"></div><div style="width:'+(100-pMe)+'%"></div></div><div class="legend"><span><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+' (tú) '+pMe+'%</span><span>'+esc(A.pa)+' '+(100-pMe)+'%<i class="dot" style="background:var(--b);margin:0 0 0 6px"></i></span></div></section>';
+
+  h += '<section class="card"><div class="index"><div class="ring" style="background:conic-gradient('+idxColor+' '+(A.index*3.6)+'deg, var(--line) 0)"><div style="width:96px;height:96px;border-radius:50%;background:var(--card);display:grid;place-items:center"><div><b>'+A.index+'</b><small>de 100</small></div></div></div><div><h2>Índice de cambio: '+idxLabel+'</h2><p class="sub" style="margin:0">Mide cuánto ha cambiado la forma en que '+esc(A.pa)+' se comunica contigo, comparando '+cutTxt+'. No mide infidelidad: muestra cambios de patrón que vale la pena conversar.</p>'+(A.enough?'':'<p class="err">Hay pocos mensajes en alguno de los dos periodos, así que las señales son poco confiables.</p>')+'</div></div></section>';
+
+  h += '<section class="card"><h2>Señales de cambio</h2><p class="sub">Comparación de '+cutTxt+'.</p><div class="grid2">';
+  h += sigCard(sig[0]) + sigCard(sig[1]);
+  if (full) h += sig.slice(2).map(sigCard).join('');
+  h += '</div>';
+  if (!full) h += '<div style="margin-top:16px">'+lock('<div class="grid2">'+fakeSig('Tiempo de respuesta')+fakeSig('Expresiones de afecto')+fakeSig('Actividad nocturna')+fakeSig('Mensajes eliminados')+fakeSig('Intimidad')+fakeSig('Tono negativo')+'</div>','6 señales más')+'</div>';
+  h += '</section>';
+
+  h += chartBox('cVol','Mensajes por mes','Cuánto escribe cada uno, mes a mes.');
+  h += chartBox('cIni','Quién busca a quién','Porcentaje de conversaciones que inicia cada uno (tras 6 horas o más de silencio).');
+  if (full){
+    h += chartBox('cResp','Tiempo de respuesta','Mediana de lo que tarda cada uno en contestar.');
+    h += chartBox('cAff','Afecto','Mensajes cariñosos por cada 100 (te amo, amor, besos, corazones y similares).');
+    h += chartBox('cSex','Intimidad','Mensajes de contexto íntimo o sexual por cada 100. Solo se cuentan palabras y emojis; ningún mensaje se muestra ni se guarda.');
+    h += chartBox('cNight','Actividad nocturna','Porcentaje de mensajes entre 11 p. m. y 5 a. m.');
+    h += chartBox('cDel','Mensajes eliminados','Cantidad de mensajes borrados por mes.');
+    h += emotionsHTML(A) + chartBox('cEmo','Balance emocional por mes','Mensajes positivos menos negativos, por cada 100. Por debajo de cero domina el tono negativo.');
+    h += habitsHTML(A) + wordsHTML(A, 15) + placesHTML(A);
+    if (A.H[A.me].audios + A.H[A.pa].audios > 0) h += chartBox('cAud','Audios por mes','Cuántos audios envía cada uno.');
+    if (A.H[A.me].stk + A.H[A.me].gif + A.H[A.pa].stk + A.H[A.pa].gif > 0) h += chartBox('cMeme','Memes por mes','Stickers y GIF que envía cada uno.');
+    h += '<section class="card"><h2>La historia de tu chat</h2><p class="sub">Los momentos en que la comunicación cambió.</p><ul class="tl">'+A.ev.map(e=>'<li class="'+(e.good?'good':'')+'"><div class="m">'+monthLabel(e.k,true)+'</div><div class="t">'+esc(e.t)+'</div></li>').join('')+'</ul></section>';
+  } else {
+    h += emoTeaser(A) + wordsHTML(A, 5);
+    h += lock('<section class="card"><h2>Hábitos del chat</h2><table class="tbl"><tr><td>Audios enviados</td><td>000</td><td>000</td></tr><tr><td>Duración promedio de un audio</td><td>0 min</td><td>0 min</td></tr><tr><td>Llamadas</td><td>00</td><td>00</td></tr><tr><td>Stickers y GIF (memes)</td><td>000</td><td>000</td></tr></table></section><section class="card"><h2>Lugares más mencionados</h2><p>Casa 00</p><p>Oficina 00</p></section>', 'Emociones, audios, llamadas, memes y lugares');
+    h += '<section class="card paywall noprint"><h2>Tu informe completo</h2><p class="sub">Pago único de '+PRECIO+'. Se abre al instante y lo descargas en PDF.</p><ul><li>Tiempo de respuesta de cada uno, mes a mes</li><li>Evolución del afecto, la intimidad y la actividad nocturna</li><li>Mensajes eliminados</li><li>Las emociones de cada uno: alegría, cariño, deseo, enojo, tristeza, ansiedad y celos</li><li>Audios, llamadas, memes y lugares más mencionados</li><li>Las 15 palabras y emojis que más usa cada uno</li><li>La historia de tu chat: los meses en que todo cambió</li></ul><ol class="note" style="padding-left:20px;margin:0 0 14px"><li>Paga con Nequi, PSE o tarjeta.</li><li>Al aprobarse el pago, se abre tu informe completo automáticamente.</li><li>Vuelve a cargar el mismo archivo del chat.</li></ol><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="'+PAY_URL+'">Pagar '+PRECIO+'</a>'+(AYUDA_URL?'<a class="btn ghost" href="'+AYUDA_URL+'" target="_blank" rel="noopener">¿Problemas con el pago?</a>':'')+'</div><p class="note" style="margin-top:10px">Tu chat sigue sin salir de tu teléfono: en el informe completo vuelves a cargar el mismo archivo.</p></section>';
+  }
+  h += '<section class="card close"><h2>Antes de sacar conclusiones</h2><p>Estos datos muestran patrones, no intenciones. Un cambio puede deberse a trabajo, cansancio, salud, estrés o simple rutina. Si algo te inquieta, conversa con tu pareja con calma, desde lo que sientes y no desde un puntaje. Si la situación te está afectando, buscar apoyo en terapia de pareja o con un psicólogo es una decisión valiente.</p></section>';
+  if (full) h += '<div class="noprint" style="text-align:center"><button class="btn" onclick="descargarPDF(this)">Descargar informe en PDF</button></div>';
+
+  $('#res').innerHTML = h; $('#res').hidden = false;
+  charts.forEach(c=>c.destroy()); charts = [];
+  const L = A.series.map(s=>monthLabel(s.k));
+  const ca = css('--a'), cb = css('--b'), grid = css('--line'), ink = css('--mute');
+  Chart.defaults.font.family = 'Inter, system-ui, sans-serif'; Chart.defaults.color = ink;
+  const mk2 = (id, f, type, yfmt)=>{ const el = document.getElementById(id); if (!el) return;
+    charts.push(new Chart(el, {type: type||'line', data:{labels:L, datasets:[
+      {label:A.me+' (tú)', data:A.series.map(s=>f(s.me)), borderColor:ca, backgroundColor:ca, tension:.3, spanGaps:true, pointRadius:2},
+      {label:A.pa, data:A.series.map(s=>f(s.pa)), borderColor:cb, backgroundColor:cb, tension:.3, spanGaps:true, pointRadius:2}]},
+      options:{responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, plugins:{legend:{position:'bottom',labels:{boxWidth:10,usePointStyle:true}}, tooltip:{callbacks:{label:c=>c.dataset.label+': '+(yfmt?yfmt(c.raw):c.raw)}}}, scales:{x:{grid:{display:false}}, y:{beginAtZero:true, grid:{color:grid}, ticks:{callback:v=>yfmt?yfmt(v):v}}}}}));
+  };
+  mk2('cVol', s=>s.n, 'bar');
+  mk2('cIni', s=>(s.initShare===null||s.initsN<3)?null:Math.round(s.initShare), 'line', v=>v===null?'sin datos':v+'%');
+  mk2('cResp', s=>s.respN>=3?Math.round(s.resp*10)/10:null, 'line', v=>fmtMin(v));
+  mk2('cAff', s=>s.n>=20&&s.affRate!==null?Math.round(s.affRate*10)/10:null, 'line');
+  mk2('cSex', s=>s.n>=20&&s.sexRate!==null?Math.round(s.sexRate*10)/10:null, 'line');
+  mk2('cNight', s=>s.n>=20?Math.round(s.nightShare):null, 'line', v=>v===null?'sin datos':v+'%');
+  mk2('cDel', s=>s.del, 'bar');
+  mk2('cAud', s=>s.audios, 'bar');
+  mk2('cEmo', s=>s.textN>=20 && s.balance!==null ? Math.round(s.balance) : null, 'line');
+  mk2('cMeme', s=>s.memes, 'bar');
+  $('#res').scrollIntoView({behavior:'smooth'});
+}
+
+async function verificarPago(){
+  const id = new URLSearchParams(location.search).get('id');
+  let saved = null; try{ saved = localStorage.getItem('mdv_tx'); }catch(e){}
+  const tx = id || saved; if (!tx) return 'none';
+  try{
+    const r = await fetch(WOMPI_API + encodeURIComponent(tx)); const j = await r.json(); const d = j && j.data;
+    if (!d) return 'none';
+    const fresh = (Date.now() - new Date(d.created_at)) / 86400000 <= DIAS_VALIDEZ;
+    if (d.status === 'APPROVED' && d.amount_in_cents >= MONTO_MIN && (!LINK_ID || d.payment_link_id === LINK_ID)){
+      if (!fresh) return 'expired';
+      try{ localStorage.setItem('mdv_tx', tx); }catch(e){}
+      return 'ok';
+    }
+    return d.status === 'PENDING' ? 'pending' : 'none';
+  } catch(e){ return 'error'; }
+}
+async function gate(){
+  if (EDICION !== 'completa') return;
+  const g = $('#gate'), c = $('#cargar');
+  c.hidden = true; g.hidden = false; g.innerHTML = '<h2>Confirmando tu pago...</h2><p class="sub">Esto toma unos segundos.</p>';
+  const st = await verificarPago();
+  if (st === 'ok'){ g.innerHTML = '<div class="badge" style="margin:0">✅ Pago confirmado. Carga tu chat para ver el informe completo.</div>'; c.hidden = false; return; }
+  const msg = {pending:['Tu pago está en proceso','Algunos pagos con PSE o Nequi tardan unos minutos. Toca reintentar en un momento.'],
+    expired:['Tu acceso venció','El acceso dura '+DIAS_VALIDEZ+' días después del pago. Si necesitas ayuda, escríbenos.'],
+    error:['No pudimos verificar el pago','Revisa tu conexión a internet y reintenta.'],
+    none:['Este informe requiere pago','Paga una sola vez y el informe completo se abre automáticamente.']}[st];
+  g.innerHTML = '<h2>'+msg[0]+'</h2><p class="sub">'+msg[1]+'</p><div style="display:flex;gap:10px;flex-wrap:wrap">'+(st==='none'?'<a class="btn" href="'+PAY_URL+'">Pagar '+PRECIO+'</a>':'<button class="btn" onclick="gate()">Reintentar</button>')+''+(AYUDA_URL?'<a class="btn ghost" href="'+AYUDA_URL+'" target="_blank" rel="noopener">Pedir ayuda</a>':'')+'</div>';
+}
+gate();
+</script>
+</body>
+</html>
