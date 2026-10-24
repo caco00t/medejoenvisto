@@ -534,10 +534,10 @@ async function compartir(btn){
     x.font = F(800,54); x.fillText(v, 540, y+158); y += 240;
   }
   x.font = F(600,38); x.fillText('Descubre lo que dice el tuyo', 540, 1790);
-  x.globalAlpha = .85; x.font = F(500,32); x.fillText('caco00t.github.io/medejoenvisto', 540, 1845); x.globalAlpha = 1;
+  x.globalAlpha = .85; x.font = F(500,32); x.fillText('medejoenvisto.com', 540, 1845); x.globalAlpha = 1;
   const blob = await new Promise(r=>c.toBlob(r,'image/png'));
   const file = new File([blob], 'me-dejo-en-visto.png', {type:'image/png'});
-  try{ if (navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], text:'Lo que nuestro chat dice de nosotros: caco00t.github.io/medejoenvisto'}); return; } }catch(e){ if (e && e.name === 'AbortError') return; }
+  try{ if (navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], text:'Lo que nuestro chat dice de nosotros: medejoenvisto.com'}); return; } }catch(e){ if (e && e.name === 'AbortError') return; }
   const u = URL.createObjectURL(blob); const l = document.createElement('a'); l.href = u; l.download = 'me-dejo-en-visto.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000);
 }
 
