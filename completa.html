@@ -99,6 +99,7 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
 </head>
 <body>
 <div class="wrap">
+  <div id="promo" class="noprint" hidden style="background:linear-gradient(90deg,#c2185b,#7b1fa2);color:#fff;text-align:center;padding:10px 16px;border-radius:0 0 16px 16px;font-weight:600;font-size:15px;margin:0 -16px"></div>
   <header class="hero">
     <div class="brand">✓✓ Me Dejó en Visto</div>
     <h1>Lo que tu chat dice de tu relación</h1>
@@ -144,8 +145,11 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
 <script>
 /* ========= CONFIGURACIÓN DE LA EDICIÓN ========= */
 const EDICION = 'completa';           // 'gratis' o 'completa'
-const PAY_URL = 'https://checkout.wompi.co/l/mDO81a';
-const PRECIO  = '$19.900';
+const PRECIO_NORMAL = '$19.900', PAY_NORMAL = 'https://checkout.wompi.co/l/mDO81a';
+const PROMO = { precio: '$9.900', pay: 'PENDIENTE_LINK_9900', hasta: new Date('2026-10-26T00:00:00-05:00'), centavos: 990000 };
+const PROMO_ON = PROMO.pay.startsWith('https://') && Date.now() < PROMO.hasta.getTime();
+const PAY_URL = PROMO_ON ? PROMO.pay : PAY_NORMAL;
+const PRECIO  = PROMO_ON ? PROMO.precio : PRECIO_NORMAL;
 const WOMPI_API = 'https://production.wompi.co/v1/transactions/';
 const MONTO_MIN = 1990000;            // en centavos: 19.900 pesos
 const LINK_ID   = '';                 // opcional: id del link de pago de Wompi, para aceptar solo ese link
@@ -674,7 +678,8 @@ async function verificarPago(){
     const r = await fetch(WOMPI_API + encodeURIComponent(tx)); const j = await r.json(); const d = j && j.data;
     if (!d) return 'none';
     const fresh = (Date.now() - new Date(d.created_at)) / 86400000 <= DIAS_VALIDEZ;
-    if (d.status === 'APPROVED' && d.amount_in_cents >= MONTO_MIN && (!LINK_ID || d.payment_link_id === LINK_ID)){
+    const minimo = new Date(d.created_at).getTime() < PROMO.hasta.getTime() + 3600000 ? PROMO.centavos : MONTO_MIN;
+    if (d.status === 'APPROVED' && d.amount_in_cents >= minimo && (!LINK_ID || d.payment_link_id === LINK_ID)){
       if (!fresh) return 'expired';
       try{ localStorage.setItem('mdv_tx', tx); }catch(e){}
       return 'ok';
@@ -694,6 +699,14 @@ async function gate(){
     none:['Este informe requiere pago','Paga una sola vez y el informe completo se abre automáticamente.']}[st];
   g.innerHTML = '<h2>'+msg[0]+'</h2><p class="sub">'+msg[1]+'</p><div style="display:flex;gap:10px;flex-wrap:wrap">'+(st==='none'?'<a class="btn" href="'+PAY_URL+'">Pagar '+PRECIO+'</a>':'<button class="btn" onclick="gate()">Reintentar</button>')+''+(AYUDA_URL?'<a class="btn ghost" href="'+AYUDA_URL+'" target="_blank" rel="noopener">Pedir ayuda</a>':'')+'</div>';
 }
+function promoBanner(){
+  const el = document.getElementById('promo'); if (!PROMO_ON){ el.hidden = true; return; }
+  const ms = PROMO.hasta - Date.now(); if (ms <= 0){ el.hidden = true; return; }
+  const h = Math.floor(ms/3600000), m = Math.floor(ms%3600000/60000);
+  el.innerHTML = '🎉 Precio de lanzamiento: <b>'+PROMO.precio+'</b> <s style="opacity:.75">'+PRECIO_NORMAL+'</s> · termina el domingo a medianoche (quedan '+h+' h '+m+' min)';
+  el.hidden = false;
+}
+promoBanner(); setInterval(promoBanner, 60000);
 gate();
 </script>
 </body>
