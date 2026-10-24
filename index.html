@@ -107,6 +107,9 @@ body.pdfmode .pdfhead b{font-size:22px}
 body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
 @media (max-width:640px){.steps,.grid2,.who{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}.index{flex-direction:column;text-align:center}}
 @media print{.noprint{display:none!important}body{background:#fff;color:#000}.card,.sig{break-inside:avoid;border-color:#ddd}.hero{padding-top:0}}
+.trust{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;margin-top:12px;font-size:13px;color:var(--muted,#666)}
+.trust span{white-space:nowrap}
+.heroCta{margin-top:16px}
 </style>
 </head>
 <body>
@@ -117,6 +120,8 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
     <h1>Lo que tu chat dice de tu relación</h1>
     <p class="lead">Carga tu chat de WhatsApp con tu pareja y mira la comunicación con datos: quién busca a quién, cuánto tardan en responder y cómo ha cambiado el afecto con el tiempo.</p>
     <div class="badge">🔒 Tu chat se analiza en tu teléfono. Nunca se sube a ningún servidor.</div>
+    <div class="trust"><span>✅ Resumen gratis, sin registrarte</span><span>💳 Pago seguro con Wompi, de Bancolombia</span><span>🇨🇴 Hecho en Colombia</span></div>
+    <div class="heroCta noprint"><button class="btn ghost" type="button" onclick="document.getElementById('demoBtn').click()">👀 Mira primero un ejemplo</button></div>
   </header>
 
   <section class="card noprint" id="gate" hidden></section>
@@ -152,6 +157,8 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
     <h2>Preguntas frecuentes</h2>
     <details><summary>¿Mi pareja se va a enterar?</summary><p>No. No enviamos mensajes, notificaciones ni nada a nadie. Todo pasa dentro de tu celular, con el archivo que tú exportas.</p></details>
     <details><summary>¿Suben mi chat a algún servidor?</summary><p>No. El análisis se hace en tu navegador y tu conversación nunca sale de tu teléfono. Ni nosotros ni nadie puede leerla.</p></details>
+    <details><summary>¿Cómo compruebo que no se sube mi chat?</summary><p>Abre esta página, activa el modo avión y después carga tu chat. El análisis funciona igual, porque todo pasa dentro de tu teléfono y no necesita internet.</p></details>
+    <details><summary>¿Cuánto cuesta?</summary><p>El resumen es gratis y no necesitas registrarte. El informe completo cuesta <b class="precioTxt"></b>, en un solo pago y sin suscripciones. Pagas con tarjeta, PSE o Nequi a través de Wompi, la pasarela de pagos de Bancolombia.</p></details>
     <details><summary>¿Me dice si me son infiel?</summary><p>No. Te muestra cómo ha cambiado la comunicación: tiempos de respuesta, cariño, emociones y quién busca a quién, mes a mes. Son datos para conversar, no una prueba de nada.</p></details>
     <details><summary>¿Funciona en iPhone y Android?</summary><p>Sí. Exporta el chat desde WhatsApp y carga el archivo .zip o .txt. Funciona en Chrome y Safari.</p></details>
     <details><summary>¿Qué incluye el informe completo?</summary><p>Todas las señales de cambio, la historia de tu chat mes a mes, las emociones de cada uno, audios, llamadas, memes, palabras y lugares más mencionados, y la descarga en PDF. Tienes acceso por 7 días.</p></details>
@@ -159,7 +166,7 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
   </section>
 
   <footer>
-    <div style="margin-bottom:8px"><a href="privacidad.html" style="color:inherit">Privacidad</a> · <a href="terminos.html" style="color:inherit">Términos</a> · <a href="mailto:hola@medejoenvisto.com" style="color:inherit">hola@medejoenvisto.com</a></div>
+    <div style="margin-bottom:8px"><a href="privacidad.html" style="color:inherit">Privacidad</a> · <a href="terminos.html" style="color:inherit">Términos</a> · <a href="mailto:hola@medejoenvisto.com" style="color:inherit">hola@medejoenvisto.com</a> · <a href="https://www.instagram.com/medejoenvisto.app/" target="_blank" rel="noopener" style="color:inherit">Instagram</a> · <a href="https://www.tiktok.com/@medejoenvisto.app" target="_blank" rel="noopener" style="color:inherit">TikTok</a></div>
     Solo para mayores de 18 años. Me Dejó en Visto muestra patrones de comunicación. No determina infidelidad ni intenciones, y no reemplaza una conversación honesta ni el acompañamiento de un profesional.
   </footer>
 </div>
@@ -176,6 +183,7 @@ const REF = (()=>{ try{ const q = new URLSearchParams(location.search).get('ref'
 const REF_LINK = REF && REFS[REF] ? (PROMO_ON ? (REFS[REF].promo || REFS[REF].normal) : REFS[REF].normal) : null;
 const PAY_URL = REF_LINK || (PROMO_ON ? PROMO.pay : PAY_NORMAL);
 const PRECIO  = PROMO_ON ? PROMO.precio : PRECIO_NORMAL;
+document.querySelectorAll('.precioTxt').forEach(e=>e.textContent=PRECIO);
 const WOMPI_API = 'https://production.wompi.co/v1/transactions/';
 const MONTO_MIN = 1990000;            // en centavos: 19.900 pesos
 const LINK_ID   = '';                 // opcional: id del link de pago de Wompi, para aceptar solo ese link
