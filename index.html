@@ -483,8 +483,30 @@ const $ = s=>document.querySelector(s);
 const esc = s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let DATA = null, DUR = {}, charts = [];
 
-$('#file').addEventListener('change', async e=>{
-  const f = e.target.files[0]; if (!f) return;
+/* ===== Guardado local temporal del chat mientras se paga (nunca sale del teléfono) ===== */
+let LAST_FILE = null, LAST_ME = null;
+const IDB = {
+  open(){ return new Promise((res,rej)=>{ const r = indexedDB.open('mdv',1); r.onupgradeneeded=()=>r.result.createObjectStore('k'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); },
+  async tx(mode, fn){ const db = await this.open(); return new Promise((res,rej)=>{ const t = db.transaction('k',mode); const st = t.objectStore('k'); const r = fn(st); t.oncomplete=()=>res(r && r.result); t.onerror=()=>rej(t.error); }); },
+  set(k,v){ return this.tx('readwrite', st=>st.put(v,k)); },
+  get(k){ return this.tx('readonly', st=>st.get(k)); },
+  del(k){ return this.tx('readwrite', st=>st.delete(k)); }
+};
+(async()=>{ try{ const p = await IDB.get('pendiente'); if (p && Date.now()-p.t > 86400000) await IDB.del('pendiente'); }catch(e){} })();
+/* ===== Embudo anónimo: solo cuenta pasos, sin datos del chat ni de la persona ===== */
+function ev(n){ try{ if (location.protocol.startsWith('http')) navigator.sendBeacon('/api/e?n='+n+'&ed='+EDICION); }catch(e){} }
+ev('visita');
+document.addEventListener('click', async e=>{
+  const a = e.target.closest && e.target.closest('a'); if (!a || a.href !== PAY_URL) return;
+  ev('pago_click');
+  if (EDICION !== 'gratis' || !LAST_FILE) return;
+  e.preventDefault();
+  try{ await Promise.race([IDB.set('pendiente', {file: LAST_FILE, me: LAST_ME, t: Date.now()}), new Promise(r=>setTimeout(r,1500))]); }catch(x){}
+  location.href = PAY_URL;
+}, true);
+
+$('#file').addEventListener('change', e=>{ const f = e.target.files[0]; if (f){ ev('archivo'); cargarArchivo(f); } });
+async function cargarArchivo(f, autoMe){
   $('#err').hidden = true; DUR = {}; $('#status').textContent = 'Leyendo el chat...';
   try{
     let text, zip = null;
@@ -513,13 +535,17 @@ $('#file').addEventListener('change', async e=>{
       ? 'Parece un chat de grupo. Analizaremos a las dos personas que más escriben.'
       : 'Encontramos '+DATA.msgs.length.toLocaleString('es-CO')+' mensajes. Elige tu nombre para comparar contigo a tu pareja.';
     $('#whoBtns').innerHTML = [p1,p2].map((p,i)=>'<button class="btn '+(i?'ghost':'')+'" data-i="'+i+'">'+esc(p[0])+'</button>').join('');
+    LAST_FILE = f;
     document.querySelectorAll('#whoBtns button').forEach(b=>b.onclick=()=>{
       const i = +b.dataset.i; const me = [p1,p2][i][0], pa = [p1,p2][1-i][0];
-      render(analyze(DATA.msgs, me, pa, DUR), false);
+      LAST_ME = me; $('#status').textContent = 'Armando tu informe...';
+      setTimeout(()=>{ ev(EDICION==='completa' ? 'informe' : 'resumen'); try{ render(analyze(DATA.msgs, me, pa, DUR), false); } finally { $('#status').textContent = ''; } }, 30);
     });
+    const auto = autoMe && [...document.querySelectorAll('#whoBtns button')].find(b=>b.textContent===autoMe);
+    if (auto){ auto.click(); return; }
     $('#quien').hidden = false; $('#quien').scrollIntoView({behavior:'smooth'});
   } catch(x){ $('#status').textContent = ''; $('#err').textContent = x.message || 'No pudimos leer el archivo.'; $('#err').hidden = false; }
-});
+}
 
 async function descargarPDF(btn){
   const txt = btn.textContent; btn.disabled = true; btn.textContent = 'Generando PDF...';
@@ -632,7 +658,7 @@ function sigCard(s){
   return '<div class="sig"><span class="pill p-'+s.lv+'">'+LV[s.lv]+'</span><h3>'+s.t+'</h3><p>'+esc(s.d)+'</p><div class="ba"><div><small>Antes</small><b>'+fmtV(s.b,s.fmt)+'</b></div><div><small>Ahora</small><b>'+fmtV(s.r,s.fmt)+'</b></div></div></div>';
 }
 function fakeSig(t){ return '<div class="sig"><span class="pill p-moderado">Cambio ?</span><h3>'+t+'</h3><p>Disponible en el informe completo</p><div class="ba"><div><small>Antes</small><b>00,0</b></div><div><small>Ahora</small><b>00,0</b></div></div></div>'; }
-function lock(inner, msg){ return '<div class="locked"><div class="blur">'+inner+'</div><div class="lockcta"><b>🔒 '+msg+'</b><p>Inclúyelo en tu informe completo por '+PRECIO+'.</p><a class="btn" href="'+PAY_URL+'" target="_blank" rel="noopener">Desbloquear informe</a></div></div>'; }
+function lock(inner, msg){ return '<div class="locked"><div class="blur">'+inner+'</div><div class="lockcta"><b>🔒 '+msg+'</b><p>Inclúyelo en tu informe completo por '+PRECIO+'.</p><a class="btn" href="'+PAY_URL+'">Desbloquear informe</a></div></div>'; }
 function chartBox(id, title, sub){ return '<div class="card"><h2>'+title+'</h2><p class="sub">'+sub+'</p><div class="chart"><canvas id="'+id+'"></canvas></div></div>'; }
 
 function render(A, demo){
@@ -675,7 +701,7 @@ function render(A, demo){
   } else {
     h += emoTeaser(A) + wordsHTML(A, 5);
     h += lock('<section class="card"><h2>Hábitos del chat</h2><table class="tbl"><tr><td>Audios enviados</td><td>000</td><td>000</td></tr><tr><td>Duración promedio de un audio</td><td>0 min</td><td>0 min</td></tr><tr><td>Llamadas</td><td>00</td><td>00</td></tr><tr><td>Stickers y GIF (memes)</td><td>000</td><td>000</td></tr></table></section><section class="card"><h2>Lugares más mencionados</h2><p>Casa 00</p><p>Oficina 00</p></section>', 'Emociones, audios, llamadas, memes y lugares');
-    h += '<section class="card paywall noprint"><h2>Tu informe completo</h2><p class="sub">Pago único de '+PRECIO+'. Se abre al instante y lo descargas en PDF.</p><ul><li>Tiempo de respuesta de cada uno, mes a mes</li><li>Evolución del afecto, la intimidad y la actividad nocturna</li><li>Mensajes eliminados</li><li>Las emociones de cada uno: alegría, cariño, deseo, enojo, tristeza, ansiedad y celos</li><li>Audios, llamadas, memes y lugares más mencionados</li><li>Las 15 palabras y emojis que más usa cada uno</li><li>La historia de tu chat: los meses en que todo cambió</li></ul><ol class="note" style="padding-left:20px;margin:0 0 14px"><li>Paga con Nequi, PSE o tarjeta.</li><li>Al aprobarse el pago, se abre tu informe completo automáticamente.</li><li>Vuelve a cargar el mismo archivo del chat.</li></ol><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="'+PAY_URL+'">Pagar '+PRECIO+'</a>'+(AYUDA_URL?'<a class="btn ghost" href="'+AYUDA_URL+'" target="_blank" rel="noopener">¿Problemas con el pago?</a>':'')+'</div><p class="note" style="margin-top:10px">Tu chat sigue sin salir de tu teléfono: en el informe completo vuelves a cargar el mismo archivo.</p></section>';
+    h += '<section class="card paywall noprint"><h2>Tu informe completo</h2><p class="sub">Pago único de '+PRECIO+'. Se abre al instante y lo descargas en PDF.</p><ul><li>Tiempo de respuesta de cada uno, mes a mes</li><li>Evolución del afecto, la intimidad y la actividad nocturna</li><li>Mensajes eliminados</li><li>Las emociones de cada uno: alegría, cariño, deseo, enojo, tristeza, ansiedad y celos</li><li>Audios, llamadas, memes y lugares más mencionados</li><li>Las 15 palabras y emojis que más usa cada uno</li><li>La historia de tu chat: los meses en que todo cambió</li></ul><ol class="note" style="padding-left:20px;margin:0 0 14px"><li>Paga con Nequi, PSE o tarjeta.</li><li>Al aprobarse el pago, se abre tu informe completo automáticamente.</li><li>Tu informe se abre solo con este mismo chat. Si pagas desde otro navegador, vuelve a cargar el archivo.</li></ol><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="'+PAY_URL+'">Pagar '+PRECIO+'</a>'+(AYUDA_URL?'<a class="btn ghost" href="'+AYUDA_URL+'" target="_blank" rel="noopener">¿Problemas con el pago?</a>':'')+'</div><p class="note" style="margin-top:10px">Tu chat sigue sin salir de tu teléfono: lo guardamos solo en tu celular mientras pagas y lo borramos al abrir el informe.</p></section>';
   }
   h += '<section class="card close"><h2>Antes de sacar conclusiones</h2><p>Estos datos muestran patrones, no intenciones. Un cambio puede deberse a trabajo, cansancio, salud, estrés o simple rutina. Si algo te inquieta, conversa con tu pareja con calma, desde lo que sientes y no desde un puntaje. Si la situación te está afectando, buscar apoyo en terapia de pareja o con un psicólogo es una decisión valiente.</p></section>';
   if (!full && !DEMO) h += '<section class="card noprint" style="text-align:center;border:2px dashed var(--accent)"><h2>🎁 Gana el informe completo gratis</h2><p class="sub" style="margin:6px 0 0">Toca <b>Compartir mi resultado</b>, súbelo a tus historias de Instagram y etiqueta a <b>@medejoenvisto.app</b>. Te enviamos el acceso completo por mensaje. Válido para las primeras 30 personas.</p></section>';
@@ -741,7 +767,15 @@ async function gate(){
   const g = $('#gate'), c = $('#cargar');
   c.hidden = true; g.hidden = false; g.innerHTML = '<h2>Confirmando tu pago...</h2><p class="sub">Esto toma unos segundos.</p>';
   const st = await verificarPago();
-  if (st === 'ok'){ g.innerHTML = '<div class="badge" style="margin:0">✅ Pago confirmado. Carga tu chat para ver el informe completo.</div>'; c.hidden = false; return; }
+  if (st === 'ok'){
+    ev('pago_ok');
+    let p = null; try{ p = await IDB.get('pendiente'); }catch(e){}
+    if (p && p.file && Date.now()-p.t < 86400000){
+      g.innerHTML = '<div class="badge" style="margin:0">✅ Pago confirmado. Abriendo tu informe completo...</div>'; c.hidden = false;
+      await cargarArchivo(p.file, p.me); try{ await IDB.del('pendiente'); }catch(e){}
+      return;
+    }
+    g.innerHTML = '<div class="badge" style="margin:0">✅ Pago confirmado. Carga tu chat para ver el informe completo.</div>'; c.hidden = false; return; }
   const msg = {pending:['Tu pago está en proceso','Algunos pagos con PSE o Nequi tardan unos minutos. Toca reintentar en un momento.'],
     usado:['Este código ya fue usado','Cada código de regalo funciona en un solo celular. Si crees que es un error, escríbenos.'],
     invalido:['Código no válido','Revisa que el enlace esté completo.'],
