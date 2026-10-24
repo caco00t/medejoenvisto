@@ -678,7 +678,7 @@ async function verificarPago(){
     const r = await fetch(WOMPI_API + encodeURIComponent(tx)); const j = await r.json(); const d = j && j.data;
     if (!d) return 'none';
     const fresh = (Date.now() - new Date(d.created_at)) / 86400000 <= DIAS_VALIDEZ;
-    const minimo = new Date(d.created_at).getTime() < PROMO.hasta.getTime() + 3600000 ? PROMO.centavos : MONTO_MIN;
+    const minimo = PROMO.centavos; // acepta también pagos del link de lanzamiento hechos después de la fecha, para no dejar a nadie sin su informe
     if (d.status === 'APPROVED' && d.amount_in_cents >= minimo && (!LINK_ID || d.payment_link_id === LINK_ID)){
       if (!fresh) return 'expired';
       try{ localStorage.setItem('mdv_tx', tx); }catch(e){}
