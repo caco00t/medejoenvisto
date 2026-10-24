@@ -110,6 +110,15 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
 .trust{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;margin-top:12px;font-size:13px;color:var(--muted,#666)}
 .trust span{white-space:nowrap}
 .heroCta{margin-top:16px}
+#hist{position:fixed;inset:0;z-index:99;background:#14001f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px}
+#hist[hidden]{display:none}
+#hist .hbox{position:relative;height:min(74vh,calc((100vw - 24px)*16/9));aspect-ratio:9/16}
+#hist img{width:100%;height:100%;border-radius:18px;display:block;transition:opacity .2s;background:#4a148c}
+#hist .hnav{position:absolute;top:0;bottom:0;width:40%;background:none;border:0;cursor:pointer}
+#hist .hl{left:0}#hist .hr{right:0}
+#hist .hbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;max-width:520px}
+#hist .hname{color:#fff;font-size:14px;display:flex;gap:6px;align-items:center;width:100%;justify-content:center}
+#hist .btn.ghost{background:rgba(255,255,255,.12);color:#fff}
 </style>
 </head>
 <body>
@@ -443,7 +452,7 @@ function analyze(all, me, pa, dur){
   if (best) ev.push({k:best.k, good:true, best:true, t:'El mes con más afecto de '+pa+': '+best.pa.affRate.toFixed(1).replace('.',',')+' mensajes cariñosos por cada 100.'});
   ev.sort((x,y)=>x.k<y.k?-1:x.k>y.k?1:(x.best?1:0)-(y.best?1:0));
 
-  return {me, pa, first, last, total:msgs.length, nMe:msgs.filter(m=>m.who===me).length, nPa:msgs.filter(m=>m.who===pa).length, cut, enough, S, index, series, ev, spanDays, H:habits(msgs, me, pa, dur||{}), E:{[me]:agg(msgs,me), [pa]:agg(msgs,pa)}};
+  return {me, pa, first, last, total:msgs.length, nMe:msgs.filter(m=>m.who===me).length, nPa:msgs.filter(m=>m.who===pa).length, cut, enough, S, index, series, ev, spanDays, H:habits(msgs, me, pa, dur||{}), E:{[me]:agg(msgs,me), [pa]:agg(msgs,pa)}, M:msgs};
 }
 
 function fmtMin(v){ if (v===null||v===undefined||isNaN(v)) return 'sin datos'; if (v<1) return 'menos de 1 min'; if (v<60) return Math.round(v)+' min'; if (v<1440) return (v/60).toFixed(1).replace('.',',')+' h'; return (v/1440).toFixed(1).replace('.',',')+' días'; }
@@ -607,6 +616,157 @@ async function compartir(btn){
   const u = URL.createObjectURL(blob); const l = document.createElement('a'); l.href = u; l.download = 'me-dejo-en-visto.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000);
 }
 
+/* ========= TU CHAT EN HISTORIAS (resumen para compartir) ========= */
+const RE_PERDON = /\b(perd[oó]n(ame)?|perd[oó]name|lo siento|disc[uú]lpa(me)?|me disculpo)\b/i;
+const RE_TEAMO = /\b(te amo|te adoro|te amooo*)\b/i;
+const SECAS = new Set(['ok','okey','okay','oki','k','ya','dale','va','vale','bueno','listo','aja','ajá','mmm','mm','👍','👌','sí','si','no']);
+const EMO_NO = /[🍆🍑💦👅😈🔞🥵]/u;
+function divertidos(A){
+  const M = A.M, me = A.me, pa = A.pa, two = [me, pa];
+  const z = ()=>({[me]:0, [pa]:0});
+  const perdon = z(), teamo = z(), insiste = z(), secas = z(), txt = z();
+  let firstTeAmo = null, firstPerdon = null;
+  let run = 0, runStart = null, prev = null;
+  for (const m of M){
+    if (!two.includes(m.who)) continue;
+    if (!m.media && !m.del){
+      txt[m.who]++;
+      if (RE_PERDON.test(m.text)){ perdon[m.who]++; if (!firstPerdon) firstPerdon = m.who; }
+      if (RE_TEAMO.test(m.text)){ teamo[m.who]++; if (!firstTeAmo) firstTeAmo = {who:m.who, t:m.t}; }
+      if (SECAS.has(m.text.toLowerCase().replace(/[.!¡¿?\s]+/g,''))) secas[m.who]++;
+    }
+    if (prev && prev.who === m.who){ run++; } else { if (prev && run >= 3 && (prev.t - runStart) >= 5*60000) insiste[prev.who]++; run = 1; runStart = m.t; }
+    prev = m;
+  }
+  if (prev && run >= 3 && (prev.t - runStart) >= 5*60000) insiste[prev.who]++;
+  // días, récord, racha y hora de despedida
+  const byDay = new Map();
+  for (const m of M){ const k = m.t.getFullYear()+'-'+(m.t.getMonth()+1)+'-'+m.t.getDate(); byDay.set(k, (byDay.get(k)||0)+1); }
+  let rec = null; for (const [k,v] of byDay) if (!rec || v > rec.v) rec = {k, v};
+  const days = [...byDay.keys()].map(k=>{ const [y,mo,d] = k.split('-').map(Number); return Date.UTC(y,mo-1,d)/86400000; }).sort((a,b)=>a-b);
+  let racha = days.length ? 1 : 0, cur = 1; for (let i=1;i<days.length;i++){ cur = days[i]-days[i-1]===1 ? cur+1 : 1; if (cur > racha) racha = cur; }
+  const lastByNight = new Map(), hours = new Array(24).fill(0);
+  for (const m of M){
+    hours[m.t.getHours()]++;
+    const sh = new Date(m.t.getTime() - 5*3600000); const k = sh.toDateString(); const mins = sh.getHours()*60 + sh.getMinutes() + 300;
+    if (!lastByNight.has(k) || mins > lastByNight.get(k)) lastByNight.set(k, mins);
+  }
+  const nights = [...lastByNight.values()].filter(v=>v >= 20*60);
+  const despedida = nights.length >= 10 ? median(nights) : null;
+  const pico = hours.indexOf(Math.max(...hours));
+  // palabras y emojis compartidos, sin nada íntimo
+  const wc = {}, ec = {};
+  for (const w of two){ for (const [k,v] of A.H[w].topWords) if (!RE_SEX.test(k)) wc[k] = (wc[k]||0)+v; for (const [k,v] of A.H[w].topEmo) if (!EMO_NO.test(k)) ec[k] = (ec[k]||0)+v; }
+  const topW = Object.entries(wc).sort((a,b)=>b[1]-a[1]).slice(0,3), topE = Object.entries(ec).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  return {perdon, teamo, insiste, secas, txt, firstTeAmo, firstPerdon, rec, racha, despedida, pico, topW, topE};
+}
+function horaTxt(mins){ mins = Math.round(mins) % 1440; let h = Math.floor(mins/60), mi = mins%60; const ap = h < 12 ? 'a. m.' : 'p. m.'; h = h%12 || 12; return h+':'+String(mi).padStart(2,'0')+' '+ap; }
+function quienGana(o, A, menos){ const a = o[A.me], b = o[A.pa]; if (!a && !b) return null; if (a === b) return 'empate'; return (menos ? a < b : a > b) ? 'me' : 'pa'; }
+function divertidosHTML(A){
+  const D = A.D; const n = w=>w==='me'?esc(A.me):w==='pa'?esc(A.pa):'Empate';
+  const pct = (o,w)=>D.txt[w] ? Math.round(100*o[w]/D.txt[w]) : 0;
+  const rows = [
+    ['💗 Dice más "te amo"', quienGana(D.teamo,A), D.teamo[A.me], D.teamo[A.pa]],
+    ['🙏 Pide perdón más veces', quienGana(D.perdon,A), D.perdon[A.me], D.perdon[A.pa]],
+    ['📲 Insiste más (varios mensajes seguidos sin respuesta)', quienGana(D.insiste,A), D.insiste[A.me], D.insiste[A.pa]],
+    ['😐 Responde más seco ("ok", "ya", "dale")', quienGana({[A.me]:pct(D.secas,A.me),[A.pa]:pct(D.secas,A.pa)},A), pct(D.secas,A.me)+'%', pct(D.secas,A.pa)+'%']
+  ].filter(r=>r[1]);
+  let h = '<section class="card"><h2>Datos curiosos</h2><p class="sub">Lo divertido de su chat.</p>';
+  if (D.firstTeAmo) h += '<p style="margin:0 0 12px">El primer "te amo" del chat lo escribió <b>'+esc(D.firstTeAmo.who)+'</b>, el '+D.firstTeAmo.t.getDate()+' de '+MES[D.firstTeAmo.t.getMonth()]+' de '+D.firstTeAmo.t.getFullYear()+'.</p>';
+  if (rows.length) h += '<table class="tbl"><tr><th></th><th><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+'</th><th><i class="dot" style="background:var(--b)"></i>'+esc(A.pa)+'</th></tr>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+(r[1]==='me'?'<b>'+r[2]+'</b>':r[2])+'</td><td>'+(r[1]==='pa'?'<b>'+r[3]+'</b>':r[3])+'</td></tr>').join('')+'</table>';
+  return h + '</section>';
+}
+function historiasCTA(){ return '<section class="card noprint" style="text-align:center;background:linear-gradient(135deg,#c2185b,#4a148c);color:#fff;border:0"><h2 style="color:#fff">✨ Su chat en historias</h2><p style="margin:6px 0 14px;opacity:.9">Su récord, su racha, su hora y quién es quién, listo para subir a Instagram. Sin nada íntimo.</p><button class="btn" style="background:#fff;color:#8e1659" onclick="abrirHistorias()">Crear mis historias</button></section>'; }
+
+let HIST = {i:0, nombres:false, urls:[], blobs:[]};
+async function slidesHistorias(A, nombres){
+  const D = A.D, a = A.E[A.me], b = A.E[A.pa], Ha = A.H[A.me], Hb = A.H[A.pa];
+  const yo = nombres ? A.me : 'Yo', el = nombres ? A.pa : 'Mi pareja';
+  const quien = w=>w==='me'?yo:w==='pa'?el:'Empate';
+  const S = [];
+  S.push({t:'portada', k:nombres ? A.me+' y '+A.pa : 'Nuestro chat', big:A.total.toLocaleString('es-CO'), sub:'mensajes en '+Math.max(1,Math.round(A.spanDays)).toLocaleString('es-CO')+' días', foot:'Unos '+Math.round(A.total/Math.max(1,A.spanDays))+' mensajes al día'});
+  if (D.rec){ const [y,mo,d] = D.rec.k.split('-').map(Number); S.push({k:'Nuestro día récord', big:d+' de '+MES[mo-1], sub:y+'', foot:'Ese día nos escribimos '+D.rec.v.toLocaleString('es-CO')+' mensajes'}); }
+  S.push({k:'Nuestra hora', big:D.despedida!==null ? horaTxt(D.despedida) : horaTxt(D.pico*60), sub:D.despedida!==null ? 'es la hora en que solemos despedirnos' : 'es la hora en que más hablamos', foot:D.despedida!==null ? 'La hora en que más hablamos: '+horaTxt(D.pico*60) : ''});
+  if (D.racha >= 3) S.push({k:'Nuestra racha', big:Math.min(D.racha, Math.max(1,Math.round(A.spanDays)))+' días', sub:'seguidos sin dejar de hablarnos', foot:''});
+  if (D.topW.length || D.topE.length) S.push({k:'Lo que más nos decimos', big:D.topW.length ? '"'+D.topW[0][0]+'"' : D.topE.map(e=>e[0]).join(' '), sub:D.topW.length>1 ? 'y también "'+D.topW.slice(1).map(w=>w[0]).join('", "')+'"' : '', foot:D.topE.length && D.topW.length ? D.topE.map(e=>e[0]).join('  ') : '', emo:true});
+  const rows = [];
+  if (a.initShare!==null && b.initShare!==null) rows.push(['Escribe primero', quien(a.initShare===b.initShare?'empate':a.initShare>b.initShare?'me':'pa')]);
+  if (a.resp!==null && b.resp!==null) rows.push(['Responde más rápido', quien(a.resp===b.resp?'empate':a.resp<b.resp?'me':'pa')]);
+  const g1 = quienGana(D.teamo,A); if (g1) rows.push(['Dice más "te amo"', quien(g1)]);
+  const g2 = quienGana(D.perdon,A); if (g2) rows.push(['Pide perdón más', quien(g2)]);
+  if (Ha.audios+Hb.audios > 0) rows.push(['Manda más audios', quien(Ha.audios===Hb.audios?'empate':Ha.audios>Hb.audios?'me':'pa')]);
+  const g3 = quienGana(D.insiste,A); if (g3) rows.push(['Insiste más', quien(g3)]);
+  if (rows.length >= 2) S.push({t:'tabla', k:'Quién es quién', rows:rows.slice(0,6)});
+  const aud = Ha.audios+Hb.audios, cal = Ha.calls+Hb.calls, tot = (Ha.audioTot||0)+(Hb.audioTot||0);
+  if (aud >= 10 || cal >= 5) S.push({k:aud >= 10 ? 'Nuestros audios' : 'Nuestras llamadas', big:aud >= 10 ? (tot >= 600 ? fmtSec(tot) : aud.toLocaleString('es-CO')+' audios') : cal.toLocaleString('es-CO')+' llamadas', sub:aud >= 10 ? (tot >= 600 ? 'escuchándonos en '+aud.toLocaleString('es-CO')+' audios' : 'enviados entre los dos') : 'entre los dos', foot:aud >= 10 && cal >= 5 ? 'Y '+cal.toLocaleString('es-CO')+' llamadas' : ''});
+  S.push({t:'cierre'});
+  const out = [];
+  for (let i=0;i<S.length;i++) out.push(await pintarHistoria(S[i], i, S.length));
+  return out;
+}
+async function pintarHistoria(s, i, n){
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const x = c.getContext('2d');
+  const pal = [['#c2185b','#4a148c'],['#ad1457','#311b92'],['#d81b60','#6a1b9a'],['#880e4f','#4527a0'],['#c2185b','#283593'],['#6a1b9a','#c2185b'],['#4a148c','#ad1457'],['#c2185b','#4a148c']][i%8];
+  const g = x.createLinearGradient(0,0,1080,1920); g.addColorStop(0,pal[0]); g.addColorStop(1,pal[1]); x.fillStyle = g; x.fillRect(0,0,1080,1920);
+  x.globalAlpha = .08; x.fillStyle = '#fff'; x.beginPath(); x.arc(980,260,360,0,7); x.fill(); x.beginPath(); x.arc(80,1700,300,0,7); x.fill(); x.globalAlpha = 1;
+  const F = (w,sz)=>w+' '+sz+'px Inter, system-ui, sans-serif';
+  const fit = (t, w, sz, max)=>{ do { x.font = F(w,sz); if (x.measureText(t).width <= max) break; sz -= 4; } while (sz > 30); return sz; };
+  x.fillStyle = '#fff'; x.textAlign = 'center';
+  for (let k=0;k<n;k++){ x.globalAlpha = k <= i ? .95 : .35; rrect(x, 60 + k*(960/n), 70, 960/n - 12, 8, 4); x.fill(); }
+  x.globalAlpha = .9; x.font = F(800,40); x.fillText('✓✓ ME DEJÓ EN VISTO', 540, 180); x.globalAlpha = 1;
+  if (s.t === 'cierre'){
+    x.font = F(800,150); x.fillText('✓✓', 540, 680);
+    x.font = F(800,108); x.fillText('¿Y el chat', 540, 900); x.fillText('de ustedes?', 540, 1030);
+    x.globalAlpha = .9; x.font = F(500,50); x.fillText('Descúbrelo gratis en', 540, 1180); x.globalAlpha = 1;
+    x.fillStyle = '#fff'; rrect(x, 150, 1240, 780, 140, 70); x.fill(); x.fillStyle = '#8e1659'; x.font = F(800,62); x.fillText('medejoenvisto.com', 540, 1332);
+    x.fillStyle = '#fff'; x.globalAlpha = .85; x.font = F(500,42); x.fillText('🔒 Tu chat nunca sale de tu celular', 540, 1490); x.globalAlpha = 1;
+  } else if (s.t === 'tabla'){
+    const h = Math.min(220, 1240/s.rows.length); let y = 960 - (s.rows.length*h)/2 + 60;
+    x.font = F(800,104); x.fillText(s.k, 540, y - 90);
+    for (const [k,v] of s.rows){
+      x.fillStyle = 'rgba(255,255,255,.14)'; rrect(x, 80, y, 920, h-28, 40); x.fill(); x.fillStyle = '#fff';
+      x.globalAlpha = .8; x.font = F(600,42); x.fillText(k, 540, y + (h-28)/2 - 14); x.globalAlpha = 1;
+      x.font = F(800, fit(v, 800, 68, 840)); x.fillText(v, 540, y + (h-28)/2 + 60); y += h;
+    }
+  } else {
+    x.globalAlpha = .88; x.font = F(700, fit(s.k, 700, 72, 920)); x.fillText(s.k, 540, 700); x.globalAlpha = 1;
+    x.font = F(800, fit(s.big, 800, s.emo ? 170 : 200, 980)); x.fillText(s.big, 540, 960);
+    if (s.sub){ x.font = F(600, fit(s.sub, 600, 60, 960)); x.fillText(s.sub, 540, 1080); }
+    if (s.foot){ x.fillStyle = 'rgba(255,255,255,.16)'; x.font = F(600, 50); const w = Math.min(1000, x.measureText(s.foot).width + 110); rrect(x, 540-w/2, 1250, w, 124, 62); x.fill(); x.fillStyle = '#fff'; x.font = F(600, fit(s.foot, 600, 50, 920)); x.fillText(s.foot, 540, 1330); }
+  }
+  x.fillStyle = '#fff'; x.globalAlpha = .8; x.font = F(600,34); x.fillText('medejoenvisto.com', 540, 1830); x.globalAlpha = 1;
+  return await new Promise(r=>c.toBlob(r,'image/png'));
+}
+async function abrirHistorias(){
+  const A = LAST; if (!A) return; ev('historias');
+  let ov = document.getElementById('hist');
+  if (!ov){
+    ov = document.createElement('div'); ov.id = 'hist';
+    ov.innerHTML = '<div class="hbox"><img id="himg" alt="Historia"><button class="hnav hl" aria-label="Anterior" onclick="pasoHist(-1)"></button><button class="hnav hr" aria-label="Siguiente" onclick="pasoHist(1)"></button></div><div class="hbar"><label class="hname"><input type="checkbox" id="hnom" onchange="regenHist()"> Mostrar nombres</label><button class="btn" id="hshare" onclick="compartirHist(true)">Compartir todas</button><button class="btn ghost" onclick="compartirHist(false)">Solo esta</button><button class="btn ghost" onclick="cerrarHist()">Cerrar</button></div>';
+    document.body.appendChild(ov);
+  }
+  ov.hidden = false; document.body.style.overflow = 'hidden';
+  await regenHist();
+}
+async function regenHist(){
+  const A = LAST; HIST.nombres = document.getElementById('hnom').checked;
+  document.getElementById('himg').style.opacity = .4;
+  HIST.urls.forEach(u=>URL.revokeObjectURL(u));
+  HIST.blobs = await slidesHistorias(A, HIST.nombres); HIST.urls = HIST.blobs.map(b=>URL.createObjectURL(b));
+  HIST.i = Math.min(HIST.i, HIST.blobs.length-1); mostrarHist();
+}
+function mostrarHist(){ const im = document.getElementById('himg'); im.src = HIST.urls[HIST.i]; im.style.opacity = 1; }
+function pasoHist(d){ HIST.i = Math.max(0, Math.min(HIST.blobs.length-1, HIST.i + d)); mostrarHist(); }
+function cerrarHist(){ document.getElementById('hist').hidden = true; document.body.style.overflow = ''; }
+async function compartirHist(todas){
+  ev('historias_compartir');
+  const sel = todas ? HIST.blobs.map((b,i)=>[b,i]) : [[HIST.blobs[HIST.i], HIST.i]];
+  const files = sel.map(([b,i])=>new File([b], 'mi-chat-'+(i+1)+'.png', {type:'image/png'}));
+  try{ if (navigator.canShare && navigator.canShare({files})){ await navigator.share({files, text:'Nuestro chat en datos 👀 ¿Y el de ustedes? medejoenvisto.com'}); return; } }catch(e){ if (e && e.name === 'AbortError') return; }
+  for (const f of files){ const u = URL.createObjectURL(f); const l = document.createElement('a'); l.href = u; l.download = f.name; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000); await new Promise(r=>setTimeout(r,300)); }
+}
+document.addEventListener('keydown', e=>{ const ov = document.getElementById('hist'); if (!ov || ov.hidden) return; if (e.key==='ArrowRight') pasoHist(1); if (e.key==='ArrowLeft') pasoHist(-1); if (e.key==='Escape') cerrarHist(); });
+
 function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 const LV = {estable:'Estable', moderado:'Cambio moderado', fuerte:'Cambio marcado', mejora:'Mejoró', nd:'Sin datos suficientes'};
 function fmtV(v, f){ if (v===null||v===undefined||isNaN(v)) return 'sin datos'; if (f==='min') return fmtMin(v); if (f==='pct') return Math.round(v)+'%'; if (f==='rate') return v.toFixed(1).replace('.',','); return v.toFixed(1).replace('.',','); }
@@ -663,6 +823,7 @@ function chartBox(id, title, sub){ return '<div class="card"><h2>'+title+'</h2><
 
 function render(A, demo){
   LAST = A; DEMO = !!demo;
+  if (!A.D) A.D = divertidos(A);
   const full = EDICION === 'completa' || DEMO;
   const d = t=>t.getDate()+' '+MES[t.getMonth()]+' '+t.getFullYear();
   const pMe = Math.round(100*A.nMe/A.total);
@@ -675,6 +836,7 @@ function render(A, demo){
   h += '<section class="card"><h2>Resumen</h2><p class="sub">Del '+d(A.first)+' al '+d(A.last)+'</p>';
   h += '<div class="grid3"><div class="kpi"><div class="v">'+A.total.toLocaleString('es-CO')+'</div><div class="l">mensajes</div></div><div class="kpi"><div class="v">'+Math.max(1,Math.round(A.spanDays)).toLocaleString('es-CO')+'</div><div class="l">días de conversación</div></div><div class="kpi"><div class="v">'+Math.round(A.total/Math.max(1,A.spanDays))+'</div><div class="l">mensajes por día</div></div></div>';
   h += '<div class="split"><div style="width:'+pMe+'%"></div><div style="width:'+(100-pMe)+'%"></div></div><div class="legend"><span><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+' (tú) '+pMe+'%</span><span>'+esc(A.pa)+' '+(100-pMe)+'%<i class="dot" style="background:var(--b);margin:0 0 0 6px"></i></span></div></section>';
+  h += historiasCTA();
 
   h += '<section class="card"><div class="index"><div class="ring" style="background:conic-gradient('+idxColor+' '+(A.index*3.6)+'deg, var(--line) 0)"><div style="width:96px;height:96px;border-radius:50%;background:var(--card);display:grid;place-items:center"><div><b>'+A.index+'</b><small>de 100</small></div></div></div><div><h2>Índice de cambio: '+idxLabel+'</h2><p class="sub" style="margin:0">Mide cuánto ha cambiado la forma en que '+esc(A.pa)+' se comunica contigo, comparando '+cutTxt+'. No mide infidelidad: muestra cambios de patrón que vale la pena conversar.</p>'+(A.enough?'':'<p class="err">Hay pocos mensajes en alguno de los dos periodos, así que las señales son poco confiables.</p>')+'</div></div></section>';
 
@@ -687,6 +849,7 @@ function render(A, demo){
 
   h += chartBox('cVol','Mensajes por mes','Cuánto escribe cada uno, mes a mes.');
   h += chartBox('cIni','Quién busca a quién','Porcentaje de conversaciones que inicia cada uno (tras 6 horas o más de silencio).');
+  h += divertidosHTML(A);
   if (full){
     h += chartBox('cResp','Tiempo de respuesta','Mediana de lo que tarda cada uno en contestar.');
     h += chartBox('cAff','Afecto','Mensajes cariñosos por cada 100 (te amo, amor, besos, corazones y similares).');
@@ -704,8 +867,8 @@ function render(A, demo){
     h += '<section class="card paywall noprint"><h2>Tu informe completo</h2><p class="sub">Pago único de '+PRECIO+'. Se abre al instante y lo descargas en PDF.</p><ul><li>Tiempo de respuesta de cada uno, mes a mes</li><li>Evolución del afecto, la intimidad y la actividad nocturna</li><li>Mensajes eliminados</li><li>Las emociones de cada uno: alegría, cariño, deseo, enojo, tristeza, ansiedad y celos</li><li>Audios, llamadas, memes y lugares más mencionados</li><li>Las 15 palabras y emojis que más usa cada uno</li><li>La historia de tu chat: los meses en que todo cambió</li></ul><ol class="note" style="padding-left:20px;margin:0 0 14px"><li>Paga con Nequi, PSE o tarjeta.</li><li>Al aprobarse el pago, se abre tu informe completo automáticamente.</li><li>Tu informe se abre solo con este mismo chat. Si pagas desde otro navegador, vuelve a cargar el archivo.</li></ol><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="'+PAY_URL+'">Pagar '+PRECIO+'</a>'+(AYUDA_URL?'<a class="btn ghost" href="'+AYUDA_URL+'" target="_blank" rel="noopener">¿Problemas con el pago?</a>':'')+'</div><p class="note" style="margin-top:10px">Tu chat sigue sin salir de tu teléfono: lo guardamos solo en tu celular mientras pagas y lo borramos al abrir el informe.</p></section>';
   }
   h += '<section class="card close"><h2>Antes de sacar conclusiones</h2><p>Estos datos muestran patrones, no intenciones. Un cambio puede deberse a trabajo, cansancio, salud, estrés o simple rutina. Si algo te inquieta, conversa con tu pareja con calma, desde lo que sientes y no desde un puntaje. Si la situación te está afectando, buscar apoyo en terapia de pareja o con un psicólogo es una decisión valiente.</p></section>';
-  if (!full && !DEMO) h += '<section class="card noprint" style="text-align:center;border:2px dashed var(--accent)"><h2>🎁 Gana el informe completo gratis</h2><p class="sub" style="margin:6px 0 0">Toca <b>Compartir mi resultado</b>, súbelo a tus historias de Instagram y etiqueta a <b>@medejoenvisto.app</b>. Te enviamos el acceso completo por mensaje. Válido para las primeras 30 personas.</p></section>';
-  h += '<div class="noprint" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'+(full && !DEMO ? '<button class="btn" onclick="descargarPDF(this)">Descargar informe en PDF</button>' : '')+'<button class="btn ghost" onclick="compartir(this)">Compartir mi resultado</button></div>';
+  if (!full && !DEMO) h += '<section class="card noprint" style="text-align:center;border:2px dashed var(--accent)"><h2>🎁 Gana el informe completo gratis</h2><p class="sub" style="margin:6px 0 0">Toca <b>Crear mis historias</b>, súbelas a tu Instagram y etiqueta a <b>@medejoenvisto.app</b>. Te enviamos el acceso completo por mensaje. Válido para las primeras 30 personas.</p></section>';
+  h += '<div class="noprint" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'+(full && !DEMO ? '<button class="btn" onclick="descargarPDF(this)">Descargar informe en PDF</button>' : '')+'<button class="btn ghost" onclick="abrirHistorias()">✨ Crear mis historias</button></div>';
 
   $('#res').innerHTML = h; $('#res').hidden = false;
   charts.forEach(c=>c.destroy()); charts = [];
