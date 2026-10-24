@@ -183,8 +183,8 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
 <script>
 /* ========= CONFIGURACIÓN DE LA EDICIÓN ========= */
 const EDICION = 'completa';           // 'gratis' o 'completa'
-const PRECIO_NORMAL = '$19.900', PAY_NORMAL = 'https://checkout.wompi.co/l/mDO81a';
-const PROMO = { precio: '$9.900', pay: 'https://checkout.wompi.co/l/CxTcuo', hasta: new Date('2026-10-26T00:00:00-05:00'), centavos: 990000 };
+const PRECIO_NORMAL = '$14.900', PAY_NORMAL = 'https://checkout.wompi.co/l/bONj4t';
+const PROMO = { precio: '$7.900', pay: 'https://checkout.wompi.co/l/i3AQUF', hasta: new Date('2026-10-26T00:00:00-05:00'), centavos: 790000 };
 const PROMO_ON = PROMO.pay.startsWith('https://') && Date.now() < PROMO.hasta.getTime();
 // Links por creador: medejoenvisto.com/?ref=nombre. Cada creador tiene su propio link de pago en Wompi para contar sus ventas exactas.
 const REFS = { /* 'nombre': { normal: 'https://checkout.wompi.co/l/XXXX', promo: 'https://checkout.wompi.co/l/YYYY' } */ };
@@ -194,7 +194,7 @@ const PAY_URL = REF_LINK || (PROMO_ON ? PROMO.pay : PAY_NORMAL);
 const PRECIO  = PROMO_ON ? PROMO.precio : PRECIO_NORMAL;
 document.querySelectorAll('.precioTxt').forEach(e=>e.textContent=PRECIO);
 const WOMPI_API = 'https://production.wompi.co/v1/transactions/';
-const MONTO_MIN = 1990000;            // en centavos: 19.900 pesos
+const MONTO_MIN = 1490000;            // en centavos: 14.900 pesos
 const LINK_ID   = '';                 // opcional: id del link de pago de Wompi, para aceptar solo ese link
 const DIAS_VALIDEZ = 7;               // días que dura el acceso después del pago
 const AYUDA_URL = '';                // opcional: correo (mailto:...) o Instagram de la marca; vacío oculta el botón de ayuda
