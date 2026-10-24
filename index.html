@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Me Dejó en Visto</title>
 <meta name="description" content="Descubre cómo ha cambiado la comunicación en tu relación. Análisis privado de tu chat de WhatsApp, hecho en tu propio teléfono.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://medejoenvisto.com/">
+<meta property="og:title" content="Me Dejó en Visto: lo que tu chat dice de tu relación">
+<meta property="og:description" content="Quién escribe primero, cuánto tardan en responder, el cariño y las emociones mes a mes. Gratis y privado: tu chat nunca sale de tu teléfono.">
+<meta property="og:image" content="https://medejoenvisto.com/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_CO">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#c2185b">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -124,7 +135,7 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
       <span>Acepta el .zip o el .txt que exporta WhatsApp</span>
     </label>
     <p class="note" style="text-align:center;margin:10px 0 0;font-size:13px">Al cargar tu chat aceptas los <a href="terminos.html" style="color:inherit">términos</a> y el <a href="privacidad.html" style="color:inherit">aviso de privacidad</a>.</p>
-    <div style="text-align:center;margin-top:12px"><button class="btn ghost" id="demoBtn" type="button">Ver un ejemplo con un chat ficticio</button></div>
+    <div style="text-align:center;margin-top:12px"><button class="btn ghost" id="demoBtn" type="button">Ver un ejemplo con un chat ficticio</button> <a class="btn ghost" id="waShare" target="_blank" rel="noopener">Enviárselo a alguien</a></div>
     <div class="note" id="status"></div>
     <div class="err" id="err" hidden></div>
   </section>
@@ -722,6 +733,7 @@ function promoBanner(){
   el.hidden = false;
 }
 promoBanner(); setInterval(promoBanner, 60000);
+try{ document.getElementById('waShare').href = 'https://wa.me/?text='+encodeURIComponent('Mira esto 👀 Te dice con datos cómo ha cambiado la comunicación con tu pareja, y el chat no sale del celular: https://medejoenvisto.com'); }catch(e){}
 gate();
 </script>
 </body>
