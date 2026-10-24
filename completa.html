@@ -146,7 +146,7 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
 /* ========= CONFIGURACIÓN DE LA EDICIÓN ========= */
 const EDICION = 'completa';           // 'gratis' o 'completa'
 const PRECIO_NORMAL = '$19.900', PAY_NORMAL = 'https://checkout.wompi.co/l/mDO81a';
-const PROMO = { precio: '$9.900', pay: 'PENDIENTE_LINK_9900', hasta: new Date('2026-10-26T00:00:00-05:00'), centavos: 990000 };
+const PROMO = { precio: '$9.900', pay: 'https://checkout.wompi.co/l/CxTcuo', hasta: new Date('2026-10-26T00:00:00-05:00'), centavos: 990000 };
 const PROMO_ON = PROMO.pay.startsWith('https://') && Date.now() < PROMO.hasta.getTime();
 const PAY_URL = PROMO_ON ? PROMO.pay : PAY_NORMAL;
 const PRECIO  = PROMO_ON ? PROMO.precio : PRECIO_NORMAL;
