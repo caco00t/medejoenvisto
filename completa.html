@@ -159,7 +159,11 @@ const EDICION = 'completa';           // 'gratis' o 'completa'
 const PRECIO_NORMAL = '$19.900', PAY_NORMAL = 'https://checkout.wompi.co/l/mDO81a';
 const PROMO = { precio: '$9.900', pay: 'https://checkout.wompi.co/l/CxTcuo', hasta: new Date('2026-10-26T00:00:00-05:00'), centavos: 990000 };
 const PROMO_ON = PROMO.pay.startsWith('https://') && Date.now() < PROMO.hasta.getTime();
-const PAY_URL = PROMO_ON ? PROMO.pay : PAY_NORMAL;
+// Links por creador: medejoenvisto.com/?ref=nombre. Cada creador tiene su propio link de pago en Wompi para contar sus ventas exactas.
+const REFS = { /* 'nombre': { normal: 'https://checkout.wompi.co/l/XXXX', promo: 'https://checkout.wompi.co/l/YYYY' } */ };
+const REF = (()=>{ try{ const q = new URLSearchParams(location.search).get('ref'); if (q){ const k = q.toLowerCase().replace(/[^a-z0-9_-]/g,''); localStorage.setItem('mdv_ref', JSON.stringify({k, t:Date.now()})); return k; } const s = JSON.parse(localStorage.getItem('mdv_ref')||'null'); return (s && Date.now()-s.t < 30*86400000) ? s.k : null; }catch(e){ return null; } })();
+const REF_LINK = REF && REFS[REF] ? (PROMO_ON ? (REFS[REF].promo || REFS[REF].normal) : REFS[REF].normal) : null;
+const PAY_URL = REF_LINK || (PROMO_ON ? PROMO.pay : PAY_NORMAL);
 const PRECIO  = PROMO_ON ? PROMO.precio : PRECIO_NORMAL;
 const WOMPI_API = 'https://production.wompi.co/v1/transactions/';
 const MONTO_MIN = 1990000;            // en centavos: 19.900 pesos
