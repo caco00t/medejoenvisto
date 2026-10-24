@@ -121,6 +121,7 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
       <strong>Toca para elegir el archivo</strong>
       <span>Acepta el .zip o el .txt que exporta WhatsApp</span>
     </label>
+    <div style="text-align:center;margin-top:12px"><button class="btn ghost" id="demoBtn" type="button">Ver un ejemplo con un chat ficticio</button></div>
     <div class="note" id="status"></div>
     <div class="err" id="err" hidden></div>
   </section>
@@ -407,7 +408,35 @@ function analyze(all, me, pa, dur){
 
 function fmtMin(v){ if (v===null||v===undefined||isNaN(v)) return 'sin datos'; if (v<1) return 'menos de 1 min'; if (v<60) return Math.round(v)+' min'; if (v<1440) return (v/60).toFixed(1).replace('.',',')+' h'; return (v/1440).toFixed(1).replace('.',',')+' días'; }
 function monthLabel(k, long){ const [y,m]=k.split('-'); return long ? MESL[+m-1]+' de '+y : MES[+m-1]+' '+y.slice(2); }
-if (typeof module !== 'undefined') module.exports = {parseChat, analyze, fmtMin, oggSeconds, classify};
+function demoChat(){
+  let seed = 7; const rnd = ()=>{ seed = (seed*16807) % 2147483647; return seed/2147483647; };
+  const pick = a=>a[Math.floor(rnd()*a.length)];
+  const warm = ['Buenos días mi amor ❤','te extraño mucho','jajaja qué bueno','ya salí del trabajo, voy para la casa','te amo 😘','qué rico verte hoy','vamos al cine el sábado?','estoy feliz contigo 🥰','me encanta cuando me llamas','cómo te fue hoy, bebé?','jajajaja','besos 😘','tengo ganas de ti 🔥','paso por ti a las 7','en la oficina todo bien','llegando al Centro Comercial Buenavista','te mando un abrazo gigante','qué genial, felicitaciones!'];
+  const neutral = ['ok','listo','ya voy','sí','después hablamos','estoy ocupada','bueno','en el trabajo','dale','mmm','ya'];
+  const tense = ['por qué no contestas?','con quién estabas?','estoy cansada de lo mismo','no me hables así','me siento mal 😢','qué te pasa?','estoy brava','no sé qué hacer'];
+  const end = new Date(2026,9,15,22,0), coolFrom = new Date(2026,3,1);
+  const fmt = d=>d.getDate()+'/'+(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(2)+', '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  const lines = []; let t = new Date(2025,0,6,8,0), who = 'Andrés';
+  while (t < end){
+    const cool = t > coolFrom, laura = who === 'Laura';
+    const r = rnd();
+    const mood = cool && laura ? (r<0.2?'tense':r<0.75?'neutral':'warm') : cool ? (r<0.1?'tense':r<0.45?'neutral':'warm') : (r<0.78?'warm':r<0.96?'neutral':'tense');
+    let text = mood==='warm' ? pick(warm) : mood==='neutral' ? pick(neutral) : pick(tense);
+    const k = rnd();
+    if (laura && cool && k < 0.04) text = 'Se eliminó este mensaje';
+    else if (k < 0.07) text = 'audio omitido'; else if (k < 0.1) text = 'sticker omitido';
+    lines.push(fmt(t)+' - '+who+': '+text);
+    let gap;
+    if (rnd() < 0.09){ gap = 360 + rnd()*500; who = cool ? (rnd()<0.82?'Andrés':'Laura') : (rnd()<0.5?'Andrés':'Laura'); }
+    else { if (rnd() < 0.7) who = laura ? 'Andrés' : 'Laura'; gap = (who==='Laura' && cool) ? 15 + rnd()*200 : 2 + rnd()*35; }
+    t = new Date(t.getTime() + gap*60000);
+    const h = t.getHours();
+    if (h < 7 && !(cool && who==='Laura' && rnd() < 0.35)) t.setHours(7, Math.floor(rnd()*59));
+  }
+  return lines.join('\n');
+}
+
+if (typeof module !== 'undefined') module.exports = {parseChat, analyze, fmtMin, oggSeconds, classify, demoChat};
 // </logic>
 
 const $ = s=>document.querySelector(s);
@@ -446,7 +475,7 @@ $('#file').addEventListener('change', async e=>{
     $('#whoBtns').innerHTML = [p1,p2].map((p,i)=>'<button class="btn '+(i?'ghost':'')+'" data-i="'+i+'">'+esc(p[0])+'</button>').join('');
     document.querySelectorAll('#whoBtns button').forEach(b=>b.onclick=()=>{
       const i = +b.dataset.i; const me = [p1,p2][i][0], pa = [p1,p2][1-i][0];
-      render(analyze(DATA.msgs, me, pa, DUR));
+      render(analyze(DATA.msgs, me, pa, DUR), false);
     });
     $('#quien').hidden = false; $('#quien').scrollIntoView({behavior:'smooth'});
   } catch(x){ $('#status').textContent = ''; $('#err').textContent = x.message || 'No pudimos leer el archivo.'; $('#err').hidden = false; }
@@ -473,6 +502,43 @@ async function descargarPDF(btn){
   document.body.classList.remove('pdfmode');
   if (prevTheme === null) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', prevTheme);
   btn.disabled = false; btn.textContent = txt;
+}
+
+let DEMO = false, LAST = null;
+$('#demoBtn').addEventListener('click', ()=>{
+  DEMO = true; $('#err').hidden = true; $('#quien').hidden = true;
+  const D = parseChat(demoChat()); render(analyze(D.msgs, 'Andrés', 'Laura', {}), true);
+});
+
+function rrect(x, X, Y, W, H, R){ x.beginPath(); x.moveTo(X+R,Y); x.arcTo(X+W,Y,X+W,Y+H,R); x.arcTo(X+W,Y+H,X,Y+H,R); x.arcTo(X,Y+H,X,Y,R); x.arcTo(X,Y,X+W,Y,R); x.closePath(); }
+async function compartir(btn){
+  const A = LAST; if (!A) return;
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const x = c.getContext('2d');
+  const g = x.createLinearGradient(0,0,0,1920); g.addColorStop(0,'#c2185b'); g.addColorStop(1,'#4a148c'); x.fillStyle = g; x.fillRect(0,0,1080,1920);
+  const F = (w,sz)=>w+' '+sz+'px Inter, system-ui, sans-serif';
+  x.fillStyle = '#fff'; x.textAlign = 'center';
+  x.font = F(800,48); x.fillText('✓✓ ME DEJÓ EN VISTO', 540, 170);
+  x.font = F(800,84); x.fillText('Nuestro chat', 540, 300); x.fillText('en datos', 540, 395);
+  x.font = F(500,38); x.globalAlpha = .85; x.fillText(A.total.toLocaleString('es-CO')+' mensajes en '+Math.max(1,Math.round(A.spanDays)).toLocaleString('es-CO')+' días', 540, 470); x.globalAlpha = 1;
+  const a = A.E[A.me], b = A.E[A.pa];
+  const pMe = Math.round(100*A.nMe/A.total);
+  const faster = (a.resp!==null && b.resp!==null) ? (a.resp <= b.resp ? 'Yo' : 'Mi pareja') : 'Empate';
+  const starter = (a.initShare!==null && b.initShare!==null) ? (a.initShare >= b.initShare ? 'Yo' : 'Mi pareja') : 'Empate';
+  const rows = [['Quién escribe más', pMe >= 50 ? 'Yo, con el '+pMe+'%' : 'Mi pareja, con el '+(100-pMe)+'%'],
+    ['Quién responde más rápido', faster], ['Quién escribe primero', starter],
+    ['Mi emoción dominante', dominant(a)], ['La de mi pareja', dominant(b)]];
+  let y = 560;
+  for (const [k,v] of rows){
+    x.fillStyle = 'rgba(255,255,255,.14)'; rrect(x, 90, y, 900, 210, 36); x.fill();
+    x.fillStyle = '#fff'; x.globalAlpha = .8; x.font = F(600,36); x.fillText(k, 540, y+78); x.globalAlpha = 1;
+    x.font = F(800,54); x.fillText(v, 540, y+158); y += 240;
+  }
+  x.font = F(600,38); x.fillText('Descubre lo que dice el tuyo', 540, 1790);
+  x.globalAlpha = .85; x.font = F(500,32); x.fillText('caco00t.github.io/medejoenvisto', 540, 1845); x.globalAlpha = 1;
+  const blob = await new Promise(r=>c.toBlob(r,'image/png'));
+  const file = new File([blob], 'me-dejo-en-visto.png', {type:'image/png'});
+  try{ if (navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], text:'Lo que nuestro chat dice de nosotros: caco00t.github.io/medejoenvisto'}); return; } }catch(e){ if (e && e.name === 'AbortError') return; }
+  const u = URL.createObjectURL(blob); const l = document.createElement('a'); l.href = u; l.download = 'me-dejo-en-visto.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000);
 }
 
 function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
@@ -529,8 +595,9 @@ function fakeSig(t){ return '<div class="sig"><span class="pill p-moderado">Camb
 function lock(inner, msg){ return '<div class="locked"><div class="blur">'+inner+'</div><div class="lockcta"><b>🔒 '+msg+'</b><p>Inclúyelo en tu informe completo por '+PRECIO+'.</p><a class="btn" href="'+PAY_URL+'" target="_blank" rel="noopener">Desbloquear informe</a></div></div>'; }
 function chartBox(id, title, sub){ return '<div class="card"><h2>'+title+'</h2><p class="sub">'+sub+'</p><div class="chart"><canvas id="'+id+'"></canvas></div></div>'; }
 
-function render(A){
-  const full = EDICION === 'completa';
+function render(A, demo){
+  LAST = A; DEMO = !!demo;
+  const full = EDICION === 'completa' || DEMO;
   const d = t=>t.getDate()+' '+MES[t.getMonth()]+' '+t.getFullYear();
   const pMe = Math.round(100*A.nMe/A.total);
   const idxLabel = A.index < 20 ? 'Comunicación estable' : A.index < 45 ? 'Cambios moderados' : 'Cambios marcados';
@@ -538,6 +605,7 @@ function render(A){
   const cutTxt = A.spanDays >= 150 ? 'los últimos 3 meses frente a todo lo anterior' : 'la segunda mitad del chat frente a la primera';
   const sig = A.S;
   let h = '<div class="pdfhead"><b>✓✓ Me Dejó en Visto</b><div class="note">Informe de '+esc(A.me)+' y '+esc(A.pa)+'</div></div>';
+  if (DEMO) h += '<section class="card" style="background:var(--soft);border-color:var(--accent)"><h2>Ejemplo con un chat ficticio</h2><p class="sub" style="margin:0">Andrés y Laura no existen: así se ve un informe completo. Carga tu chat arriba para ver el tuyo.</p></section>';
   h += '<section class="card"><h2>Resumen</h2><p class="sub">Del '+d(A.first)+' al '+d(A.last)+'</p>';
   h += '<div class="grid3"><div class="kpi"><div class="v">'+A.total.toLocaleString('es-CO')+'</div><div class="l">mensajes</div></div><div class="kpi"><div class="v">'+Math.max(1,Math.round(A.spanDays)).toLocaleString('es-CO')+'</div><div class="l">días de conversación</div></div><div class="kpi"><div class="v">'+Math.round(A.total/Math.max(1,A.spanDays))+'</div><div class="l">mensajes por día</div></div></div>';
   h += '<div class="split"><div style="width:'+pMe+'%"></div><div style="width:'+(100-pMe)+'%"></div></div><div class="legend"><span><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+' (tú) '+pMe+'%</span><span>'+esc(A.pa)+' '+(100-pMe)+'%<i class="dot" style="background:var(--b);margin:0 0 0 6px"></i></span></div></section>';
@@ -570,7 +638,7 @@ function render(A){
     h += '<section class="card paywall noprint"><h2>Tu informe completo</h2><p class="sub">Pago único de '+PRECIO+'. Se abre al instante y lo descargas en PDF.</p><ul><li>Tiempo de respuesta de cada uno, mes a mes</li><li>Evolución del afecto, la intimidad y la actividad nocturna</li><li>Mensajes eliminados</li><li>Las emociones de cada uno: alegría, cariño, deseo, enojo, tristeza, ansiedad y celos</li><li>Audios, llamadas, memes y lugares más mencionados</li><li>Las 15 palabras y emojis que más usa cada uno</li><li>La historia de tu chat: los meses en que todo cambió</li></ul><ol class="note" style="padding-left:20px;margin:0 0 14px"><li>Paga con Nequi, PSE o tarjeta.</li><li>Al aprobarse el pago, se abre tu informe completo automáticamente.</li><li>Vuelve a cargar el mismo archivo del chat.</li></ol><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="'+PAY_URL+'">Pagar '+PRECIO+'</a>'+(AYUDA_URL?'<a class="btn ghost" href="'+AYUDA_URL+'" target="_blank" rel="noopener">¿Problemas con el pago?</a>':'')+'</div><p class="note" style="margin-top:10px">Tu chat sigue sin salir de tu teléfono: en el informe completo vuelves a cargar el mismo archivo.</p></section>';
   }
   h += '<section class="card close"><h2>Antes de sacar conclusiones</h2><p>Estos datos muestran patrones, no intenciones. Un cambio puede deberse a trabajo, cansancio, salud, estrés o simple rutina. Si algo te inquieta, conversa con tu pareja con calma, desde lo que sientes y no desde un puntaje. Si la situación te está afectando, buscar apoyo en terapia de pareja o con un psicólogo es una decisión valiente.</p></section>';
-  if (full) h += '<div class="noprint" style="text-align:center"><button class="btn" onclick="descargarPDF(this)">Descargar informe en PDF</button></div>';
+  h += '<div class="noprint" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'+(full && !DEMO ? '<button class="btn" onclick="descargarPDF(this)">Descargar informe en PDF</button>' : '')+'<button class="btn ghost" onclick="compartir(this)">Compartir mi resultado</button></div>';
 
   $('#res').innerHTML = h; $('#res').hidden = false;
   charts.forEach(c=>c.destroy()); charts = [];
