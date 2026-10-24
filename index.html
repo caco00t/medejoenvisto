@@ -504,7 +504,7 @@ const IDB = {
 (async()=>{ try{ const p = await IDB.get('pendiente'); if (p && Date.now()-p.t > 86400000) await IDB.del('pendiente'); }catch(e){} })();
 /* ===== Embudo anónimo: solo cuenta pasos, sin datos del chat ni de la persona ===== */
 function ev(n){ try{ if (location.protocol.startsWith('http')) navigator.sendBeacon('/api/e?n='+n+'&ed='+EDICION); }catch(e){} }
-ev('visita');
+// las visitas las mide Cloudflare Web Analytics (ahorra escrituras en KV)
 document.addEventListener('click', async e=>{
   const a = e.target.closest && e.target.closest('a'); if (!a || a.href !== PAY_URL) return;
   ev('pago_click');

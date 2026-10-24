@@ -28,8 +28,10 @@ export default {
       if (!EVENTOS.has(n)) return new Response(null, {status: 204});
       const d = new Date(Date.now() - 5*3600000).toISOString().slice(0,10);
       const key = 'ev:' + d + ':' + ed + ':' + n;
-      const v = parseInt(await env.REGALOS_KV.get(key) || '0', 10);
-      await env.REGALOS_KV.put(key, String(v + 1), {expirationTtl: 400*86400});
+      try{
+        const v = parseInt(await env.REGALOS_KV.get(key) || '0', 10);
+        await env.REGALOS_KV.put(key, String(v + 1), {expirationTtl: 400*86400});
+      }catch(e){ /* si se agota el cupo diario de KV, el conteo se pierde pero nada se rompe */ }
       return new Response(null, {status: 204});
     }
     if (url.pathname === '/api/stats'){
