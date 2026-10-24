@@ -3,3 +3,5 @@ wrangler.jsonc
 .assetsignore
 .git
 .github
+worker
+node_modules
