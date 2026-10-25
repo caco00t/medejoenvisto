@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#4a148c}
+body{font-family:'Inter','Noto Color Emoji',sans-serif;color:#fff}
+#stage{position:absolute;inset:0;overflow:hidden;
+ background:linear-gradient(180deg,#c2185b 0%,#8e1a78 50%,#4a148c 100%)}
+.anim{position:absolute;opacity:0;will-change:transform,opacity}
+.brand{left:0;right:0;top:78px;text-align:center;font-weight:700;font-size:34px;letter-spacing:.5px;color:#fff}
+.brand b{color:#fff;letter-spacing:-6px;margin-right:14px}
+.pill{left:50%;top:150px;transform:translateX(-50%);padding:14px 40px;border-radius:999px;font-weight:700;font-size:40px;letter-spacing:3px;white-space:nowrap}
+.pill.and{background:#fff;color:#a0186e}
+.pill.ios{background:#2a1035;color:#fff}
+.pill.fin{background:#fff;color:#a0186e}
+
+/* hook */
+.h1{left:70px;right:70px;top:560px;font-weight:700;font-size:104px;line-height:1.08;letter-spacing:-2px}
+.h1 em{font-style:normal;color:#ffd1e6}
+.h2{left:70px;right:70px;top:1010px;font-weight:500;font-size:52px;line-height:1.3;color:#fff}
+.h2 b{color:#ffd1e6;font-weight:700}
+.bigcheck{left:70px;top:330px;font-size:150px;font-weight:800;color:#fff;letter-spacing:-40px}
+
+/* phone */
+#phone{left:210px;top:270px;width:660px;height:1190px;border-radius:78px;background:#05050a;
+ box-shadow:0 0 0 5px rgba(255,255,255,.25),0 40px 120px rgba(30,0,40,.5)}
+#screen{position:absolute;left:14px;top:14px;width:632px;height:1162px;border-radius:64px;overflow:hidden;background:#0b141a}
+.scr{position:absolute;inset:0;opacity:0}
+.status{height:46px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 40px 4px;font-size:22px;font-weight:500;color:#e9edef}
+/* android chat */
+.ahead{height:100px;background:#1f2c34;display:flex;align-items:center;padding:0 14px;gap:14px;color:#e9edef}
+.av{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#FF8FB5,#FF4D8D);display:flex;align-items:center;justify-content:center;font-size:30px;flex:none}
+.nm{flex:1;line-height:1.15}.nm div{font-size:30px;font-weight:500}.nm span{font-size:21px;color:#8696a0}
+.ic{font-size:30px;width:52px;text-align:center;color:#e9edef}
+.dots{font-size:42px;font-weight:700;width:46px;text-align:center;line-height:1}
+.body{position:absolute;top:146px;bottom:96px;left:0;right:0;padding:24px 22px;display:flex;flex-direction:column;gap:14px;justify-content:flex-end;
+ background:#0b141a}
+.b{max-width:75%;padding:14px 20px 12px;border-radius:18px;font-size:27px;line-height:1.3;color:#e9edef}
+.b small{display:block;text-align:right;font-size:17px;color:#8fa5ad;margin-top:2px}
+.b small i{font-style:normal;color:#53BDEB;letter-spacing:-4px;margin-left:6px}
+.in{background:#202c33;align-self:flex-start;border-top-left-radius:4px}
+.out{background:#7b2a7f;align-self:flex-end;border-top-right-radius:4px}
+.inbar{position:absolute;bottom:0;left:0;right:0;height:96px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#0b141a}
+.inbar .f{flex:1;height:66px;border-radius:33px;background:#202c33;color:#8696a0;font-size:25px;display:flex;align-items:center;padding:0 26px}
+.inbar .m{width:66px;height:66px;border-radius:50%;background:#c2185b;display:flex;align-items:center;justify-content:center;font-size:28px}
+/* android menu */
+.menu{position:absolute;top:52px;right:10px;width:400px;background:#233138;border-radius:14px;padding:10px 0;box-shadow:0 10px 40px rgba(0,0,0,.6);transform-origin:top right}
+.mi{height:80px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:28px;color:#e9edef}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.dlg{position:absolute;left:40px;right:40px;top:400px;background:#233138;border-radius:28px;padding:40px 40px 26px}
+.dlg h3{font-size:34px;font-weight:500;margin-bottom:18px}
+.dlg p{font-size:25px;color:#aebac1;line-height:1.4}
+.dlg .btns{display:flex;justify-content:flex-end;gap:12px;margin-top:34px}
+.dlg .btn{font-size:25px;font-weight:700;color:#f48fc1;padding:16px 18px;border-radius:12px}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#1f2c34;border-radius:34px 34px 0 0;padding:28px 26px 60px}
+.sheet h4{font-size:28px;font-weight:500;color:#e9edef;margin:6px 10px 30px}
+.grab{width:70px;height:7px;border-radius:4px;background:#8696a0;margin:0 auto 18px}
+.grid{display:flex;justify-content:space-around}
+.app{width:130px;text-align:center;font-size:21px;color:#d1d7db;padding:12px 0;border-radius:18px}
+.app .c{width:90px;height:90px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:40px}
+.toast{position:absolute;left:0;right:0;margin:0 auto;width:fit-content;bottom:150px;background:#e9edef;color:#111;font-size:26px;font-weight:500;padding:16px 34px;border-radius:40px;white-space:nowrap}
+
+/* iOS */
+.ios{background:#000}
+.ihead{height:100px;background:#1c1c1e;display:flex;align-items:center;padding:0 16px;gap:12px;color:#fff;border-bottom:1px solid #2c2c2e}
+.ihead .bk{font-size:56px;color:#0A84FF;line-height:1;margin-top:-8px;width:34px}
+.ibody{position:absolute;top:146px;bottom:96px;left:0;right:0;padding:24px 22px;display:flex;flex-direction:column;gap:14px;justify-content:flex-end;background:#0b141a}
+.info{position:absolute;inset:0;background:#000}
+.info .status{position:absolute;top:0;left:0;right:0;background:#000;z-index:3}
+.nav{position:absolute;top:46px;left:0;right:0;height:90px;display:flex;align-items:center;justify-content:center;font-size:29px;font-weight:500;background:#000;z-index:2}
+.nav .bk{position:absolute;left:18px;color:#0A84FF;font-size:56px;margin-top:-8px}
+.scroll{position:absolute;top:136px;left:0;right:0}
+.bigav{width:190px;height:190px;border-radius:50%;margin:20px auto 18px;background:linear-gradient(135deg,#FF8FB5,#FF4D8D);display:flex;align-items:center;justify-content:center;font-size:90px}
+.iname{text-align:center;font-size:40px;font-weight:700}
+.isub{text-align:center;font-size:24px;color:#8e8e93;margin-top:4px}
+.qbtns{display:flex;gap:14px;padding:30px 30px 6px}
+.qb{flex:1;background:#1c1c1e;border-radius:18px;height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:21px;color:#fff;gap:6px}
+.qb span{font-size:34px;color:#0A84FF}
+.grp{margin:26px 26px 0;background:#1c1c1e;border-radius:20px;overflow:hidden}
+.row{height:84px;display:flex;align-items:center;padding:0 28px;font-size:27px;border-bottom:1px solid #2c2c2e}
+.row:last-child{border-bottom:none}
+.row.blue{color:#0A84FF}.row.red{color:#FF453A}
+.asheet{position:absolute;left:18px;right:18px;bottom:40px}
+.ac{background:#2c2c2e;border-radius:26px;overflow:hidden;margin-bottom:16px}
+.ac div{height:100px;display:flex;align-items:center;justify-content:center;font-size:31px;color:#0A84FF;border-bottom:1px solid #3a3a3c}
+.ac div:last-child{border-bottom:none}
+.ac .cancel{font-weight:700}
+.isheet{position:absolute;left:0;right:0;bottom:0;top:300px;background:#1c1c1e;border-radius:34px 34px 0 0;padding:24px 22px}
+.fileh{display:flex;align-items:center;gap:18px;padding:6px 10px 24px;border-bottom:1px solid #3a3a3c}
+.fileh .fi{width:70px;height:84px;border-radius:10px;background:#3a3a3c;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#ddd}
+.fileh div{font-size:24px;line-height:1.3}.fileh small{color:#8e8e93;font-size:20px}
+.irow{margin-top:24px;background:#2c2c2e;border-radius:20px;overflow:hidden}
+.irow div{height:88px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font-size:28px;border-bottom:1px solid #3a3a3c}
+.irow div:last-child{border-bottom:none}
+
+/* web */
+.web{background:#FBF8FF;color:#1a1530}
+.urlbar{margin:56px 22px 0;height:62px;border-radius:31px;background:#ece8f6;display:flex;align-items:center;justify-content:center;font-size:23px;color:#4a4566;gap:8px}
+.wbody{padding:40px 38px}
+.wlogo{font-weight:700;font-size:26px;color:#6c63a8}.wlogo b{color:#2ea6d9;letter-spacing:-4px;margin-right:8px}
+.wt{font-weight:700;font-size:46px;line-height:1.12;margin:22px 0 16px;letter-spacing:-.5px}
+.wp{font-size:23px;line-height:1.45;color:#5b5675}
+.drop{margin-top:34px;border:3px dashed #b5a9e8;border-radius:26px;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#5a4bb5;background:#f4f0ff;gap:6px}
+.drop small{font-weight:400;font-size:20px;color:#7d77a0}
+.chip{left:56px;right:56px;top:560px;height:104px;border-radius:22px;background:#fff;box-shadow:0 14px 40px rgba(60,40,120,.25);display:flex;align-items:center;gap:18px;padding:0 24px;color:#1a1530}
+.chip .fi{width:58px;height:70px;border-radius:10px;background:#c2185b;color:#fff;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.chip div{font-size:22px;line-height:1.3}.chip small{color:#7d77a0}
+.prog{position:absolute;left:38px;right:38px;top:720px}
+.prog p{font-size:23px;color:#5b5675;margin-bottom:12px}
+.bar{height:16px;border-radius:8px;background:#e5def9;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#c2185b,#6a1b9a)}
+.lock{font-size:21px;color:#5b5675;margin-top:16px}
+.ready{position:absolute;left:38px;right:38px;top:720px}
+.ready h5{font-size:31px;font-weight:700;margin-bottom:18px}
+.ready div{display:flex;align-items:center;gap:16px;font-size:24px;padding:14px 18px;border-radius:16px;background:#fff;margin-bottom:12px;box-shadow:0 4px 14px rgba(60,40,120,.08)}
+.ready span{font-size:30px}
+
+/* tap */
+.tapdot{position:absolute;width:74px;height:74px;margin:-37px 0 0 -37px;border-radius:50%;background:rgba(255,255,255,.55);border:4px solid #fff;opacity:0;pointer-events:none;z-index:50}
+.tapring{position:absolute;width:74px;height:74px;margin:-37px 0 0 -37px;border-radius:50%;border:6px solid #fff;opacity:0;z-index:49}
+.hlon{background:rgba(83,189,235,.35)!important;transition:none}
+
+/* caption */
+.cap{left:60px;right:60px;top:1500px;background:#fff;color:#16122b;border-radius:30px;padding:26px 34px;display:flex;align-items:center;gap:26px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.cap .n{flex:none;width:76px;height:76px;border-radius:50%;background:#c2185b;color:#fff;font-weight:700;font-size:40px;display:flex;align-items:center;justify-content:center}
+.cap .t{font-weight:700;font-size:44px;line-height:1.18}
+.cap .t small{display:block;font-weight:500;font-size:30px;color:#5b5675;margin-top:4px}
+
+/* end */
+.endlogo{left:0;right:0;top:470px;text-align:center}
+.endlogo .ck{font-size:200px;font-weight:800;color:#fff;letter-spacing:-56px;line-height:1;margin-left:-56px}
+.endlogo .nm2{font-size:92px;font-weight:700;letter-spacing:-2px;margin-top:10px}
+.endtag{left:80px;right:80px;top:880px;text-align:center;font-size:50px;font-weight:500;line-height:1.3;color:#fff}
+.endurl{left:50%;top:1100px;transform:translateX(-50%);background:#fff;color:#16122b;font-weight:700;font-size:58px;padding:26px 56px;border-radius:999px;white-space:nowrap;box-shadow:0 20px 60px rgba(40,0,60,.35)}
+.endpromo{left:0;right:0;top:1290px;text-align:center;font-size:44px;font-weight:500}
+.endpromo b{color:#ffd1e6;font-size:64px;display:block;margin-top:6px}
+.endlegal{left:90px;right:90px;top:1560px;text-align:center;font-size:25px;color:#f3d6ea;line-height:1.4}
+</style></head><body>
+<div id="stage">
+
+<!-- HOOK 0 to 3.5 -->
+<div class="anim bigcheck" data-in="0" data-out="3.5" data-fx="pop">✓✓</div>
+<div class="anim h1" data-in="0.15" data-out="3.5" data-fx="up">¿Sabes descargar tu chat de <em>WhatsApp</em>?</div>
+<div class="anim h2" data-in="1.2" data-out="3.5" data-fx="up">Casi nadie sabe cómo.<br><b>Te lo muestro en 30 segundos</b> 👇</div>
+
+<!-- persistent -->
+<div class="anim brand" data-in="3.3" data-out="29.9" data-fx="fade"><b>✓✓</b>Me Dejó en Visto</div>
+<div class="anim pill and" data-in="3.4" data-out="14.9" data-fx="pill">🤖 ANDROID</div>
+<div class="anim pill ios" data-in="14.9" data-out="25.4" data-fx="pill">📱 iPHONE</div>
+<div class="anim pill fin" data-in="25.4" data-out="29.9" data-fx="pill">ÚLTIMO PASO</div>
+
+<div class="anim" id="phone" data-in="3.3" data-out="29.9" data-fx="phone">
+ <div id="screen">
+
+  <!-- ANDROID CHAT -->
+  <div class="scr" data-in="3.3" data-out="14.95" data-fx="cut">
+   <div class="status" style="background:#1f2c34"><span>9:41</span><span>▂▄▆ 🔋</span></div>
+   <div class="ahead"><span class="ic">←</span><div class="av">💗</div><div class="nm"><div>Mi amor ❤️</div><span>en línea</span></div><span class="ic">📹</span><span class="ic">📞</span><span class="dots" id="a-dots">⋮</span></div>
+   <div class="body">
+    <div class="b in">¿Ya saliste? 🙈<small>21:02</small></div>
+    <div class="b out">Ya casi, 10 min<small>21:03<i>✓✓</i></small></div>
+    <div class="b in">Te espero entonces ❤️<small>21:03</small></div>
+    <div class="b out">Voy volando 🚀<small>21:04<i>✓✓</i></small></div>
+   </div>
+   <div class="inbar"><div class="f">Mensaje</div><div class="m">🎤</div></div>
+
+   <div class="menu anim" data-in="6.35" data-out="8.25" data-fx="menu">
+    <div class="mi">Ver contacto</div><div class="mi">Buscar</div><div class="mi">Silenciar notificaciones</div><div class="mi">Fondo de pantalla</div><div class="mi" id="a-mas">Más<span>›</span></div>
+   </div>
+   <div class="menu anim" data-in="8.2" data-out="9.95" data-fx="menu">
+    <div class="mi">Reportar</div><div class="mi">Bloquear</div><div class="mi">Vaciar chat</div><div class="mi" id="a-exp">Exportar chat</div><div class="mi">Añadir a inicio</div>
+   </div>
+   <div class="dim anim" data-in="9.9" data-out="14.3" data-fx="fade" style="left:0;top:0"></div>
+   <div class="dlg anim" data-in="9.9" data-out="12.0" data-fx="pop">
+    <h3>Exportar chat</h3>
+    <p>Incluir archivos hará que el chat exportado pese más.</p>
+    <div class="btns"><span class="btn">INCLUIR ARCHIVOS</span><span class="btn" id="a-sin">SIN ARCHIVOS</span></div>
+   </div>
+   <div class="sheet anim" data-in="12.0" data-out="14.3" data-fx="sheet">
+    <div class="grab"></div><h4>Compartir chat con…</h4>
+    <div class="grid">
+     <div class="app" id="a-arch"><div class="c" style="background:#2b6cb0">📁</div>Archivos</div>
+     <div class="app"><div class="c" style="background:#2f855a">☁️</div>Drive</div>
+     <div class="app"><div class="c" style="background:#c53030">✉️</div>Correo</div>
+     <div class="app"><div class="c" style="background:#4a5568">⋯</div>Más</div>
+    </div>
+   </div>
+   <div class="toast anim" data-in="14.0" data-out="14.95" data-fx="up">✅ Chat guardado</div>
+  </div>
+
+  <!-- iOS CHAT -->
+  <div class="scr ios" data-in="14.9" data-out="25.45" data-fx="cut">
+   <div class="status" style="background:#1c1c1e"><span>9:41</span><span>▂▄▆ 🔋</span></div>
+   <div class="ihead"><span class="bk">‹</span><div class="av">💗</div><div class="nm" id="i-name"><div>Mi amor ❤️</div><span>toca aquí para ver info.</span></div><span class="ic" style="color:#0A84FF">📹</span><span class="ic" style="color:#0A84FF">📞</span></div>
+   <div class="ibody">
+    <div class="b in">¿Viste lo que te mandé? 👀<small>20:15</small></div>
+    <div class="b out">Jajaja sí, me encantó<small>20:16<i>✓✓</i></small></div>
+    <div class="b in">¿Cine el sábado? 🍿<small>20:16</small></div>
+    <div class="b out">¡Hecho! ❤️<small>20:17<i>✓✓</i></small></div>
+   </div>
+   <div class="inbar" style="background:#1c1c1e"><div class="f" style="background:#2c2c2e">Mensaje</div><div class="m" style="background:#0A84FF">🎤</div></div>
+
+   <div class="info anim" data-in="16.9" data-out="25.45" data-fx="push">
+    <div class="status"><span>9:41</span><span>▂▄▆ 🔋</span></div>
+    <div class="nav"><span class="bk">‹</span>Info. del contacto</div>
+    <div class="scroll" id="i-scroll" data-s0="18.0" data-s1="18.9" data-dy="-560">
+     <div class="bigav">💗</div><div class="iname">Mi amor ❤️</div><div class="isub">en línea</div>
+     <div class="qbtns"><div class="qb"><span>📞</span>Audio</div><div class="qb"><span>📹</span>Video</div><div class="qb"><span>🔍</span>Buscar</div></div>
+     <div class="grp"><div class="row">Archivos, enlaces y docs.</div><div class="row">Mensajes destacados</div></div>
+     <div class="grp"><div class="row">Silenciar</div><div class="row">Fondo de pantalla y sonido</div><div class="row">Guardar en Fotos</div></div>
+     <div class="grp"><div class="row">Mensajes temporales</div><div class="row">Bloqueo del chat</div></div>
+     <div class="grp"><div class="row blue">Compartir contacto</div><div class="row blue" id="i-exp">Exportar chat</div><div class="row red">Vaciar chat</div></div>
+     <div class="grp"><div class="row red">Bloquear</div><div class="row red">Reportar</div></div>
+    </div>
+   </div>
+   <div class="dim anim" data-in="19.7" data-out="24.4" data-fx="fade" style="left:0;top:0"></div>
+   <div class="asheet anim" data-in="19.7" data-out="21.75" data-fx="sheet">
+    <div class="ac"><div>Incluir archivos</div><div id="i-sin">Sin archivos</div></div>
+    <div class="ac"><div class="cancel">Cancelar</div></div>
+   </div>
+   <div class="isheet anim" data-in="21.7" data-out="24.4" data-fx="sheet">
+    <div class="fileh"><div class="fi">ZIP</div><div>Chat de WhatsApp con Mi amor<br><small>Documento comprimido</small></div></div>
+    <div class="irow"><div>Copiar <span>⧉</span></div><div id="i-arch">Guardar en Archivos <span>📁</span></div><div>Imprimir <span>🖨️</span></div></div>
+   </div>
+   <div class="toast anim" data-in="23.9" data-out="25.45" data-fx="up">✅ Guardado en Archivos</div>
+  </div>
+
+  <!-- WEB -->
+  <div class="scr web" data-in="25.4" data-out="30" data-fx="cut">
+   <div class="urlbar">🔒 medejoenvisto.com</div>
+   <div class="wbody">
+    <div class="wlogo"><b>✓✓</b>Me Dejó en Visto</div>
+    <div class="wt">Lo que tu chat dice de tu relación</div>
+    <div class="wp">Carga tu chat y mira quién busca a quién, cuánto tardan en responder y cómo cambia el afecto.</div>
+    <div class="drop anim" id="w-drop" data-in="25.4" data-out="27.35" data-fx="fade" style="position:relative">📂 Toca para elegir el archivo<small>Acepta el .zip o el .txt</small></div>
+   </div>
+   <div class="chip anim" data-in="26.75" data-out="30" data-fx="drop"><div class="fi">ZIP</div><div>Chat de WhatsApp con Mi amor.zip<br><small>Cargado ✓</small></div></div>
+   <div class="prog anim" data-in="27.3" data-out="28.75" data-fx="fade"><p>Analizando en tu teléfono…</p><div class="bar"><i id="w-bar" data-b0="27.4" data-b1="28.6"></i></div><div class="lock">🔒 Tu chat nunca se sube a un servidor</div></div>
+   <div class="ready anim" data-in="28.7" data-out="30" data-fx="up"><h5>Tu radiografía está lista 💘</h5>
+    <div><span>💬</span>Quién busca a quién</div><div><span>⏱️</span>Tiempos de respuesta</div><div><span>❤️</span>El afecto con el tiempo</div></div>
+  </div>
+
+  <div class="tapring" id="ring"></div><div class="tapdot" id="dot"></div>
+ </div>
+</div>
+
+<!-- CAPTIONS -->
+<div class="anim cap" data-in="3.6" data-out="5.5" data-fx="cap"><div class="n">1</div><div class="t">Abre el chat con tu pareja</div></div>
+<div class="anim cap" data-in="5.5" data-out="7.0" data-fx="cap"><div class="n">2</div><div class="t">Toca los tres puntos ⋮</div></div>
+<div class="anim cap" data-in="7.0" data-out="8.6" data-fx="cap"><div class="n">3</div><div class="t">Toca Más</div></div>
+<div class="anim cap" data-in="8.6" data-out="10.4" data-fx="cap"><div class="n">4</div><div class="t">Toca Exportar chat</div></div>
+<div class="anim cap" data-in="10.4" data-out="12.4" data-fx="cap"><div class="n">5</div><div class="t">Elige Sin archivos<small>Es más rápido y liviano</small></div></div>
+<div class="anim cap" data-in="12.4" data-out="14.9" data-fx="cap"><div class="n">6</div><div class="t">Guárdalo en tu teléfono</div></div>
+
+<div class="anim cap" data-in="14.9" data-out="16.0" data-fx="cap"><div class="n">1</div><div class="t">Abre el chat con tu pareja</div></div>
+<div class="anim cap" data-in="16.0" data-out="17.6" data-fx="cap"><div class="n">2</div><div class="t">Toca su nombre arriba</div></div>
+<div class="anim cap" data-in="17.6" data-out="20.0" data-fx="cap"><div class="n">3</div><div class="t">Baja y toca Exportar chat</div></div>
+<div class="anim cap" data-in="20.0" data-out="21.9" data-fx="cap"><div class="n">4</div><div class="t">Elige Sin archivos<small>Es más rápido y liviano</small></div></div>
+<div class="anim cap" data-in="21.9" data-out="25.4" data-fx="cap"><div class="n">5</div><div class="t">Guárdalo en Archivos</div></div>
+
+<div class="anim cap" data-in="25.4" data-out="29.9" data-fx="cap"><div class="n">✓</div><div class="t">Súbelo en medejoenvisto.com<small>Se analiza en tu teléfono, en privado</small></div></div>
+
+<!-- END -->
+<div class="anim endlogo" data-in="30.0" data-out="99" data-fx="pop"><div class="ck">✓✓</div><div class="nm2">Me Dejó en Visto</div></div>
+<div class="anim endtag" data-in="30.4" data-out="99" data-fx="up">Descubre lo que tu chat dice de tu relación</div>
+<div class="anim endurl" data-in="30.9" data-out="99" data-fx="pill">medejoenvisto.com</div>
+<div class="anim endpromo" data-in="31.4" data-out="99" data-fx="up">Precio de lanzamiento<b>$7.900</b></div>
+<div class="anim endlegal" data-in="31.8" data-out="99" data-fx="fade">Solo mayores de 18 años. Muestra patrones de comunicación; no determina infidelidad ni intenciones.</div>
+</div>
+
+<script>
+const TAPS=[['#a-dots',6.1],['#a-mas',7.9],['#a-exp',9.6],['#a-sin',11.5],['#a-arch',13.6],
+ ['#i-name',16.55],['#i-exp',19.35],['#i-sin',21.0],['#i-arch',23.35],['#w-drop',26.2]];
+const cl=x=>x<0?0:x>1?1:x, ease=x=>1-Math.pow(1-cl(x),3), eio=x=>{x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const els=[...document.querySelectorAll('[data-in]')];
+const screen=document.getElementById('screen');
+function vis(t,a,b,d){ if(t<a||t>b)return 0; return Math.min(ease((t-a)/d),ease((b-t)/d)); }
+function render(t){
+ for(const e of els){
+  const a=+e.dataset.in,b=+e.dataset.out,fx=e.dataset.fx;
+  const d= fx==='cut'?0.08: fx==='phone'?0.5:0.32;
+  const v=vis(t,a,b,d);
+  let tr='';
+  if(fx==='up') tr=`translateY(${(1-v)*50}px)`;
+  else if(fx==='pop') tr=`scale(${0.86+0.14*v})`;
+  else if(fx==='pill') tr=`translateX(-50%) scale(${0.8+0.2*v})`;
+  else if(fx==='menu') tr=`scale(${0.9+0.1*v})`;
+  else if(fx==='sheet') tr=`translateY(${(1-v)*100}%)`;
+  else if(fx==='push') { const p=vis(t,a,b,0.35); tr=`translateX(${(1-p)*100}%)`; e.style.opacity=1*(t>=a&&t<=b); e.style.transform=tr; continue; }
+  else if(fx==='phone') tr=`translateY(${(1-v)*120}px) scale(${0.94+0.06*v})`;
+  else if(fx==='cap') tr=`translateY(${(1-v)*40}px)`;
+  else if(fx==='drop') tr=`translateY(${(1-v)*-260}px) scale(${0.9+0.1*v})`;
+  e.style.opacity=v; e.style.transform=tr;
+ }
+ // scroll
+ const s=document.getElementById('i-scroll');
+ s.style.transform=`translateY(${eio((t-+s.dataset.s0)/(+s.dataset.s1-+s.dataset.s0))*+s.dataset.dy}px)`;
+ const bar=document.getElementById('w-bar');
+ bar.style.width=(eio((t-+bar.dataset.b0)/(+bar.dataset.b1-+bar.dataset.b0))*100)+'%';
+ // taps
+ const dot=document.getElementById('dot'),ring=document.getElementById('ring');
+ dot.style.opacity=0;ring.style.opacity=0;
+ document.querySelectorAll('.hlon').forEach(x=>x.classList.remove('hlon'));
+ const sr=screen.getBoundingClientRect();
+ for(const [sel,T] of TAPS){
+  if(t>T-0.45&&t<T+0.4){
+   const r=document.querySelector(sel).getBoundingClientRect();
+   const x=r.left+r.width/2-sr.left, y=r.top+r.height/2-sr.top;
+   const k=t<T? ease((t-(T-0.45))/0.25) : 1-ease((t-T)/0.4);
+   const press=t<T? 1 : 0.85;
+   dot.style.left=ring.style.left=x+'px'; dot.style.top=ring.style.top=y+'px';
+   dot.style.opacity=k; dot.style.transform=`scale(${press})`;
+  }
+  if(t>=T&&t<T+0.55){
+   const r=document.querySelector(sel).getBoundingClientRect();
+   ring.style.left=(r.left+r.width/2-sr.left)+'px'; ring.style.top=(r.top+r.height/2-sr.top)+'px';
+   const p=(t-T)/0.55; ring.style.opacity=1-p; ring.style.transform=`scale(${1+1.6*p})`;
+  }
+  if(t>=T&&t<T+0.35) document.querySelector(sel).classList.add('hlon');
+ }
+}
+window.render=render; render(0);
+</script>
+</body></html>

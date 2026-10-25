@@ -1,0 +1,85 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+.num{left:0;right:0;margin:0 auto;top:330px;width:150px;height:150px;border-radius:50%;background:#fff;color:#a0186e;font-weight:900;font-size:96px;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 40px rgba(40,0,60,.3)}
+.name{left:60px;right:60px;top:520px;text-align:center;font-weight:800;font-size:92px;line-height:1.05;letter-spacing:-1.5px}
+.desc{left:80px;right:80px;top:1330px;text-align:center;font-weight:600;font-size:48px;line-height:1.28;opacity:.95}
+.zone{left:0;right:0;top:800px;height:480px}
+.audio{left:150px;right:150px;top:880px;height:150px;border-radius:40px;background:#fff;color:#2a1035;display:flex;align-items:center;gap:22px;padding:0 34px}
+.audio .pl{font-size:58px;color:#a0186e}
+.wave{flex:1;display:flex;align-items:center;gap:7px;height:90px}
+.wave i{display:block;width:9px;border-radius:5px;background:#c79ad2}
+.audio b{font-size:40px;font-weight:700}
+.sp{left:0;right:0;margin:0 auto;width:fit-content;top:1080px;background:#2a1035;color:#fff;font-weight:800;font-size:46px;padding:14px 34px;border-radius:999px}
+.sticker{font-size:200px;line-height:1;top:850px}
+.flash{left:0;top:0;right:0;bottom:0;background:#fff}
+</style></head><body><div id="stage">
+<div data-in="0" data-out="21" class="brand"><b>✓✓</b>ME DEJÓ EN VISTO</div>
+<!-- gancho -->
+<div data-in="0" data-out="2" data-fx="pop" data-d="0.25" class="title" style="top:560px;font-size:120px">Tipos de pareja según su chat</div>
+<div data-in="0.5" data-out="2" data-fx="up" data-d="0.2" class="sub" style="top:1030px;font-size:56px;font-weight:700">¿Cuál eres tú? 👀</div>
+
+<!-- 1 audios -->
+<div data-in="2" data-out="5" data-fx="pop" data-d="0.18" class="num">1</div>
+<div data-in="2" data-out="5" data-fx="up" data-d="0.18" class="name">El de los audios<br>de 5 minutos</div>
+<div data-in="2.5" data-out="5" data-fx="pop" data-d="0.2" class="audio"><span class="pl">▶</span><div class="wave" id="wave"></div><b>5:12</b></div>
+<div data-in="3.0" data-out="5" data-fx="pop" data-d="0.2" class="sp">Velocidad 2x 🏃</div>
+<div data-in="3.0" data-out="5" data-fx="up" data-d="0.2" class="desc">Te cuenta todo su día en un audio.</div>
+
+<!-- 2 ok -->
+<div data-in="5" data-out="8" data-fx="pop" data-d="0.18" class="num">2</div>
+<div data-in="5" data-out="8" data-fx="up" data-d="0.18" class="name">La del<br>“ok”</div>
+<div data-in="5.5" data-out="8" data-fx="bubble-in" data-d="0.15" class="bub in" style="top:820px;font-size:70px">ok</div>
+<div data-in="6.0" data-out="8" data-fx="bubble-in" data-d="0.15" class="bub in" style="top:980px;font-size:70px">ok</div>
+<div data-in="6.5" data-out="8" data-fx="bubble-in" data-d="0.15" class="bub in" style="top:1140px;font-size:70px">ok.</div>
+<div data-in="6.5" data-out="8" data-fx="up" data-d="0.2" class="desc" style="top:1330px">Responde rápido, pero seco.<br>Nadie sabe si está brava.</div>
+
+<!-- 3 insiste -->
+<div data-in="8" data-out="11" data-fx="pop" data-d="0.18" class="num">3</div>
+<div data-in="8" data-out="11" data-fx="up" data-d="0.18" class="name">El que insiste</div>
+<div data-in="8.5" data-out="11" data-fx="bubble-out" data-d="0.12" class="bub out" style="top:760px;font-size:42px;padding:18px 30px">Hola</div>
+<div data-in="9.0" data-out="11" data-fx="bubble-out" data-d="0.12" class="bub out" style="top:860px;font-size:42px;padding:18px 30px">Holaaa</div>
+<div data-in="9.5" data-out="11" data-fx="bubble-out" data-d="0.12" class="bub out" style="top:960px;font-size:42px;padding:18px 30px">¿Estás?</div>
+<div data-in="10.0" data-out="11" data-fx="bubble-out" data-d="0.12" class="bub out" style="top:1060px;font-size:42px;padding:18px 30px">¿¿??</div>
+<div data-in="10.25" data-out="11" data-fx="bubble-out" data-d="0.12" class="bub out" style="top:1160px;font-size:42px;padding:18px 30px">👀</div>
+<div data-in="9.0" data-out="11" data-fx="up" data-d="0.2" class="desc" style="top:1300px;left:80px;right:auto;width:520px;text-align:left;font-size:42px">Porque no le contestaste en 3 minutos.</div>
+
+<!-- 4 memes -->
+<div data-in="11" data-out="14" data-fx="pop" data-d="0.18" class="num">4</div>
+<div data-in="11" data-out="14" data-fx="up" data-d="0.18" class="name">La de los memes</div>
+<div data-in="11.5" data-out="14" data-fx="pop" data-d="0.2" class="sticker" style="left:170px">🐸</div>
+<div data-in="12.0" data-out="14" data-fx="pop" data-d="0.2" class="sticker" style="left:440px;top:900px">😂</div>
+<div data-in="12.5" data-out="14" data-fx="pop" data-d="0.2" class="sticker" style="left:700px">🐶</div>
+<div data-in="12.5" data-out="14" data-fx="up" data-d="0.2" class="desc">Su forma de decir “te quiero”<br>es un sticker.</div>
+
+<!-- 5 no se despiden -->
+<div data-in="14" data-out="17" data-fx="pop" data-d="0.18" class="num">5</div>
+<div data-in="14" data-out="17" data-fx="up" data-d="0.18" class="name">Los que nunca<br>se despiden</div>
+<div data-in="14.5" data-out="17" data-fx="bubble-out" data-d="0.15" class="bub out" style="top:860px">Bueno, ya me voy a dormir 😴<small>11:47 p. m.<i>✓✓</i></small></div>
+<div data-in="15.5" data-out="17" data-fx="bubble-in" data-d="0.15" class="bub in" style="top:1100px">Jajaja sí, ya<small>12:52 a. m.</small></div>
+<div data-in="15.5" data-out="17" data-fx="up" data-d="0.2" class="desc" style="top:1330px">Una hora después, siguen.</div>
+
+<!-- cierre -->
+<div data-in="17" data-out="21" data-fx="pop" data-d="0.25" class="title" style="top:520px">Etiqueta a<br>tu pareja 👇</div>
+<div data-in="17.5" data-out="21" data-fx="up" class="sub" style="top:800px">y dile cuál es</div>
+<div data-in="18.0" data-out="21" data-fx="up" class="sub" style="top:1000px;font-size:40px">Descubre el tuyo de verdad:</div>
+<div data-in="18.3" data-out="21" data-fx="pop" class="url" style="top:1090px">medejoenvisto.com</div>
+<div data-in="18.7" data-out="21" data-fx="fade" class="note" style="top:1270px">🔒 Tu chat nunca sale de tu teléfono</div>
+<div id="fl" class="flash" style="position:absolute;opacity:0"></div>
+</div>
+<script>
+const w=document.getElementById('wave'); for(let i=0;i<26;i++){const b=document.createElement('i');w.appendChild(b);}
+</script>
+<script src="common.js"></script>
+<script>
+const cuts=[2,5,8,11,14,17];
+window.extra=function(t){
+ // destello en cada corte (sigue el ritmo)
+ let f=0; for(const c of cuts){ if(t>=c&&t<c+0.12) f=0.55*(1-(t-c)/0.12); }
+ document.getElementById('fl').style.opacity=f;
+ // pulso de los números al ritmo (cada 0.5 s)
+ const ph=(t%0.5)/0.5, pulse=1+0.08*Math.exp(-ph*6);
+ document.querySelectorAll('.num').forEach(n=>{ if(+n.style.opacity>0.9) n.style.transform=`scale(${pulse})`; });
+ [...w.children].forEach((b,i)=>{ const h=20+60*Math.abs(Math.sin(i*1.7+t*(t>3?12:5))); b.style.height=h+'px'; b.style.background= (i/26)<((t-2.5)/2.5)?'#a0186e':'#c79ad2'; });
+};
+render(0);
+</script></body></html>

@@ -1,0 +1,77 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+#stage{background:radial-gradient(1200px 900px at 50% 30%,#3a0d3f 0%,#1a0722 55%,#0b0410 100%)}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.75) 100%);pointer-events:none;opacity:1}
+.n{left:0;right:0;top:420px;text-align:center;font-weight:800;font-size:40px;letter-spacing:6px;color:#ff7ab6}
+.big{left:0;right:0;top:480px;text-align:center;font-weight:900;font-size:300px;line-height:1;color:rgba(255,122,182,.14)}
+.cap{left:90px;right:90px;top:1200px;text-align:center;font-weight:700;font-size:62px;line-height:1.2}
+.bub{font-size:58px}
+.typing{left:80px;top:860px;background:#fff;color:#2a1035;border-radius:34px;border-top-left-radius:8px;padding:26px 40px;font-size:54px;font-weight:600}
+.typing span{display:inline-block;width:18px;height:18px;border-radius:50%;background:#8a6a92;margin-left:10px;vertical-align:middle}
+.clock{left:0;right:0;top:1060px;text-align:center;font-size:44px;font-weight:600;color:#ffb3d4;font-variant-numeric:tabular-nums}
+.seen{right:90px;top:1060px;font-size:36px;font-weight:600;color:#9fd8f0}
+.glitch{left:0;right:0;top:0;bottom:0;background:#ff2d7a;mix-blend-mode:overlay}
+.hk{left:0;right:0;top:300px;text-align:center;font-weight:800;font-size:38px;letter-spacing:5px;color:#ff7ab6}
+</style></head><body><div id="stage">
+<div data-in="0" data-out="24" class="brand"><b>✓✓</b>ME DEJÓ EN VISTO</div>
+
+<!-- gancho -->
+<div data-in="0" data-out="3.0" data-fx="down" class="hk" style="top:420px">🎃 ESPECIAL HALLOWEEN</div>
+<div data-in="0.1" data-out="3.0" data-fx="pop" class="title" style="top:600px;font-size:108px">5 mensajes que dan más miedo que una película de terror</div>
+<div data-in="1.1" data-out="3.0" data-fx="up" class="sub" style="top:1220px;color:#ffb3d4">El n.º 5 es el peor 👀</div>
+
+<!-- 1 -->
+<div data-in="3.0" data-out="6.4" data-fx="cut" class="big">1</div>
+<div data-in="3.0" data-out="6.4" data-fx="cut" class="n">MIEDO N.º 1</div>
+<div data-in="3.2" data-out="6.4" data-fx="bubble-in" class="bub in" style="top:860px">Tenemos que hablar.<small>9:12 p. m.</small></div>
+<div data-in="4.0" data-out="6.4" data-fx="fade" class="clock" id="clk">⏳ 0 h 00 min sin respuesta</div>
+<div data-in="4.4" data-out="6.4" data-fx="up" class="cap">Y después… nada.</div>
+
+<!-- 2 -->
+<div data-in="6.4" data-out="9.8" data-fx="cut" class="big">2</div>
+<div data-in="6.4" data-out="9.8" data-fx="cut" class="n">MIEDO N.º 2</div>
+<div data-in="6.55" data-out="9.8" data-fx="cut" class="typing" id="typ">escribiendo<span></span><span></span><span></span></div>
+<div data-in="7.2" data-out="9.8" data-fx="up" class="cap">Aparece. Desaparece.<br>Y no llega nada.</div>
+
+<!-- 3 -->
+<div data-in="9.8" data-out="13.2" data-fx="cut" class="big">3</div>
+<div data-in="9.8" data-out="13.2" data-fx="cut" class="n">MIEDO N.º 3</div>
+<div data-in="9.95" data-out="13.2" data-fx="bubble-out" class="bub out" style="top:860px">¿Hablamos? 🥺<small>11:40 p. m.<i>✓✓</i></small></div>
+<div data-in="10.7" data-out="13.2" data-fx="up" class="seen">Visto a las 11:47 p. m.</div>
+<div data-in="11.1" data-out="13.2" data-fx="up" class="cap">Doble chulito azul.<br>Cero respuesta.</div>
+
+<!-- 4 -->
+<div data-in="13.2" data-out="16.6" data-fx="cut" class="big">4</div>
+<div data-in="13.2" data-out="16.6" data-fx="cut" class="n">MIEDO N.º 4</div>
+<div data-in="13.35" data-out="16.6" data-fx="bubble-in" class="bub in" style="top:860px;font-size:90px;padding:26px 50px">Ok.<small>8:03 p. m.</small></div>
+<div data-in="14.2" data-out="16.6" data-fx="up" class="cap">Con punto final.<br>Sin emoji. Sin nada más.</div>
+
+<!-- 5 -->
+<div data-in="16.6" data-out="20.2" data-fx="cut" class="big">5</div>
+<div data-in="16.6" data-out="20.2" data-fx="cut" class="n">MIEDO N.º 5</div>
+<div data-in="17.0" data-out="20.2" data-fx="pop" class="bub in" style="top:860px;font-size:76px" id="q5">¿Quién es esa?<small>12:01 a. m.</small></div>
+<div data-in="17.9" data-out="20.2" data-fx="up" class="cap">Tres palabras que congelan cualquier chat. 🥶</div>
+<div data-in="17.0" data-out="17.35" data-fx="cut" class="glitch"></div>
+
+<!-- cierre -->
+<div data-in="20.2" data-out="24" data-fx="pop" class="title" style="top:540px;font-size:100px">¿Cuál te da más miedo a ti?</div>
+<div data-in="20.7" data-out="24" data-fx="up" class="sub" style="top:880px;color:#ffb3d4">Comenta tu número 👇</div>
+<div data-in="21.2" data-out="24" data-fx="up" class="sub" style="top:1060px;font-size:40px">Y mira lo que de verdad dice tu chat:</div>
+<div data-in="21.5" data-out="24" data-fx="pop" class="url" style="top:1150px">medejoenvisto.com</div>
+<div data-in="21.9" data-out="24" data-fx="fade" class="note" style="top:1330px">🔒 Tu chat nunca sale de tu teléfono</div>
+<div id="vig"></div>
+</div>
+<script src="common.js"></script>
+<script>
+window.extra=function(t){
+ const st=document.getElementById('stage');
+ // parpadeo de luz tenebroso
+ const fl=(t>2.85&&t<3.0)||(t>9.7&&t<9.78)||(t>16.5&&t<16.6)||(t>19.95&&t<20.05)?0.35:1;
+ st.style.filter=`brightness(${fl})`;
+ const c=document.getElementById('clk'); if(t>=4){const m=Math.min(180,Math.floor((t-4)*75)); c.textContent=`⏳ ${Math.floor(m/60)} h ${String(m%60).padStart(2,'0')} min sin respuesta`;}
+ const ty=document.getElementById('typ'); if(t>6.55&&t<9.8){ const ph=(t-6.55)%1.1; ty.style.opacity= ph<0.65?1:0;
+  [...ty.querySelectorAll('span')].forEach((s,i)=>s.style.transform=`translateY(${-10*Math.max(0,Math.sin((t*6)-i))}px)`); }
+ const q=document.getElementById('q5'); if(t>17&&t<17.5){q.style.transform+=` translateX(${Math.sin(t*90)*14}px)`;}
+};
+render(0);
+</script></body></html>

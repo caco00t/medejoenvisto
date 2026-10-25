@@ -1,0 +1,18 @@
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#4a148c}
+body{font-family:'Inter','Noto Color Emoji',sans-serif;color:#fff;-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden;background:linear-gradient(180deg,#c2185b 0%,#8e1a78 50%,#4a148c 100%)}
+[data-in]{position:absolute;opacity:0;will-change:transform,opacity}
+.brand{left:0;right:0;top:110px;text-align:center;font-weight:800;font-size:34px;letter-spacing:1.5px}
+.brand b{letter-spacing:-8px;margin-right:16px}
+.kicker{left:0;right:0;text-align:center;font-weight:700;font-size:34px;letter-spacing:4px;opacity:.85}
+.title{left:70px;right:70px;text-align:center;font-weight:800;font-size:100px;line-height:1.06;letter-spacing:-2px}
+.sub{left:80px;right:80px;text-align:center;font-weight:500;font-size:46px;line-height:1.3}
+.card{left:70px;right:70px;border-radius:44px;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.18);padding:60px 56px;text-align:center}
+.url{left:0;right:0;margin:0 auto;width:fit-content;background:#fff;color:#6a1b7a;font-weight:800;font-size:60px;padding:28px 60px;border-radius:999px;white-space:nowrap;box-shadow:0 20px 60px rgba(40,0,60,.35)}
+.note{left:90px;right:90px;text-align:center;font-size:30px;font-weight:500;opacity:.85;line-height:1.35}
+.bub{max-width:760px;padding:26px 36px;border-radius:34px;font-size:50px;font-weight:600;line-height:1.25;box-shadow:0 14px 40px rgba(40,0,60,.25)}
+.bub.in{left:80px;background:#fff;color:#2a1035;border-top-left-radius:8px}
+.bub.out{right:80px;background:#fde4f0;color:#2a1035;border-top-right-radius:8px}
+.bub small{display:block;text-align:right;font-size:26px;font-weight:500;color:#8a6a92;margin-top:4px}
+.bub small i{font-style:normal;color:#2ea6d9;letter-spacing:-6px;margin-left:8px}
