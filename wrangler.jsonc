@@ -6,7 +6,7 @@
     "directory": "./",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*", "/r/*"]
   },
   "kv_namespaces": [
     { "binding": "REGALOS_KV", "id": "d3c0e1c60d1c4866bea5e16ad44180c7" }

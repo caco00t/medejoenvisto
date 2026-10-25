@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /completa.html
+Disallow: /api/
+Sitemap: https://medejoenvisto.com/sitemap.xml

@@ -142,6 +142,7 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
       <div class="step"><b>Android</b>Abre el chat, toca los tres puntos, luego Más y Exportar chat. Guárdalo en tu teléfono.</div>
       <div class="step"><b>iPhone</b>Abre el chat, toca el nombre del contacto y luego Exportar chat. Guárdalo en Archivos.</div>
     </div>
+    <p class="note" style="text-align:center;margin:10px 0 0;font-size:14px">¿No te sale? <a href="exportar-chat-whatsapp" style="color:inherit;font-weight:600">Mira el paso a paso en video</a></p>
     <h2>2. Cárgalo aquí</h2>
     <label class="drop">
       <input type="file" id="file" accept=".txt,.zip,text/plain,application/zip">
@@ -503,7 +504,14 @@ const IDB = {
 };
 (async()=>{ try{ const p = await IDB.get('pendiente'); if (p && Date.now()-p.t > 86400000) await IDB.del('pendiente'); }catch(e){} })();
 /* ===== Embudo anónimo: solo cuenta pasos, sin datos del chat ni de la persona ===== */
-function ev(n){ try{ if (location.protocol.startsWith('http')) navigator.sendBeacon('/api/e?n='+n+'&ed='+EDICION); }catch(e){} }
+/* Origen anónimo: de qué publicación llegaste (ej. ?src=halloween). Se guarda solo en este dispositivo y se suma como un conteo total. */
+const META_ADS = false; // se activa cuando arranque la pauta (ver worker/index.js)
+const SRC = (()=>{ try{ const q = new URLSearchParams(location.search); let s = (q.get('src')||q.get('utm_source')||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,24);
+  if (!s){ const r = document.referrer||''; s = /instagram/.test(r)?'ig':/tiktok/.test(r)?'tt':/facebook|fb\./.test(r)?'fb':/google\./.test(r)?'google':''; }
+  if (s){ localStorage.setItem('mdv_src', s); return s; } return localStorage.getItem('mdv_src')||'directo'; }catch(e){ return 'directo'; } })();
+let FBC = ''; try{ if (META_ADS){ const f = new URLSearchParams(location.search).get('fbclid'); if (f){ FBC = 'fb.1.'+Date.now()+'.'+f; localStorage.setItem('mdv_fbc', FBC); } else FBC = localStorage.getItem('mdv_fbc')||''; } }catch(e){}
+function ev(n, extra){ try{ if (location.protocol.startsWith('http')) navigator.sendBeacon('/api/e?n='+n+'&ed='+EDICION+'&s='+encodeURIComponent(SRC)+(FBC?'&fbc='+encodeURIComponent(FBC):'')+(extra||'')); }catch(e){} }
+try{ if (new URLSearchParams(location.search).get('src') && !sessionStorage.getItem('mdv_ll')){ sessionStorage.setItem('mdv_ll','1'); ev('llegada'); } }catch(e){}
 // las visitas las mide Cloudflare Web Analytics (ahorra escrituras en KV)
 document.addEventListener('click', async e=>{
   const a = e.target.closest && e.target.closest('a'); if (!a || a.href !== PAY_URL) return;
@@ -920,6 +928,7 @@ async function verificarPago(){
     if (d.status === 'APPROVED' && d.amount_in_cents >= minimo && (!LINK_ID || d.payment_link_id === LINK_ID)){
       if (!fresh) return 'expired';
       try{ localStorage.setItem('mdv_tx', tx); }catch(e){}
+      window.MDV_AMT = Math.round((d.amount_in_cents||0)/100);
       return 'ok';
     }
     return d.status === 'PENDING' ? 'pending' : 'none';
@@ -931,7 +940,8 @@ async function gate(){
   c.hidden = true; g.hidden = false; g.innerHTML = '<h2>Confirmando tu pago...</h2><p class="sub">Esto toma unos segundos.</p>';
   const st = await verificarPago();
   if (st === 'ok'){
-    ev('pago_ok');
+    let dup = false; try{ const k = 'mdv_ok_'+(localStorage.getItem('mdv_tx')||'regalo'); dup = !!localStorage.getItem(k); localStorage.setItem(k,'1'); }catch(e){}
+    if (!dup) ev('pago_ok', '&v='+(window.MDV_AMT||0));
     let p = null; try{ p = await IDB.get('pendiente'); }catch(e){}
     if (p && p.file && Date.now()-p.t < 86400000){
       g.innerHTML = '<div class="badge" style="margin:0">✅ Pago confirmado. Abriendo tu informe completo...</div>'; c.hidden = false;
