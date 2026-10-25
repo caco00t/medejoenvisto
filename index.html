@@ -163,6 +163,12 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
 
   <div id="res" hidden></div>
 
+  <section class="card noprint" id="encuesta" hidden>
+    <h2>¿Nos ayudas con 30 segundos?</h2>
+    <p class="sub">Cuéntanos qué te pareció tu informe. No te preguntamos nada de tu chat.</p>
+    <a class="btn" href="https://form.jotform.com/262976977649081" target="_blank" rel="noopener">Dar mi opinión</a>
+  </section>
+
   <section class="card noprint" id="faq">
     <h2>Preguntas frecuentes</h2>
     <details><summary>¿Mi pareja se va a enterar?</summary><p>No. No enviamos mensajes, notificaciones ni nada a nadie. Todo pasa dentro de tu celular, con el archivo que tú exportas.</p></details>
@@ -556,7 +562,7 @@ async function cargarArchivo(f, autoMe){
     document.querySelectorAll('#whoBtns button').forEach(b=>b.onclick=()=>{
       const i = +b.dataset.i; const me = [p1,p2][i][0], pa = [p1,p2][1-i][0];
       LAST_ME = me; $('#status').textContent = 'Armando tu informe...';
-      setTimeout(()=>{ ev(EDICION==='completa' ? 'informe' : 'resumen'); try{ render(analyze(DATA.msgs, me, pa, DUR), false); } finally { $('#status').textContent = ''; } }, 30);
+      setTimeout(()=>{ ev(EDICION==='completa' ? 'informe' : 'resumen'); try{ render(analyze(DATA.msgs, me, pa, DUR), false); if (EDICION==='completa'){ const q = document.getElementById('encuesta'); if (q) q.hidden = false; } } finally { $('#status').textContent = ''; } }, 30);
     });
     const auto = autoMe && [...document.querySelectorAll('#whoBtns button')].find(b=>b.textContent===autoMe);
     if (auto){ auto.click(); return; }
