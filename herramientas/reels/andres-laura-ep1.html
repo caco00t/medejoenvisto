@@ -1,0 +1,179 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#2a0f3a;font-family:'Inter','Noto Color Emoji',sans-serif}
+#stage{position:absolute;inset:0;overflow:hidden}
+#cam{position:absolute;inset:0;transform-origin:50% 62%}
+svg{position:absolute;left:0;top:0}
+#cap{position:absolute;left:60px;right:60px;top:330px;text-align:center;font-weight:900;font-size:76px;line-height:1.18;color:#fff;text-transform:uppercase;letter-spacing:.5px;
+ text-shadow:0 5px 0 rgba(30,0,40,.55),0 0 18px rgba(30,0,40,.5)}
+#cap span{display:inline-block;padding:0 10px;margin:4px 2px;border-radius:14px}
+#cap span.on{background:#c2185b;box-shadow:0 6px 0 #7a0f3c}
+#brand{position:absolute;top:110px;left:0;right:0;text-align:center;color:#fff;font-weight:800;font-size:32px;letter-spacing:1.5px;opacity:.9}
+#brand b{letter-spacing:-8px;margin-right:16px}
+#ep{position:absolute;top:165px;left:0;right:0;text-align:center;color:#ffd1e6;font-weight:700;font-size:28px;letter-spacing:4px}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse at 62% 55%,transparent 30%,rgba(10,0,20,.85) 75%);opacity:0}
+#end{position:absolute;inset:0;background:linear-gradient(180deg,#c2185b,#8e1a78 50%,#4a148c);opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center}
+#end .q{font-weight:900;font-size:104px;line-height:1.05;letter-spacing:-2px;padding:0 70px}
+#end .s{margin-top:40px;font-size:46px;font-weight:600;opacity:.95}
+#end .m{margin-top:90px;font-weight:800;font-size:40px;letter-spacing:2px}
+#end .m b{letter-spacing:-8px;margin-right:14px}
+#end .f{margin-top:12px;font-size:28px;opacity:.8}
+#flash{position:absolute;inset:0;background:#fff;opacity:0}
+</style></head><body><div id="stage">
+<div id="cam">
+<svg width="1080" height="1920" viewBox="0 0 1080 1920" id="scene">
+ <defs>
+  <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b1f6e"/><stop offset="1" stop-color="#3b1450"/></linearGradient>
+  <linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1446"/><stop offset="1" stop-color="#3d2a7a"/></linearGradient>
+  <radialGradient id="lampglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffd27a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+ </defs>
+ <rect width="1080" height="1920" fill="url(#wall)"/>
+ <!-- ventana -->
+ <rect x="600" y="560" width="360" height="420" rx="18" fill="url(#night)" stroke="#2a0f3a" stroke-width="16"/>
+ <line x1="780" y1="560" x2="780" y2="980" stroke="#2a0f3a" stroke-width="12"/>
+ <line x1="600" y1="770" x2="960" y2="770" stroke="#2a0f3a" stroke-width="12"/>
+ <circle cx="880" cy="640" r="34" fill="#fff4c9"/><circle cx="866" cy="632" r="34" fill="#1f1650"/>
+ <g fill="#fff" opacity=".8"><circle cx="660" cy="620" r="4"/><circle cx="720" cy="700" r="3"/><circle cx="910" cy="900" r="3"/><circle cx="650" cy="880" r="3"/></g>
+ <!-- lámpara -->
+ <circle cx="170" cy="760" r="230" fill="url(#lampglow)"/>
+ <rect x="162" y="760" width="16" height="520" fill="#2a0f3a"/>
+ <path d="M100 760 L240 760 L210 650 L130 650 Z" fill="#ffcf6b"/>
+ <!-- piso -->
+ <rect y="1500" width="1080" height="420" fill="#2c0d3d"/>
+ <!-- sofá -->
+ <rect x="40" y="1080" width="1000" height="300" rx="70" fill="#a3165a"/>
+ <rect x="40" y="1250" width="1000" height="260" rx="50" fill="#c2185b"/>
+ <rect x="10" y="1180" width="120" height="330" rx="50" fill="#8c1150"/>
+ <rect x="950" y="1180" width="120" height="330" rx="50" fill="#8c1150"/>
+ <rect x="90" y="1500" width="40" height="70" fill="#1d0828"/><rect x="950" y="1500" width="40" height="70" fill="#1d0828"/>
+ <g id="laura"></g>
+ <g id="andres"></g>
+</svg>
+</div>
+<div id="vig"></div>
+<div id="brand"><b>✓✓</b>ME DEJÓ EN VISTO</div>
+<div id="ep">ANDRÉS Y LAURA · EP. 1</div>
+<div id="cap"></div>
+<div id="flash"></div>
+<div id="end">
+ <div class="q">¿En tu relación quién escribe “ok.”?</div>
+ <div class="s">Etiqueta a esa persona 👇</div>
+ <div class="m"><b>✓✓</b>ME DEJÓ EN VISTO</div>
+ <div class="f">Andrés y Laura son personajes ficticios</div>
+</div>
+</div>
+<script>
+// ---------- guion ----------
+const LINES=[
+ {s:'L',t:'Amor… ¿por qué me respondiste “ok”?',e:'sus'},
+ {s:'A',t:'Porque estaba de acuerdo.',e:'calm'},
+ {s:'L',t:'Pero lo escribiste con punto.',e:'sus'},
+ {s:'A',t:'¿Y qué tiene el punto?',e:'conf'},
+ {s:'L',t:'Que el punto significa que estás bravo.',e:'sure'},
+ {s:'A',t:'¡No estoy bravo!',e:'shout'},
+ {s:'L',t:'Entonces… ¿por qué no le pusiste emoji?',e:'sus'},
+ {s:'A',t:'Mi mayor miedo no son los fantasmas…',e:'cam',cam:1},
+ {s:'A',t:'Es la puntuación.',e:'cam',cam:1,punch:1}
+];
+let t0=0.6;
+LINES.forEach(l=>{ const w=l.t.split(/\s+/); l.words=w; const d=Math.max(1.3,w.length/2.5+0.35); l.a=t0; l.b=t0+d; t0=l.b+0.35;
+  const tot=w.reduce((s,x)=>s+x.length+2,0); let acc=l.a; l.wt=w.map(x=>{const st=acc; acc+=(d-0.2)*(x.length+2)/tot; return st;}); });
+const END=t0+0.3; window.TOTAL=END+3.6;
+// ---------- personajes ----------
+function charSVG(o){
+ return `<g id="${o.id}b">
+  <!-- cuerpo -->
+  <path d="M${-120} 420 Q -130 170 0 160 Q 130 170 120 420 Z" fill="${o.shirt}"/>
+  <path d="M-40 175 Q0 215 40 175" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="10" stroke-linecap="round"/>
+  <!-- brazos -->
+  <path id="${o.id}arm" d="M-95 230 Q -150 330 -60 360" fill="none" stroke="${o.shirt2}" stroke-width="48" stroke-linecap="round"/>
+  <path d="M95 230 Q 150 330 60 360" fill="none" stroke="${o.shirt2}" stroke-width="48" stroke-linecap="round"/>
+  ${o.phone?`<g id="${o.id}ph"><rect x="-60" y="300" width="70" height="120" rx="14" fill="#1b1030" transform="rotate(-12 -25 360)"/><rect x="-52" y="310" width="54" height="96" rx="8" fill="#7fd3ff" opacity=".9" transform="rotate(-12 -25 360)"/></g>`:''}
+  <circle cx="-60" cy="360" r="30" fill="${o.skin}"/><circle cx="60" cy="360" r="30" fill="${o.skin}"/>
+  <!-- cabeza -->
+  <g id="${o.id}head">
+   ${o.hairBack||''}
+   <rect x="-24" y="120" width="48" height="50" fill="${o.skin}"/>
+   <ellipse cx="0" cy="40" rx="118" ry="128" fill="${o.skin}"/>
+   <ellipse cx="-122" cy="50" rx="18" ry="26" fill="${o.skin}"/><ellipse cx="122" cy="50" rx="18" ry="26" fill="${o.skin}"/>
+   ${o.hair}
+   <ellipse cx="-70" cy="85" rx="20" ry="12" fill="#ff6f9f" opacity=".35"/><ellipse cx="70" cy="85" rx="20" ry="12" fill="#ff6f9f" opacity=".35"/>
+   <g id="${o.id}eyes">
+    <ellipse cx="-42" cy="35" rx="26" ry="30" fill="#fff"/><ellipse cx="42" cy="35" rx="26" ry="30" fill="#fff"/>
+    <circle id="${o.id}pl" cx="-42" cy="38" r="13" fill="#21102b"/><circle id="${o.id}pr" cx="42" cy="38" r="13" fill="#21102b"/>
+    <rect id="${o.id}lid" x="-75" y="0" width="150" height="0" fill="${o.skin}"/>
+   </g>
+   <path id="${o.id}bl" d="M-66 -6 L-20 -2" stroke="#2a1530" stroke-width="10" stroke-linecap="round"/>
+   <path id="${o.id}br" d="M20 -2 L66 -6" stroke="#2a1530" stroke-width="10" stroke-linecap="round"/>
+   <ellipse id="${o.id}mouth" cx="0" cy="100" rx="24" ry="5" fill="#5a1430"/>
+   <path id="${o.id}smile" d="M-22 98 Q0 112 22 98" fill="none" stroke="#5a1430" stroke-width="8" stroke-linecap="round"/>
+  </g>
+ </g>`;
+}
+const LA={id:'L',skin:'#f2c4a0',shirt:'#f48fb1',shirt2:'#ec7aa4',phone:1,
+ hairBack:'<path d="M-130 30 Q-150 260 -90 300 L90 300 Q150 260 130 30 Z" fill="#3a1a14"/>',
+ hair:'<path d="M-122 30 Q-120 -100 0 -92 Q120 -100 122 30 Q90 -40 20 -40 Q-60 -40 -122 30 Z" fill="#3a1a14"/><path d="M-30 -86 Q 10 -30 80 -50" fill="none" stroke="#552a20" stroke-width="10" stroke-linecap="round"/>'};
+const AN={id:'A',skin:'#d9a27a',shirt:'#7e57c2',shirt2:'#6f48b3',phone:0,
+ hair:'<g fill="#1e1214"><circle cx="-80" cy="-50" r="44"/><circle cx="-30" cy="-80" r="48"/><circle cx="30" cy="-82" r="48"/><circle cx="82" cy="-52" r="44"/><circle cx="105" cy="-5" r="30"/><circle cx="-105" cy="-5" r="30"/></g>'};
+document.getElementById('laura').innerHTML=charSVG(LA);
+document.getElementById('andres').innerHTML=charSVG(AN);
+const POS={L:[330,900],A:[760,880]};
+// ---------- utilidades ----------
+const cl=x=>x<0?0:x>1?1:x, ease=x=>1-Math.pow(1-cl(x),3), eio=x=>{x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const $=id=>document.getElementById(id);
+const EM={sus:{b:[14,-6],p:[0,4]},calm:{b:[0,0],p:[0,0]},conf:{b:[-10,10],p:[0,-3]},sure:{b:[10,-2],p:[0,2]},shout:{b:[-16,-16],p:[0,-4]},cam:{b:[4,4],p:[0,0]}};
+function brows(id,em,side){ // inclinación de cejas
+ const [a,b]=EM[em].b; $(id+'bl').setAttribute('d',`M-66 ${-6-a} L-20 ${-2+a*0.3+ (em==='shout'?-14:0)}`);
+ $(id+'br').setAttribute('d',`M20 ${-2+a*0.3+(em==='shout'?-14:0)} L66 ${-6-a}`); }
+function render(t){
+ let cur=null; for(const l of LINES) if(t>=l.a&&t<l.b+0.35) cur=l;
+ const speaking=LINES.find(l=>t>=l.a&&t<l.b);
+ // personajes
+ for(const id of ['L','A']){
+  const g=$(id+'b'); const [x,y]=POS[id];
+  const talk = speaking&&speaking.s===id;
+  const bob = talk? Math.sin(t*9)*4 : Math.sin(t*2+ (id==='A'?1:0))*3;
+  let lean = 0;
+  g.setAttribute('transform',`translate(${x},${y+bob})`);
+  const last = [...LINES].reverse().find(l=>l.s===id && t>=l.a) || {e:id==='L'?'sus':'calm'};
+  brows(id,last.e);
+  // mirada: hacia el otro, o a cámara en las líneas finales
+  const toCam = cur&&cur.cam&&id==='A';
+  const lookX = toCam? 0 : (id==='L'? 9 : -9); const lookY = (id==='L'&&!talk&&!(cur&&cur.s==='A'))? 8:0;
+  $(id+'pl').setAttribute('cx',-42+lookX); $(id+'pr').setAttribute('cx',42+lookX);
+  $(id+'pl').setAttribute('cy',38+lookY); $(id+'pr').setAttribute('cy',38+lookY);
+  // parpadeo
+  const bp=((t+(id==='A'?1.3:0))%3.4); const lid = bp<0.12? 70*Math.sin(bp/0.12*Math.PI):0;
+  $(id+'lid').setAttribute('y',5); $(id+'lid').setAttribute('height',lid);
+  // boca
+  const m=$(id+'mouth'), sm=$(id+'smile');
+  if(talk){ const open=6+22*Math.abs(Math.sin(t*15))*Math.abs(Math.sin(t*5.3+1)); m.setAttribute('ry',open); m.setAttribute('rx',speaking.e==='shout'?34:24); m.style.opacity=1; sm.style.opacity=0; }
+  else { m.style.opacity=0; sm.style.opacity=1;
+   const e=last.e; const c = e==='shout'||e==='conf'||e==='cam' ? 92 : (e==='sus'||e==='sure'? 100: 112);
+   sm.setAttribute('d',`M-22 100 Q0 ${c} 22 100`); }
+  // cabeza inclinada al hablar
+  $(id+'head').setAttribute('transform',`rotate(${talk?Math.sin(t*4)*3:(id==='L'?-4:3)} 0 120)`);
+ }
+ // teléfono de Laura: lo levanta cuando reclama
+ // cámara
+ let zx=540,zy=1100,z=1;
+ if(speaking&&!speaking.cam){ const [x]=POS[speaking.s]; const k=eio((t-speaking.a)/0.5); zx=540+(x-540)*0.45*k; z=1+0.12*k; }
+ if(cur&&cur.cam){ const k=eio((t-LINES[7].a)/0.6); zx=540+(760-540)*k; zy=1100-150*k; z=1+0.55*k; if(cur.punch) z+=0.15*eio((t-cur.a)/0.3); }
+ $('cam').style.transform=`translate(${(540-zx)*z}px,${(1100-zy)*z*0.6}px) scale(${z})`;
+ $('vig').style.opacity = cur&&cur.cam? eio((t-LINES[7].a)/0.6)*0.9 : 0;
+ // subtítulos karaoke
+ const c=$('cap');
+ if(cur&&t<END){ const i=cur.words.reduce((k,w,j)=>t>=cur.wt[j]?j:k,0);
+  c.innerHTML=cur.words.map((w,j)=>`<span class="${j===i&&t<cur.b?'on':''}">${w}</span>`).join(' ');
+  c.style.opacity=1; c.style.transform=`scale(${1+0.06*(1-ease((t-cur.a)/0.2))})`;
+  c.style.color = cur.s==='L' ? '#fff' : '#fff'; }
+ else c.style.opacity=0;
+ $('flash').style.opacity = (LINES[8]&&t>=LINES[8].a&&t<LINES[8].a+0.12)?0.6*(1-(t-LINES[8].a)/0.12):0;
+ // final
+ const e=$('end'); const k=ease((t-END)/0.4); e.style.opacity=t>=END?k:0; e.style.transform=`scale(${0.96+0.04*k})`;
+ $('ep').style.opacity = t<3.5?1:0.0;
+}
+window.render=render; render(0);
+window.LINES=LINES; window.END=END;
+</script></body></html>
