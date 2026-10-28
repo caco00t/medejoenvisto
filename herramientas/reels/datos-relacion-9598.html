@@ -1,0 +1,125 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#070a1a;font-family:'Inter','Noto Color Emoji',sans-serif;color:#fff}
+#bg{position:absolute;inset:0;background:radial-gradient(1100px 900px at 50% 40%,#16204a 0%,#0b1030 45%,#060818 100%)}
+canvas{position:absolute;left:0;top:0}
+#brand{position:absolute;top:150px;left:0;right:0;text-align:center;font-weight:700;font-size:30px;letter-spacing:1px;opacity:.85}
+#brand b{color:#f48fb1;letter-spacing:-7px;margin-right:14px}
+#big{position:absolute;top:250px;left:0;right:0;text-align:center;font-weight:900;font-size:170px;letter-spacing:-4px;line-height:1;
+ text-shadow:0 0 30px rgba(160,190,255,.55),0 0 80px rgba(120,150,255,.35)}
+#lab{position:absolute;top:440px;left:0;right:0;text-align:center;font-weight:600;font-size:40px;color:#c9d4ff;opacity:.9}
+#cap{position:absolute;left:70px;right:70px;top:1440px;text-align:center;font-weight:800;font-size:62px;line-height:1.22}
+#cap span{display:inline-block;padding:0 8px;margin:3px 1px;border-radius:10px}
+#cap span.on{background:#fff;color:#0b1030}
+#note{position:absolute;left:0;right:0;top:1650px;text-align:center;font-size:26px;color:#8f9bd0}
+#end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;text-align:center}
+#end .q{font-weight:900;font-size:120px;letter-spacing:-3px;line-height:1.02;text-shadow:0 0 40px rgba(244,143,177,.5)}
+#end .s{margin-top:40px;font-size:40px;color:#c9d4ff}
+#end .m{margin-top:120px;font-weight:800;font-size:36px;letter-spacing:1.5px}
+#end .m b{color:#f48fb1;letter-spacing:-8px;margin-right:14px}
+#end .f{margin-top:14px;font-size:26px;color:#8f9bd0}
+</style></head><body>
+<div id="bg"></div>
+<canvas id="c" width="1080" height="1920"></canvas>
+<div id="brand"><b>✓✓</b>me dejó en visto</div>
+<div id="big"></div><div id="lab"></div>
+<div id="cap"></div>
+<div id="note">Pareja ficticia de ejemplo</div>
+<div id="end"><div class="q">¿Qué diría<br>el tuyo?</div><div class="s">Comenta qué dato te sorprendió 👇</div>
+ <div class="m"><b>✓✓</b>ME DEJÓ EN VISTO</div><div class="f">Datos de una pareja ficticia de ejemplo</div></div>
+<script>
+const S=__STATS__;
+const months=Object.keys(S.mon).sort();
+const M=months.map(k=>({k,a:S.mon[k]['Andrés'],l:S.mon[k]['Laura'],rA:S.rm[k].A,rL:S.rm[k].L,af:S.am[k]}));
+const N=M.length, X0=110, X1=970, Y0=1330, colW=(X1-X0)/N, P=6.2, per=Math.floor((colW-4)/P);
+// orden de puntos por mes (mezcla determinista según proporción real)
+let seed=7; const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+M.forEach(m=>{ const tot=m.a+m.l; m.tot=tot; m.seq=[]; for(let i=0;i<m.a;i++)m.seq.push(0); for(let i=0;i<m.l;i++)m.seq.push(1); });
+let cum=0; M.forEach(m=>{m.cum0=cum; cum+=m.tot;});
+const TOT=cum, iApr=months.indexOf('2026-04');
+const PH=[
+ {a:.4,b:3.4,t:'Esta es una relación de 21 meses.'},
+ {a:3.6,b:7.6,t:'Cada punto es un mensaje. Rosa, ella. Azul, él.'},
+ {a:7.8,b:11.8,t:'Durante más de un año: unos 520 mensajes al mes.'},
+ {a:12.0,b:16.0,t:'Y en abril, la conversación cae casi a la mitad.'},
+ {a:16.2,b:20.8,t:'Ella pasa de responder en 20 minutos a casi 2 horas.'},
+ {a:21.0,b:24.8,t:'Los mensajes con cariño bajan del 28 % al 15 %.'},
+ {a:25.0,b:29.0,t:'Ninguno lo dijo en voz alta. El chat sí.'}];
+PH.forEach(p=>{p.w=p.t.split(' ');const tot=p.w.reduce((s,x)=>s+x.length+2,0);let acc=p.a;p.wt=p.w.map(x=>{const s=acc;acc+=(p.b-p.a-.3)*(x.length+2)/tot;return s;});});
+const END=29.3; window.TOTAL=33.5;
+const cl=x=>x<0?0:x>1?1:x, ease=x=>1-Math.pow(1-cl(x),3), eio=x=>{x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const fmt=n=>Math.round(n).toLocaleString('es-CO');
+const ctx=document.getElementById('c').getContext('2d');
+const PINK=[244,120,170], BLUE=[110,160,255];
+function col(c,a){return `rgba(${c[0]},${c[1]},${c[2]},${a})`}
+function drawDots(t,dim){
+ // los puntos aparecen de 0.4 s a 7.4 s en orden cronológico
+ const shown = TOTAL_SHOWN(t);
+ for(let i=0;i<N;i++){ const m=M[i]; const x=X0+i*colW+2;
+  const n=Math.max(0,Math.min(m.tot,shown-m.cum0)); if(!n) continue;
+  const fall = (i>=iApr && t>12 && t<16.5) ? 1 : 0;
+  for(let j=0;j<n;j++){ const r=Math.floor(j/per), c=j%per;
+   const y=Y0-r*P; let a=dim;
+   if(t>12&&t<16.5&&i>=iApr) a=Math.min(1,dim*1.6);
+   ctx.fillStyle=col(m.seq[j]?PINK:BLUE,a); ctx.fillRect(x+c*P,y,4.4,4.4); } }
+}
+function TOTAL_SHOWN(t){ return TOT*eio((t-0.4)/7.0); }
+function line(vals,c,t0,dur,t,ymax,yTop,yBot,w){
+ const k=cl((t-t0)/dur); const n=vals.length; ctx.beginPath(); ctx.lineWidth=w; ctx.strokeStyle=col(c,1); ctx.shadowColor=col(c,.9); ctx.shadowBlur=18;
+ const last=(n-1)*k; for(let i=0;i<=Math.floor(last);i++){ const x=X0+i*colW+colW/2, y=yBot-(vals[i]/ymax)*(yBot-yTop); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+ const fi=Math.floor(last), fr=last-fi; if(fi<n-1){ const x=X0+(fi+fr)*colW+colW/2, y=yBot-((vals[fi]+(vals[fi+1]-vals[fi])*fr)/ymax)*(yBot-yTop); ctx.lineTo(x,y);}
+ ctx.stroke(); ctx.shadowBlur=0;
+ return last;
+}
+function axis(t,a){
+ ctx.fillStyle=`rgba(180,195,255,${.55*a})`; ctx.font='600 26px Inter'; ctx.textAlign='center';
+ ctx.fillText('2025',X0+colW*0.5+10,Y0+60); ctx.fillText('2026',X0+12*colW+colW*.5,Y0+60);
+ ctx.fillRect(X0,Y0+14,X1-X0,2);
+}
+function render(t){
+ ctx.clearRect(0,0,1080,1920);
+ const phaseLines = t>=16.2 && t<25;
+ const dim = phaseLines ? .22 : (t>=25? .75 : .95);
+ drawDots(t,dim);
+ // brillo suave
+ ctx.save(); ctx.filter='blur(7px)'; ctx.globalAlpha=.55; ctx.drawImage(ctx.canvas,0,0); ctx.restore();
+ drawDots(t,dim);
+ axis(t, t>0.8?1:0);
+ // promedio de 520 al mes
+ if(t>=7.8&&t<16){ const a=ease((t-7.8)/.6)*(t>15.4?1-ease((t-15.4)/.6):1); const avgH=Math.ceil(520/per)*P; const y=Y0-avgH;
+  ctx.setLineDash([10,10]); ctx.strokeStyle=`rgba(255,255,255,${.7*a})`; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(X0,y); ctx.lineTo(X0+iApr*colW,y); ctx.stroke(); ctx.setLineDash([]); }
+ // marca de abril
+ if(t>=12&&t<25){ const a=ease((t-12)/.6); const x=X0+iApr*colW; ctx.strokeStyle=`rgba(255,255,255,${.9*a})`; ctx.lineWidth=3; ctx.setLineDash([8,8]);
+  ctx.beginPath(); ctx.moveTo(x-3,650); ctx.lineTo(x-3,Y0+10); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=`rgba(255,255,255,${a})`; ctx.font='800 32px Inter'; ctx.textAlign='left'; ctx.fillText('abril 2026',x+8,672); }
+ // curva de tiempo de respuesta
+ if(t>=16.2&&t<25){ const a=t>24.4?1-ease((t-24.4)/.6):1; ctx.globalAlpha=a;
+  const yT=720,yB=1300; line(M.map(m=>m.rA),BLUE,16.4,3.0,t,130,yT,yB,6); const k=line(M.map(m=>m.rL),PINK,16.4,3.0,t,130,yT,yB,7);
+  if(t>19.4){ const la=ease((t-19.4)/.4); ctx.font='800 34px Inter'; ctx.textAlign='right';
+   const yv=v=>yB-(v/130)*(yB-yT); const xe=X1-4;
+   ctx.fillStyle=col(PINK,la); ctx.fillText('ella',xe,yv(M[N-1].rL)-22); ctx.fillStyle=col(BLUE,la); ctx.fillText('él',xe,yv(M[N-1].rA)-22); }
+  ctx.globalAlpha=1; }
+ // curva de cariño
+ if(t>=21&&t<25){ const a=ease((t-21)/.5)*(t>24.4?1-ease((t-24.4)/.6):1); ctx.globalAlpha=a; line(M.map(m=>m.af),[255,214,120],21.2,2.6,t,40,760,1300,7); if(t>23.8){ctx.globalAlpha=a*ease((t-23.8)/.3); ctx.font='800 34px Inter'; ctx.textAlign='left'; ctx.fillStyle='rgb(255,214,120)'; ctx.fillText('cariño',X0,1300-(M[1].af/40)*540-24);} ctx.globalAlpha=1; }
+ // número grande
+ const big=document.getElementById('big'), lab=document.getElementById('lab');
+ let B='',L='';
+ if(t<7.6){ B=fmt(TOTAL_SHOWN(t)); L='mensajes'; }
+ else if(t<12){ B='520'; L='mensajes al mes'; }
+ else if(t<16.2){ B='45 %'; L='menos mensajes desde abril'; }
+ else if(t<21){ B='2 h'; L='tarda ella en responder (antes, 20 min)'; }
+ else if(t<25){ B='15 %'; L='de mensajes con cariño (antes, 28 %)'; }
+ else { B='9.598'; L='mensajes que lo contaban todo'; }
+ big.textContent=B; lab.textContent=L;
+ const pa=[0,7.8,12,16.2,21,25].reduce((s,x)=>t>=x?x:s,0); const k=ease((t-pa)/.35);
+ big.style.opacity=t<END?k:0; lab.style.opacity=t<END?k*.9:0; big.style.transform=`scale(${.9+.1*k})`;
+ // subtítulos
+ const c=document.getElementById('cap'); const p=PH.find(p=>t>=p.a&&t<p.b+.2);
+ if(p&&t<END){ const i=p.wt.reduce((s,w,j)=>t>=w?j:s,0); c.innerHTML=p.w.map((w,j)=>`<span class="${j===i?'on':''}">${w}</span>`).join(' '); c.style.opacity=ease((t-p.a)/.2); } else c.style.opacity=0;
+ document.getElementById('note').style.opacity = t<END ? .9 : 0;
+ const e=document.getElementById('end'); const ke=ease((t-END)/.6); e.style.opacity=t>=END?ke:0;
+ document.getElementById('c').style.opacity = t>=END ? 1-ke : 1;
+}
+window.render=render; render(0);
+</script></body></html>
