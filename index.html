@@ -119,6 +119,19 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
 #hist .hbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;max-width:520px}
 #hist .hname{color:#fff;font-size:14px;display:flex;gap:6px;align-items:center;width:100%;justify-content:center}
 #hist .btn.ghost{background:rgba(255,255,255,.12);color:#fff}
+#pj{position:fixed;inset:0;z-index:99;background:#14001f;display:flex;align-items:center;justify-content:center;padding:16px}
+#pj[hidden]{display:none}
+#pj .pjbox{position:relative;background:var(--card,#fff);color:var(--ink,#222);border-radius:24px;padding:28px 22px;max-width:440px;width:100%;text-align:center;max-height:92vh;overflow:auto}
+#pj .pjx{position:absolute;top:10px;right:12px;background:none;border:0;font-size:20px;cursor:pointer;color:inherit}
+#pj .pjemo{font-size:52px;line-height:1}
+#pj h2{margin:12px 0 10px}
+#pj .pjprog{font-size:13px;opacity:.7}
+#pj .pjops{display:grid;gap:10px;margin-top:16px}
+#pj .pjops .btn{width:100%}
+#pj .pjok{font-size:26px;font-weight:800;color:var(--accent,#c2185b);margin:6px 0}
+#pj .pjrow{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:14px;background:var(--soft,#f6f0f4);margin:8px 0;text-align:left}
+#pj .pjnom{display:flex;gap:6px;justify-content:center;align-items:center;font-size:14px;margin:12px 0}
+#pj .btn{margin-top:10px}
 </style>
 </head>
 <body>
@@ -781,6 +794,91 @@ async function compartirHist(todas){
 }
 document.addEventListener('keydown', e=>{ const ov = document.getElementById('hist'); if (!ov || ov.hidden) return; if (e.key==='ArrowRight') pasoHist(1); if (e.key==='ArrowLeft') pasoHist(-1); if (e.key==='Escape') cerrarHist(); });
 
+/* ========= MODO PAREJA: ¿qué tanto conocen su relación? ========= */
+function preguntasPareja(A){
+  const D = A.D, me = A.me, pa = A.pa, a = A.E[me], b = A.E[pa], Ha = A.H[me], Hb = A.H[pa];
+  const P = [];
+  const quien = (q, va, vb, menos, dato) => { if (va == null || vb == null || va === vb) return; P.push({q, ops:[me, pa], ok: (menos ? va < vb : va > vb) ? me : pa, dato}); };
+  quien('¿Quién escribe más mensajes?', A.nMe, A.nPa, false, me+': '+A.nMe.toLocaleString('es-CO')+' · '+pa+': '+A.nPa.toLocaleString('es-CO'));
+  if (a.initShare != null && b.initShare != null) quien('¿Quién escribe primero más seguido?', Math.round(a.initShare), Math.round(b.initShare), false, me+' empieza el '+Math.round(a.initShare)+'% de las conversaciones y '+pa+' el '+Math.round(b.initShare)+'%');
+  if (a.resp != null && b.resp != null) quien('¿Quién responde más rápido?', a.resp, b.resp, true, 'Tiempo típico de respuesta: '+me+' '+fmtMin(a.resp)+' · '+pa+' '+fmtMin(b.resp));
+  if (D.firstTeAmo) P.push({q:'¿Quién escribió el primer "te amo" del chat?', ops:[me, pa], ok:D.firstTeAmo.who, dato:'Fue el '+D.firstTeAmo.t.getDate()+' de '+MES[D.firstTeAmo.t.getMonth()]+' de '+D.firstTeAmo.t.getFullYear()});
+  quien('¿Quién dice más "te amo"?', D.teamo[me], D.teamo[pa], false, me+': '+D.teamo[me]+' veces · '+pa+': '+D.teamo[pa]+' veces');
+  quien('¿Quién pide perdón más veces?', D.perdon[me], D.perdon[pa], false, me+': '+D.perdon[me]+' · '+pa+': '+D.perdon[pa]);
+  if (Ha.audios + Hb.audios >= 10) quien('¿Quién manda más audios?', Ha.audios, Hb.audios, false, me+': '+Ha.audios+' audios · '+pa+': '+Hb.audios);
+  const ma = Ha.stk + Ha.gif, mb = Hb.stk + Hb.gif; if (ma + mb >= 10) quien('¿Quién manda más stickers y memes?', ma, mb, false, me+': '+ma+' · '+pa+': '+mb);
+  quien('¿Quién insiste más (varios mensajes seguidos sin respuesta)?', D.insiste[me], D.insiste[pa], false, me+': '+D.insiste[me]+' veces · '+pa+': '+D.insiste[pa]+' veces');
+  if (D.despedida != null){
+    const m = D.despedida % 1440, r = [['Antes de las 10 p. m.', 0, 22*60], ['Entre 10 y 11 p. m.', 22*60, 23*60], ['Entre 11 p. m. y medianoche', 23*60, 24*60], ['Después de medianoche', 24*60, 99999]];
+    const mm = m < 300 ? m + 1440 : m; const ok = r.find(x => mm >= x[1] && mm < x[2]);
+    if (ok) P.push({q:'¿A qué hora se despiden normalmente?', ops:r.map(x=>x[0]), ok:ok[0], dato:'Su hora típica de despedida: '+horaTxt(D.despedida)});
+  }
+  if (D.topW.length >= 3){
+    const extra = [...A.H[me].topWords, ...A.H[pa].topWords].map(x=>x[0]).filter(w => !D.topW.slice(0,1).some(t=>t[0]===w) && !RE_SEX.test(w));
+    const opts = [...new Set([D.topW[0][0], D.topW[1][0], D.topW[2][0], ...extra])].slice(0,4);
+    if (opts.length === 4){ const ok = D.topW[0][0]; opts.sort(()=>Math.random()-.5); P.push({q:'¿Cuál es la palabra que más se escriben?', ops:opts.map(w=>'"'+w+'"'), ok:'"'+ok+'"', dato:'La que más usan: "'+ok+'" ('+D.topW[0][1].toLocaleString('es-CO')+' veces)'}); }
+  }
+  return P.slice(0, 8);
+}
+let PJ = null;
+function parejaCTA(){ return '<section class="card noprint" style="text-align:center;border:2px solid var(--accent)"><h2>💞 Modo pareja: ¿qué tanto conocen su relación?</h2><p class="sub" style="margin:6px 0 14px">Cada uno adivina en secreto quién escribe más, quién dijo "te amo" primero y más. Luego ven los datos y quién ganó. Un plan para hacer juntos, en este mismo celular.</p><button class="btn" onclick="abrirPareja()">Jugar en pareja</button></section>'; }
+function abrirPareja(){
+  const A = LAST; if (!A) return; if (!A.D) A.D = divertidos(A);
+  const Q = preguntasPareja(A); if (Q.length < 4){ alert('Este chat no tiene datos suficientes para el juego. Prueba con un chat más largo.'); return; }
+  ev('pareja');
+  PJ = {A, Q, jug:[A.me, A.pa], resp:[[],[]], j:0, i:0, paso:'intro'};
+  let ov = document.getElementById('pj');
+  if (!ov){ ov = document.createElement('div'); ov.id = 'pj'; document.body.appendChild(ov); }
+  ov.hidden = false; document.body.style.overflow = 'hidden'; pintarPareja();
+}
+function cerrarPareja(){ document.getElementById('pj').hidden = true; document.body.style.overflow = ''; }
+function pintarPareja(){
+  const ov = document.getElementById('pj'), S = PJ, n = S.Q.length;
+  const caja = h => '<div class="pjbox"><button class="pjx" aria-label="Cerrar" onclick="cerrarPareja()">✕</button>'+h+'</div>';
+  if (S.paso === 'intro'){
+    ov.innerHTML = caja('<div class="pjemo">💞</div><h2>¿Qué tanto conocen su relación?</h2><p>'+n+' preguntas sobre su chat. Primero responde <b>'+esc(S.jug[0])+'</b> sin que <b>'+esc(S.jug[1])+'</b> mire, luego al revés. Al final se revelan los datos.</p><p class="note">Todo pasa en este celular. Nada se envía a ningún lado.</p><button class="btn" onclick="PJ.paso=\'turno\';pintarPareja()">Empezar</button>');
+  } else if (S.paso === 'turno'){
+    ov.innerHTML = caja('<div class="pjemo">🙈</div><h2>Turno de '+esc(S.jug[S.j])+'</h2><p>'+esc(S.jug[1-S.j])+', no mires la pantalla.</p><button class="btn" onclick="PJ.paso=\'preg\';PJ.i=0;pintarPareja()">Soy '+esc(S.jug[S.j])+', empezar</button>');
+  } else if (S.paso === 'preg'){
+    const q = S.Q[S.i];
+    ov.innerHTML = caja('<div class="pjprog">'+esc(S.jug[S.j])+' · pregunta '+(S.i+1)+' de '+n+'</div><h2>'+esc(q.q)+'</h2><div class="pjops">'+q.ops.map((o,k)=>'<button class="btn ghost" onclick="responderPareja('+k+')">'+esc(o)+'</button>').join('')+'</div>');
+  } else if (S.paso === 'pasar'){
+    ov.innerHTML = caja('<div class="pjemo">📱</div><h2>¡Listo, '+esc(S.jug[0])+'!</h2><p>Ahora pásale el celular a <b>'+esc(S.jug[1])+'</b> sin mostrar tus respuestas.</p><button class="btn" onclick="PJ.j=1;PJ.paso=\'turno\';pintarPareja()">Ya lo tiene '+esc(S.jug[1])+'</button>');
+  } else if (S.paso === 'revelar'){
+    const q = S.Q[S.i], r0 = q.ops[S.resp[0][S.i]], r1 = q.ops[S.resp[1][S.i]];
+    const fila = (who, r) => '<div class="pjrow"><span>'+esc(who)+'</span><b>'+esc(r)+' '+(r === q.ok ? '✅' : '❌')+'</b></div>';
+    ov.innerHTML = caja('<div class="pjprog">Revelación '+(S.i+1)+' de '+n+'</div><h2>'+esc(q.q)+'</h2><div class="pjok">'+esc(q.ok)+'</div><p class="note">'+esc(q.dato)+'</p>'+fila(S.jug[0], r0)+fila(S.jug[1], r1)+'<button class="btn" onclick="'+(S.i+1 < n ? 'PJ.i++;pintarPareja()' : 'PJ.paso=\'final\';pintarPareja()')+'">'+(S.i+1 < n ? 'Siguiente' : 'Ver resultado')+'</button>');
+  } else if (S.paso === 'final'){
+    const pts = [0,1].map(j => S.Q.reduce((s,q,i)=>s + (q.ops[S.resp[j][i]] === q.ok ? 1 : 0), 0));
+    S.pts = pts; ev('pareja_fin');
+    const gana = pts[0] === pts[1] ? 'Empate: se conocen igual de bien 🤝' : esc(S.jug[pts[0] > pts[1] ? 0 : 1])+' conoce mejor su relación 🏆';
+    ov.innerHTML = caja('<div class="pjemo">🏁</div><h2>'+gana+'</h2><div class="pjrow"><span>'+esc(S.jug[0])+'</span><b>'+pts[0]+' de '+n+'</b></div><div class="pjrow"><span>'+esc(S.jug[1])+'</span><b>'+pts[1]+' de '+n+'</b></div><p class="note">Lo mejor de este juego es lo que hablan después. Los datos muestran patrones, no quién tiene la razón.</p><label class="pjnom"><input type="checkbox" id="pjnom"> Mostrar nombres en la imagen</label><button class="btn" onclick="compartirPareja()">Compartir resultado</button> <button class="btn ghost" onclick="cerrarPareja()">Volver al informe</button>');
+  }
+}
+function responderPareja(k){
+  const S = PJ; S.resp[S.j][S.i] = k;
+  if (S.i + 1 < S.Q.length){ S.i++; } else if (S.j === 0){ S.paso = 'pasar'; } else { S.paso = 'revelar'; S.i = 0; }
+  pintarPareja();
+}
+async function compartirPareja(){
+  const S = PJ, n = S.Q.length, nom = document.getElementById('pjnom') && document.getElementById('pjnom').checked;
+  const nm = j => nom ? S.jug[j] : (j === 0 ? 'Yo' : 'Mi pareja');
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const x = c.getContext('2d');
+  const g = x.createLinearGradient(0,0,1080,1920); g.addColorStop(0,'#c2185b'); g.addColorStop(1,'#4a148c'); x.fillStyle = g; x.fillRect(0,0,1080,1920);
+  const F = (w,sz)=>w+' '+sz+'px Inter, system-ui, sans-serif'; x.fillStyle = '#fff'; x.textAlign = 'center';
+  x.globalAlpha = .9; x.font = F(800,40); x.fillText('✓✓ ME DEJÓ EN VISTO', 540, 180); x.globalAlpha = 1;
+  x.font = F(800,84); x.fillText('¿Qué tanto', 540, 430); x.fillText('conocemos', 540, 530); x.fillText('nuestra relación?', 540, 630);
+  [0,1].forEach(j => { const y = 800 + j*300; x.fillStyle = 'rgba(255,255,255,.15)'; rrect(x, 120, y, 840, 250, 40); x.fill(); x.fillStyle = '#fff'; x.font = F(600,48); x.fillText(nm(j), 540, y+90); x.font = F(800,110); x.fillText(S.pts[j]+' de '+n, 540, y+205); });
+  x.font = F(700,52); const w = S.pts[0] > S.pts[1] ? 0 : 1; x.fillText(S.pts[0] === S.pts[1] ? 'Empate 🤝' : nom ? S.jug[w]+' gana 🏆' : (w === 0 ? 'Gané yo 🏆' : 'Ganó mi pareja 🏆'), 540, 1500);
+  x.globalAlpha = .9; x.font = F(500,40); x.fillText('Jueguen el suyo gratis en', 540, 1650); x.globalAlpha = 1;
+  x.font = F(800,52); x.fillText('medejoenvisto.com', 540, 1720);
+  x.globalAlpha = .8; x.font = F(500,32); x.fillText('🔒 El chat nunca sale del celular', 540, 1800); x.globalAlpha = 1;
+  const blob = await new Promise(r=>c.toBlob(r,'image/png')); const file = new File([blob], 'modo-pareja.png', {type:'image/png'});
+  ev('pareja_compartir');
+  try{ if (navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], text:'¿Qué tanto conocen su relación? Jueguen gratis en medejoenvisto.com'}); return; } }catch(e){ if (e && e.name === 'AbortError') return; }
+  const u = URL.createObjectURL(blob); const l = document.createElement('a'); l.href = u; l.download = 'modo-pareja.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000);
+}
+
 function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 const LV = {estable:'Estable', moderado:'Cambio moderado', fuerte:'Cambio marcado', mejora:'Mejoró', nd:'Sin datos suficientes'};
 function fmtV(v, f){ if (v===null||v===undefined||isNaN(v)) return 'sin datos'; if (f==='min') return fmtMin(v); if (f==='pct') return Math.round(v)+'%'; if (f==='rate') return v.toFixed(1).replace('.',','); return v.toFixed(1).replace('.',','); }
@@ -851,6 +949,7 @@ function render(A, demo){
   h += '<div class="grid3"><div class="kpi"><div class="v">'+A.total.toLocaleString('es-CO')+'</div><div class="l">mensajes</div></div><div class="kpi"><div class="v">'+Math.max(1,Math.round(A.spanDays)).toLocaleString('es-CO')+'</div><div class="l">días de conversación</div></div><div class="kpi"><div class="v">'+Math.round(A.total/Math.max(1,A.spanDays))+'</div><div class="l">mensajes por día</div></div></div>';
   h += '<div class="split"><div style="width:'+pMe+'%"></div><div style="width:'+(100-pMe)+'%"></div></div><div class="legend"><span><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+' (tú) '+pMe+'%</span><span>'+esc(A.pa)+' '+(100-pMe)+'%<i class="dot" style="background:var(--b);margin:0 0 0 6px"></i></span></div></section>';
   h += historiasCTA();
+  h += parejaCTA();
 
   h += '<section class="card"><div class="index"><div class="ring" style="background:conic-gradient('+idxColor+' '+(A.index*3.6)+'deg, var(--line) 0)"><div style="width:96px;height:96px;border-radius:50%;background:var(--card);display:grid;place-items:center"><div><b>'+A.index+'</b><small>de 100</small></div></div></div><div><h2>Índice de cambio: '+idxLabel+'</h2><p class="sub" style="margin:0">Mide cuánto ha cambiado la forma en que '+esc(A.pa)+' se comunica contigo, comparando '+cutTxt+'. No mide infidelidad: muestra cambios de patrón que vale la pena conversar.</p>'+(A.enough?'':'<p class="err">Hay pocos mensajes en alguno de los dos periodos, así que las señales son poco confiables.</p>')+'</div></div></section>';
 
