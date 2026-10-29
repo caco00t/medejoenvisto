@@ -13,51 +13,119 @@
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:locale" content="es_CO">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#c2185b">
+<meta name="theme-color" content="#1E0B33">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root{--bg:#faf7f5;--card:#fff;--ink:#1d1b20;--mute:#6b6570;--line:#ebe5e2;--accent:#c2185b;--accent-ink:#fff;--soft:#fce4ec;--a:#3f51b5;--b:#c2185b;--ok:#2e7d32;--okbg:#e8f5e9;--warn:#b45309;--warnbg:#fff3e0;--bad:#c62828;--badbg:#ffebee;--up:#1565c0;--upbg:#e3f2fd}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#141216;--card:#1f1c22;--ink:#f2eef4;--mute:#a59fab;--line:#2f2b34;--accent:#f06292;--accent-ink:#1d1b20;--soft:#3a1d2a;--a:#8c9eff;--b:#f06292;--ok:#81c784;--okbg:#1b2e1d;--warn:#ffb74d;--warnbg:#33260f;--bad:#ef9a9a;--badbg:#3a1a1a;--up:#90caf9;--upbg:#13283d}}
-:root[data-theme=dark]{--bg:#141216;--card:#1f1c22;--ink:#f2eef4;--mute:#a59fab;--line:#2f2b34;--accent:#f06292;--accent-ink:#1d1b20;--soft:#3a1d2a;--a:#8c9eff;--b:#f06292;--ok:#81c784;--okbg:#1b2e1d;--warn:#ffb74d;--warnbg:#33260f;--bad:#ef9a9a;--badbg:#3a1a1a;--up:#90caf9;--upbg:#13283d}
+:root{--bg:#FCFAFF;--card:#fff;--ink:#1F1530;--mute:#6C6180;--line:#ECE6F5;--accent:#E8336D;--accent-ink:#fff;--soft:#F3EEFF;--a:#3D8BFF;--b:#E8336D;--noche:#1E0B33;--leido:#7FB6FF;--ok:#5B4BC4;--okbg:#EFEBFF;--warn:#B4540A;--warnbg:#FFF1E3;--bad:#D61F5A;--badbg:#FFE6EE;--up:#2563EB;--upbg:#E6F0FF;--burbuja:24px 24px 24px 8px;--font:'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#120820;--card:#1C1030;--ink:#F4EEFF;--mute:#A99BC0;--line:#2E2145;--accent:#FF5C8D;--accent-ink:#1F1530;--soft:#271741;--a:#6FA8FF;--b:#FF5C8D;--ok:#B3A6FF;--okbg:#2A2350;--warn:#FFB86B;--warnbg:#3A2612;--bad:#FF7AA2;--badbg:#3D1426;--up:#8DB8FF;--upbg:#14264A}}
+:root[data-theme=dark]{--bg:#120820;--card:#1C1030;--ink:#F4EEFF;--mute:#A99BC0;--line:#2E2145;--accent:#FF5C8D;--accent-ink:#1F1530;--soft:#271741;--a:#6FA8FF;--b:#FF5C8D;--ok:#B3A6FF;--okbg:#2A2350;--warn:#FFB86B;--warnbg:#3A2612;--bad:#FF7AA2;--badbg:#3D1426;--up:#8DB8FF;--upbg:#14264A}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
-.wrap{max-width:860px;margin:0 auto;padding:0 16px 48px}
-.hero{padding:40px 0 20px;text-align:center}
-.brand{font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px;color:var(--accent)}
-h1{font-size:clamp(28px,6vw,42px);line-height:1.1;margin:10px 0 12px;font-weight:800}
-.lead{color:var(--mute);font-size:17px;max-width:600px;margin:0 auto}
-.badge{display:inline-flex;gap:8px;align-items:center;margin-top:16px;padding:8px 14px;border-radius:999px;background:var(--okbg);color:var(--ok);font-weight:600;font-size:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin:16px 0}
-h2{font-size:20px;margin:0 0 4px}
-.sub{color:var(--mute);font-size:14px;margin:0 0 14px}
-.steps{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 16px}
-.step{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:14px}
-.step b{display:block;margin-bottom:4px}
-.drop{display:block;border:2px dashed var(--accent);border-radius:16px;padding:28px 16px;text-align:center;cursor:pointer;background:var(--soft);transition:transform .15s}
-.drop:hover{transform:translateY(-1px)}
-.drop strong{display:block;font-size:18px;color:var(--accent)}
+html{scroll-behavior:smooth}
+body{margin:0;overflow-x:clip;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--a);outline-offset:2px;border-radius:8px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 56px}
+.main{max-width:720px;margin:0 auto}
+/* barra superior y hero */
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 4px}
+.logo{font-weight:800;font-size:18px;letter-spacing:-.01em;color:#fff;text-decoration:none;display:flex;gap:8px;align-items:center}
+.logo i{font-style:normal;color:var(--leido);letter-spacing:-.18em;margin-right:.18em}
+.top .btn{padding:9px 16px;font-size:15px;background:rgba(255,255,255,.12);color:#fff}
+.hero{background:radial-gradient(120% 90% at 85% 0%,#3B1466 0%,var(--noche) 60%);color:#fff;margin:0 calc(50% - 50vw);padding:0 20px 44px;border-radius:0 0 36px 36px;overflow:hidden}
+.top{max-width:1040px;margin:0 auto}
+.heroIn{max-width:1040px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding-top:28px}
+h1{font-size:clamp(38px,8.5vw,68px);line-height:.98;letter-spacing:-.035em;margin:0 0 18px;font-weight:800}
+.lead{color:#D9CCF0;font-size:clamp(17px,2.4vw,20px);max-width:30em;margin:0 0 26px}
+.ctas{display:flex;gap:10px;flex-wrap:wrap}
+.ctas .btn{font-size:17px;padding:16px 22px}
+.ctas .btn.ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.18)}
+.trust{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:#CBBDE6}
+/* conversación animada */
+.chatmock{background:#2A1450;border:1px solid rgba(255,255,255,.08);border-radius:30px;padding:16px 14px 18px;display:flex;flex-direction:column;gap:8px;max-width:390px;width:100%;justify-self:end;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)}
+.chathead{display:flex;gap:10px;align-items:center;padding:2px 4px 10px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:4px}
+.chathead span{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#E8336D,#7B3FE4);display:grid;place-items:center;font-size:17px}
+.chathead b{display:block;font-size:15px}.chathead small{color:#B9A8D8;font-size:12px}
+.bb{max-width:80%;padding:9px 12px 6px;border-radius:18px;font-size:15px;line-height:1.35;opacity:0;animation:pop .45s cubic-bezier(.2,.8,.3,1.2) forwards;animation-delay:var(--d)}
+.bb small{display:block;text-align:right;font-size:11px;opacity:.75;margin-top:2px}
+.bb.in{align-self:flex-start;background:#3E2570;border-bottom-left-radius:6px}
+.bb.out{align-self:flex-end;background:#C42A63;border-bottom-right-radius:6px}
+.bb .vt{color:var(--leido);font-weight:700;opacity:1}
+.escribe{align-self:flex-start;background:#3E2570;border-radius:18px;padding:10px 14px;display:flex;gap:4px;opacity:0;animation:pop .3s forwards,fuera .3s forwards;animation-delay:2.4s,4.2s}
+.escribe i{width:6px;height:6px;border-radius:50%;background:#B9A8D8;animation:salto 1s infinite}
+.escribe i:nth-child(2){animation-delay:.15s}.escribe i:nth-child(3){animation-delay:.3s}
+.insight{margin-top:8px;background:#fff;color:var(--noche);border-radius:var(--burbuja);padding:14px 16px;opacity:0;animation:pop .5s cubic-bezier(.2,.8,.3,1.2) forwards;animation-delay:var(--d)}
+.insight b{display:block;font-size:20px;line-height:1.15;letter-spacing:-.01em}
+.insight small{display:block;color:#6C6180;font-size:13px;margin-top:4px}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes fuera{to{opacity:0;height:0;padding:0;margin:-8px 0 0}}
+@keyframes salto{0%,60%,100%{transform:none;opacity:.6}30%{transform:translateY(-4px);opacity:1}}
+@media (prefers-reduced-motion:reduce){.bb,.insight{animation:none;opacity:1}.escribe{display:none}html{scroll-behavior:auto}}
+/* secciones */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--burbuja);padding:22px;margin:18px 0}
+h2{font-size:clamp(21px,3.4vw,25px);line-height:1.15;letter-spacing:-.02em;margin:0 0 6px}
+h3{letter-spacing:-.01em}
+.sub{color:var(--mute);font-size:15px;margin:0 0 16px}
+.pasos{list-style:none;margin:0;padding:0;counter-reset:p}
+.pasos>li{counter-increment:p;position:relative;padding:0 0 22px 52px}
+.pasos>li::before{content:counter(p);position:absolute;left:0;top:-2px;width:36px;height:36px;border-radius:50%;background:var(--noche);color:#fff;display:grid;place-items:center;font-weight:800}
+.pasos>li:not(:last-child)::after{content:"";position:absolute;left:17px;top:38px;bottom:4px;width:2px;background:var(--line)}
+.pasos h3{margin:4px 0 8px;font-size:18px}
+.tipo{display:flex;flex-wrap:wrap;gap:8px}
+.tipo button{appearance:none;font:600 15px var(--font);color:var(--ink);background:var(--soft);border:2px solid transparent;border-radius:999px;padding:10px 16px;cursor:pointer}
+.tipo button[aria-pressed=true]{border-color:var(--accent);background:var(--card);color:var(--accent)}
+.tipo button:disabled{opacity:.5;cursor:default}
+.steps{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.step{background:var(--soft);border-radius:16px;padding:12px 14px;font-size:14.5px}
+.step b{display:block;margin-bottom:2px}
+.drop{display:block;border:2px dashed color-mix(in srgb,var(--accent) 55%,transparent);border-radius:var(--burbuja);padding:30px 16px;text-align:center;cursor:pointer;background:color-mix(in srgb,var(--accent) 7%,var(--card));transition:transform .15s,border-color .15s}
+.drop:hover{transform:translateY(-2px);border-color:var(--accent)}
+.drop strong{display:block;font-size:19px;color:var(--accent);letter-spacing:-.01em}
 .drop span{color:var(--mute);font-size:14px}
 .drop input{display:none}
 .err{color:var(--bad);font-weight:600;margin-top:10px}
 .who{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.btn{appearance:none;border:0;border-radius:12px;padding:14px 16px;font:600 16px Inter,system-ui,sans-serif;cursor:pointer;background:var(--accent);color:var(--accent-ink);text-decoration:none;display:inline-block;text-align:center}
-.btn.ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.btn{appearance:none;border:0;border-radius:999px;padding:14px 20px;font:700 16px var(--font);cursor:pointer;background:var(--accent);color:var(--accent-ink);text-decoration:none;display:inline-block;text-align:center;transition:transform .12s,filter .12s}
+.btn:hover{filter:brightness(1.06)}.btn:active{transform:scale(.97)}
+.btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.ejemplos{display:grid;gap:10px;margin:8px 0 0}
+.ej{max-width:88%;padding:12px 16px;border-radius:20px;font-size:15.5px;line-height:1.4}
+.ej:nth-child(odd){background:var(--soft);border-bottom-left-radius:6px}
+.ej:nth-child(even){justify-self:end;background:var(--noche);color:#fff;border-bottom-right-radius:6px}
+.ej b{color:var(--accent)}.ej:nth-child(even) b{color:#FF8FB3}
+.avion{display:flex;gap:16px;align-items:center}
+.sw{flex:0 0 auto;width:62px;height:36px;border-radius:999px;background:var(--a);position:relative}
+.sw::after{content:"✈";position:absolute;right:4px;top:4px;width:28px;height:28px;border-radius:50%;background:#fff;color:var(--a);display:grid;place-items:center;font-size:15px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.kpi{background:var(--bg);border-radius:12px;padding:12px}
-.kpi .v{font-size:22px;font-weight:800}
+.kpi{background:var(--soft);border-radius:18px;padding:14px}
+.kpi .v{font-size:26px;font-weight:800;letter-spacing:-.02em}
 .kpi .l{font-size:13px;color:var(--mute)}
-.split{display:flex;height:14px;border-radius:999px;overflow:hidden;margin:8px 0 6px}
+.split{display:flex;height:14px;border-radius:999px;overflow:hidden;margin:10px 0 6px}
 .split div:first-child{background:var(--a)}.split div:last-child{background:var(--b)}
 .legend{display:flex;justify-content:space-between;font-size:14px;font-weight:600}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.lectura{background:var(--noche);color:#fff;border:0;border-radius:24px 24px 24px 8px}
+.lect-de{font-weight:700;font-size:14px;color:var(--leido);margin-bottom:8px}
+.lect-txt{font-size:clamp(18px,2.6vw,21px);line-height:1.45;margin:0;letter-spacing:-.005em}
+.inv{display:flex;height:46px;border-radius:999px;overflow:hidden;font-size:14px;font-weight:700;color:#fff}
+.inv div{display:flex;align-items:center;padding:0 14px;min-width:0;white-space:nowrap}
+.inv div:first-child{background:var(--a)}.inv div:last-child{background:var(--b);justify-content:flex-end}
+.inv span{overflow:hidden;text-overflow:ellipsis}
+.rec{border-left:4px solid var(--accent);background:var(--soft);border-radius:0 18px 18px 0;padding:12px 16px;margin:10px 0}
+.rec b{display:block;font-size:16.5px}.rec p{margin:4px 0 0;color:var(--mute);font-size:15px}
+.flotante{position:fixed;left:16px;right:16px;bottom:14px;z-index:50;display:none;justify-content:center}
+.flotante .btn{box-shadow:0 12px 30px -8px rgba(232,51,109,.6);font-size:17px;padding:16px 26px}
+.flotante.on{display:flex;animation:pop .3s forwards}
+@media (min-width:900px){.flotante{display:none!important}}
+@media (max-width:860px){.heroIn{grid-template-columns:1fr;gap:28px;padding-top:12px}.chatmock{justify-self:center}}
+
 .index{display:flex;gap:20px;align-items:center}
 .ring{flex:0 0 auto;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;position:relative}
 .ring b{font-size:34px;font-weight:800}
@@ -107,9 +175,6 @@ body.pdfmode .pdfhead b{font-size:22px}
 body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
 @media (max-width:640px){.steps,.grid2,.who{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}.index{flex-direction:column;text-align:center}}
 @media print{.noprint{display:none!important}body{background:#fff;color:#000}.card,.sig{break-inside:avoid;border-color:#ddd}.hero{padding-top:0}}
-.trust{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;margin-top:12px;font-size:13px;color:var(--muted,#666)}
-.trust span{white-space:nowrap}
-.heroCta{margin-top:16px}
 #hist{position:fixed;inset:0;z-index:99;background:#14001f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px}
 #hist[hidden]{display:none}
 #hist .hbox{position:relative;height:min(74vh,calc((100vw - 24px)*16/9));aspect-ratio:9/16}
@@ -136,34 +201,50 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
 </head>
 <body>
 <div class="wrap">
-  <div id="promo" class="noprint" hidden style="background:linear-gradient(90deg,#c2185b,#7b1fa2);color:#fff;text-align:center;padding:10px 16px;border-radius:0 0 16px 16px;font-weight:600;font-size:15px;margin:0 -16px"></div>
-  <header class="hero">
-    <div class="brand">✓✓ Me Dejó en Visto</div>
-    <h1>Lo que tu chat dice de tu relación</h1>
-    <p class="lead">Carga tu chat de WhatsApp con tu pareja y mira la comunicación con datos: quién busca a quién, cuánto tardan en responder y cómo ha cambiado el afecto con el tiempo.</p>
-    <div class="badge">🔒 Tu chat se analiza en tu teléfono. Nunca se sube a ningún servidor.</div>
-    <div class="trust"><span>✅ Resumen gratis, sin registrarte</span><span>💳 Pago seguro con Wompi, de Bancolombia</span><span>🇨🇴 Hecho en Colombia</span></div>
-    <div class="heroCta noprint"><button class="btn ghost" type="button" onclick="document.getElementById('demoBtn').click()">👀 Mira primero un ejemplo</button></div>
+  <div id="promo" class="noprint" hidden style="background:linear-gradient(90deg,#E8336D,#7B3FE4);color:#fff;text-align:center;padding:10px 16px;font-weight:600;font-size:15px;margin:0 calc(50% - 50vw)"></div>
+  <header class="hero noprint">
+    <nav class="top"><a class="logo" href="/"><i>✓✓</i>Me Dejó en Visto</a><a class="btn" href="#cargar">Probar gratis</a></nav>
+    <div class="heroIn">
+      <div>
+        <h1>¿Te dejó en visto o te dejó de buscar?</h1>
+        <p class="lead">Tu chat de WhatsApp tiene la respuesta: quién busca a quién, cuánto tardan en contestar y cómo ha cambiado el cariño. Lo analizamos dentro de tu celular, nunca lo vemos.</p>
+        <div class="ctas"><a class="btn" href="#cargar">Analizar mi chat gratis</a><button class="btn ghost" type="button" onclick="document.getElementById('demoBtn').click()">Ver un ejemplo</button></div>
+        <ul class="trust"><li>🔒 Funciona hasta en modo avión</li><li>✨ Resumen gratis, sin registrarte</li><li>💳 Pago seguro con Wompi</li></ul>
+      </div>
+      <div class="chatmock" aria-hidden="true">
+        <div class="chathead"><span>❤️</span><div><b>Mi amor</b><small>últ. vez hoy a las 11:47 p. m.</small></div></div>
+        <div class="bb in" style="--d:.3s">¿Ya llegaste a la casa? 🙈<small>10:58 p. m.</small></div>
+        <div class="bb out" style="--d:1s">Sí, ya. ¿Y tú cómo vas?<small>11:02 p. m. ✓✓</small></div>
+        <div class="bb out" style="--d:1.7s">¿Hablamos mañana? 💬<small>11:05 p. m. <span class="vt">✓✓ Visto 11:47 p. m.</span></small></div>
+        <div class="escribe"><i></i><i></i><i></i></div>
+        <div class="insight" style="--d:4.4s"><b>Antes te respondía en 4 minutos. Desde marzo, en 2 horas.</b><small>Ejemplo con un chat ficticio</small></div>
+      </div>
+    </div>
   </header>
-
+<div class="main">
   <section class="card noprint" id="gate" hidden></section>
 
   <section class="card noprint" id="cargar">
-    <h2>1. Exporta tu chat</h2>
-    <p class="sub">Toma menos de un minuto. Elige <b>Sin archivos</b> para un análisis rápido, o <b>Incluir archivos</b> si quieres saber cuánto duran los audios y separar fotos, stickers y videos (el archivo pesa más).</p>
-    <div class="steps">
-      <div class="step"><b>Android</b>Abre el chat, toca los tres puntos, luego Más y Exportar chat. Guárdalo en tu teléfono.</div>
-      <div class="step"><b>iPhone</b>Abre el chat, toca el nombre del contacto y luego Exportar chat. Guárdalo en Archivos.</div>
-    </div>
-    <p class="note" style="text-align:center;margin:10px 0 0;font-size:14px">¿No te sale? <a href="exportar-chat-whatsapp" style="color:inherit;font-weight:600">Mira el paso a paso en video</a></p>
-    <h2>2. Cárgalo aquí</h2>
-    <label class="drop">
-      <input type="file" id="file" accept=".txt,.zip,text/plain,application/zip">
-      <strong>Toca para elegir el archivo</strong>
-      <span>Acepta el .zip o el .txt que exporta WhatsApp</span>
-    </label>
-    <p class="note" style="text-align:center;margin:10px 0 0;font-size:13px">Al cargar tu chat aceptas los <a href="terminos.html" style="color:inherit">términos</a> y el <a href="privacidad.html" style="color:inherit">aviso de privacidad</a>.</p>
-    <div style="text-align:center;margin-top:12px"><button class="btn ghost" id="demoBtn" type="button">Ver un ejemplo con un chat ficticio</button> <a class="btn ghost" id="waShare" target="_blank" rel="noopener">Enviárselo a alguien</a></div>
+    <h2>Tu informe en 3 pasos</h2>
+    <p class="sub">Toma menos de dos minutos. Tu chat nunca sale de tu celular.</p>
+    <ol class="pasos">
+      <li><h3>¿Qué chat vas a analizar?</h3>
+        <div class="tipo" role="group" aria-label="Tipo de chat"><button type="button" data-t="pareja" onclick="elegirTipo('pareja')">💞 Pareja</button><button type="button" data-t="casi" onclick="elegirTipo('casi')">🌀 Casi algo</button><button type="button" data-t="ex" onclick="elegirTipo('ex')">💔 Ex</button><button type="button" disabled>😂 Grupo de amigos, muy pronto</button></div></li>
+      <li><h3>Exporta el chat de WhatsApp</h3>
+        <div class="steps">
+          <div class="step"><b>Android</b>Abre el chat, toca los tres puntos, luego Más y Exportar chat.</div>
+          <div class="step"><b>iPhone</b>Abre el chat, toca el nombre del contacto y luego Exportar chat.</div>
+        </div>
+        <p class="note" style="margin:10px 0 0">Elige <b>Sin archivos</b> para ir rápido, o <b>Incluir archivos</b> si quieres medir los audios. ¿No te sale? <a href="exportar-chat-whatsapp" style="font-weight:600">Mira el paso a paso en video</a></p></li>
+      <li><h3>Cárgalo aquí</h3>
+        <label class="drop">
+          <input type="file" id="file" accept=".txt,.zip,text/plain,application/zip">
+          <strong>📎 Toca para elegir el archivo</strong>
+          <span>El .zip o el .txt que te dio WhatsApp</span>
+        </label>
+        <p class="note" style="margin:10px 0 0;font-size:13px">Al cargar tu chat aceptas los <a href="terminos.html">términos</a> y el <a href="privacidad.html">aviso de privacidad</a>.</p></li>
+    </ol>
+    <div style="text-align:center"><button class="btn ghost" id="demoBtn" type="button">Ver un ejemplo con un chat ficticio</button> <a class="btn ghost" id="waShare" target="_blank" rel="noopener">Enviárselo a alguien</a></div>
     <div class="note" id="status"></div>
     <div class="err" id="err" hidden></div>
   </section>
@@ -182,6 +263,21 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
     <a class="btn" href="https://form.jotform.com/262976977649081" target="_blank" rel="noopener">Dar mi opinión</a>
   </section>
 
+  <section class="card noprint" id="descubre">
+    <h2>Lo que vas a descubrir</h2>
+    <p class="sub">Así suenan los hallazgos, con la pareja ficticia del ejemplo.</p>
+    <div class="ejemplos">
+      <div class="ej">Laura empezaba <b>la mitad</b> de las conversaciones. Ahora, solo 1 de cada 3.</div>
+      <div class="ej">El primer "te amo" del chat lo escribió <b>Andrés</b>, un 6 de enero.</div>
+      <div class="ej">Su hora de despedirse: <b>11:29 p. m.</b>, casi todas las noches.</div>
+      <div class="ej">Llevan una racha de <b>647 días</b> sin dejar de hablarse.</div>
+    </div>
+  </section>
+
+  <section class="card noprint" id="privado">
+    <div class="avion"><div class="sw" aria-hidden="true"></div><div><h2>Haz la prueba del modo avión</h2><p class="sub" style="margin:0">Abre la página, activa el modo avión y carga tu chat. Funciona igual, porque todo pasa en tu celular. Nadie, ni nosotros, puede leer tu conversación.</p></div></div>
+  </section>
+
   <section class="card noprint" id="faq">
     <h2>Preguntas frecuentes</h2>
     <details><summary>¿Mi pareja se va a enterar?</summary><p>No. No enviamos mensajes, notificaciones ni nada a nadie. Todo pasa dentro de tu celular, con el archivo que tú exportas.</p></details>
@@ -195,10 +291,12 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
   </section>
 
   <footer>
-    <div style="margin-bottom:8px"><a href="privacidad.html" style="color:inherit">Privacidad</a> · <a href="terminos.html" style="color:inherit">Términos</a> · <a href="mailto:hola@medejoenvisto.com" style="color:inherit">hola@medejoenvisto.com</a> · <a href="https://www.instagram.com/medejoenvisto.app/" target="_blank" rel="noopener" style="color:inherit">Instagram</a> · <a href="https://www.tiktok.com/@medejoenvisto.app" target="_blank" rel="noopener" style="color:inherit">TikTok</a></div>
+    <div style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center"><a href="privacidad.html">Privacidad</a><a href="terminos.html">Términos</a><a href="mailto:hola@medejoenvisto.com">hola@medejoenvisto.com</a><a href="https://www.instagram.com/medejoenvisto.app/" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@medejoenvisto.app" target="_blank" rel="noopener">TikTok</a></div>
     Solo para mayores de 18 años. Me Dejó en Visto muestra patrones de comunicación. No determina infidelidad ni intenciones, y no reemplaza una conversación honesta ni el acompañamiento de un profesional.
   </footer>
 </div>
+</div>
+<div class="flotante noprint" id="flot"><a class="btn" href="#cargar">Analizar mi chat gratis</a></div>
 
 <script>
 /* ========= CONFIGURACIÓN DE LA EDICIÓN ========= */
@@ -537,7 +635,7 @@ document.addEventListener('click', async e=>{
   ev('pago_click');
   if (EDICION !== 'gratis' || !LAST_FILE) return;
   e.preventDefault();
-  try{ await Promise.race([IDB.set('pendiente', {file: LAST_FILE, me: LAST_ME, t: Date.now()}), new Promise(r=>setTimeout(r,1500))]); }catch(x){}
+  try{ await Promise.race([IDB.set('pendiente', {file: LAST_FILE, me: LAST_ME, tipo: TIPO, t: Date.now()}), new Promise(r=>setTimeout(r,1500))]); }catch(x){}
   location.href = PAY_URL;
 }, true);
 
@@ -651,13 +749,13 @@ const EMO_NO = /[🍆🍑💦👅😈🔞🥵]/u;
 function divertidos(A){
   const M = A.M, me = A.me, pa = A.pa, two = [me, pa];
   const z = ()=>({[me]:0, [pa]:0});
-  const perdon = z(), teamo = z(), insiste = z(), secas = z(), txt = z();
+  const perdon = z(), teamo = z(), insiste = z(), secas = z(), txt = z(), preg = z(), largo = z();
   let firstTeAmo = null, firstPerdon = null;
   let run = 0, runStart = null, prev = null;
   for (const m of M){
     if (!two.includes(m.who)) continue;
     if (!m.media && !m.del){
-      txt[m.who]++;
+      txt[m.who]++; largo[m.who] += m.text.length; if (m.text.includes('?')) preg[m.who]++;
       if (RE_PERDON.test(m.text)){ perdon[m.who]++; if (!firstPerdon) firstPerdon = m.who; }
       if (RE_TEAMO.test(m.text)){ teamo[m.who]++; if (!firstTeAmo) firstTeAmo = {who:m.who, t:m.t}; }
       if (SECAS.has(m.text.toLowerCase().replace(/[.!¡¿?\s]+/g,''))) secas[m.who]++;
@@ -685,7 +783,8 @@ function divertidos(A){
   const wc = {}, ec = {};
   for (const w of two){ for (const [k,v] of A.H[w].topWords) if (!RE_SEX.test(k)) wc[k] = (wc[k]||0)+v; for (const [k,v] of A.H[w].topEmo) if (!EMO_NO.test(k)) ec[k] = (ec[k]||0)+v; }
   const topW = Object.entries(wc).sort((a,b)=>b[1]-a[1]).slice(0,3), topE = Object.entries(ec).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  return {perdon, teamo, insiste, secas, txt, firstTeAmo, firstPerdon, rec, racha, despedida, pico, topW, topE};
+  const len = {[me]: txt[me] ? largo[me]/txt[me] : 0, [pa]: txt[pa] ? largo[pa]/txt[pa] : 0};
+  return {perdon, teamo, insiste, secas, txt, preg, len, firstTeAmo, firstPerdon, rec, racha, despedida, pico, topW, topE};
 }
 function horaTxt(mins){ mins = Math.round(mins) % 1440; let h = Math.floor(mins/60), mi = mins%60; const ap = h < 12 ? 'a. m.' : 'p. m.'; h = h%12 || 12; return h+':'+String(mi).padStart(2,'0')+' '+ap; }
 function quienGana(o, A, menos){ const a = o[A.me], b = o[A.pa]; if (!a && !b) return null; if (a === b) return 'empate'; return (menos ? a < b : a > b) ? 'me' : 'pa'; }
@@ -879,6 +978,86 @@ async function compartirPareja(){
   const u = URL.createObjectURL(blob); const l = document.createElement('a'); l.href = u; l.download = 'modo-pareja.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000);
 }
 
+/* ========= TIPO DE CHAT, QUIÉN PONE MÁS, LECTURA Y RECOMENDACIONES ========= */
+let TIPO = (()=>{ try{ return localStorage.getItem('mdv_tipo') || 'pareja'; }catch(e){ return 'pareja'; } })();
+const TIPOS = {pareja:'Pareja', casi:'Casi algo', ex:'Ex'};
+function elegirTipo(t){ TIPO = t; try{ localStorage.setItem('mdv_tipo', t); }catch(e){} document.querySelectorAll('.tipo button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.t === t)); }
+function inversion(A){
+  const D = A.D, me = A.me, pa = A.pa, a = A.E[me], b = A.E[pa];
+  const parts = [];
+  const share = (x, y) => (x + y) > 0 ? x / (x + y) : null;
+  parts.push(share(A.nMe, A.nPa));
+  if (a.initShare != null && b.initShare != null) parts.push(share(a.initShare, b.initShare));
+  if (a.resp != null && b.resp != null && a.resp + b.resp > 0) parts.push(share(1 / Math.max(a.resp, .5), 1 / Math.max(b.resp, .5)));
+  parts.push(share(D.preg[me], D.preg[pa]));
+  parts.push(share(D.len[me], D.len[pa]));
+  const v = parts.filter(x => x != null); if (!v.length) return null;
+  const me_ = Math.round(100 * v.reduce((s, x) => s + x, 0) / v.length);
+  return {me: me_, pa: 100 - me_};
+}
+function lectura(A){
+  const D = A.D, me = A.me, pa = A.pa, inv = inversion(A), S = k => A.S.find(s => s.k === k);
+  const dias = Math.max(1, Math.round(A.spanDays)).toLocaleString('es-CO'), tot = A.total.toLocaleString('es-CO');
+  const t = [];
+  t.push(TIPO === 'casi' ? dias+' días de "no somos nada" y '+tot+' mensajes en el medio.' : TIPO === 'ex' ? 'Este chat duró '+dias+' días y guarda '+tot+' mensajes.' : 'Llevan '+dias+' días de chat y '+tot+' mensajes.');
+  if (inv){
+    if (Math.abs(inv.me - 50) <= 5) t.push('Los dos ponen casi lo mismo: escriben, buscan y responden parejo.');
+    else if (inv.me > 50) t.push((TIPO === 'ex' ? 'Quien más ponía eras tú' : 'Hoy quien más pone eres tú')+': '+inv.me+'% del esfuerzo entre escribir primero, responder rápido y preguntar.');
+    else t.push((TIPO === 'ex' ? 'Quien más ponía era '+pa : 'Hoy quien más pone es '+pa)+': '+inv.pa+'% del esfuerzo entre escribir primero, responder rápido y preguntar.');
+  }
+  const fr = [], ok = [];
+  const r = S('resp'), i = S('ini'), f = S('aff'), v = S('vol'), n = S('neg');
+  const bad = x => x && (x.lv === 'fuerte' || x.lv === 'moderado');
+  if (bad(r)) fr.push(pa+' pasó de contestarte en '+fmtMin(r.b)+' a '+fmtMin(r.r));
+  if (bad(i)) fr.push(pa+' empieza menos conversaciones, de '+Math.round(i.b)+'% a '+Math.round(i.r)+'%');
+  if (bad(f)) fr.push('los mensajes cariñosos de '+pa+' bajaron de '+f.b.toFixed(1).replace('.',',')+' a '+f.r.toFixed(1).replace('.',',')+' por cada 100');
+  if (bad(v) && fr.length < 2) fr.push(pa+' escribe menos, de '+Math.round(v.b)+' a '+Math.round(v.r)+' mensajes al día');
+  if (bad(n) && fr.length < 2) fr.push('hay más mensajes tensos que antes');
+  [r, i, f, v].forEach(x => { if (x && x.lv === 'mejora') ok.push(x.t.toLowerCase()); });
+  if (fr.length > 1 && fr[1].startsWith(pa+' ') && fr[0].startsWith(pa+' ')) fr[1] = fr[1].slice(pa.length+1);
+  if (fr.length) t.push((TIPO === 'ex' ? 'Lo que más cambió hacia el final: ' : 'Lo que más cambió en los últimos meses: ')+fr.slice(0, 2).join(', y ')+'.');
+  else t.push(TIPO === 'ex' ? 'No hubo cambios fuertes: la forma en que se hablaban fue estable hasta el final.' : 'No hay cambios fuertes: la forma en que se hablan se mantiene estable.');
+  if (ok.length) t.push('Buena noticia: mejoró '+ok.slice(0, 2).join(' y ')+'.');
+  t.push(TIPO === 'casi' ? 'Los datos no deciden qué son, pero sí muestran quién está invirtiendo más.' : TIPO === 'ex' ? 'Mirarlo sirve para entender, no para culparte. Cerrar también es cuidarte.' : 'Nada de esto es una sentencia: es un buen punto de partida para una conversación tranquila.');
+  return t.join(' ');
+}
+function recomendaciones(A){
+  const D = A.D, me = A.me, pa = A.pa, inv = inversion(A), S = k => A.S.find(s => s.k === k), R = [];
+  const bad = x => x && (x.lv === 'fuerte' || x.lv === 'moderado');
+  const secas = w => D.txt[w] ? D.secas[w] / D.txt[w] : 0;
+  if (TIPO === 'ex'){
+    R.push({t:'Archiva el chat', d:'Si vuelves a leerlo de madrugada, archívalo. Lo que necesitas entender ya está en este informe, no en releer mensajes.'});
+    if (inv && inv.me > 58) R.push({t:'No eras exagerada ni exagerado', d:'Ponías el '+inv.me+'% del esfuerzo. Sentir que dabas más tenía fundamento; tenlo presente en tu próxima relación.'});
+    R.push({t:'Escribe lo que aprendiste', d:'Tres líneas: qué te gustó, qué no vuelves a aceptar y qué quieres para la próxima. Ayuda más que cualquier análisis.'});
+    R.push({t:'Habla con alguien', d:'Una amiga, un amigo o un psicólogo. Si la ruptura te pesa mucho, pedir apoyo es una decisión valiente.'});
+    return R.slice(0, 3);
+  }
+  if (TIPO === 'casi') R.push({t:'Pregunta directo qué son', d:'Los datos muestran el patrón, pero solo una conversación da la respuesta. Mejor en persona que por chat.'});
+  if (inv && inv.me >= 60) R.push({t:'Deja espacio para que te busquen', d:'Pones el '+inv.me+'% del esfuerzo. Prueba unos días sin ser siempre quien escribe primero y observa qué pasa.'});
+  if (inv && inv.me <= 40) R.push({t:'Equilibra la balanza', d:pa+' está poniendo el '+inv.pa+'% del esfuerzo. Un mensaje tuyo sin motivo, a mitad del día, equilibra mucho.'});
+  if (bad(S('resp'))) R.push({t:'Hablen de los tiempos', d:'No se trata de responder rápido, sino de acordar qué esperar del otro cuando el día está pesado.'});
+  if (bad(S('aff'))) R.push({t:'El cariño también se escribe', d:'Un "te pensé hoy" sin motivo cambia el tono de todo el chat. El suyo bajó; el tuyo puede empezar.'});
+  if (bad(S('neg'))) R.push({t:'Las peleas, mejor en persona', d:'Si una conversación se pone tensa, pásenla a llamada o a un café. Por chat todo se malinterpreta el doble.'});
+  if (D.preg[pa] + D.preg[me] > 0 && D.preg[pa] < D.preg[me] * 0.6) R.push({t:'Vuelvan a preguntarse por el día', d:'"¿Cómo te fue?" es la pregunta más subestimada. Hoy tú preguntas mucho más que '+pa+'; díselo con cariño.'});
+  if (secas(pa) > 0.15) R.push({t:'Menos "ok", más conversación', d:'Muchos "ok" y "ya" de '+pa+'. Antes de suponer, pregúntale en persona cómo está.'});
+  if (D.despedida != null && (D.despedida % 1440 >= 23*60 || D.despedida % 1440 < 300)) R.push({t:'Los temas importantes, antes de las 10', d:'Se despiden tarde, a eso de las '+horaTxt(D.despedida)+'. Con sueño todo suena peor; dejen lo serio para más temprano.'});
+  if (D.racha >= 14) R.push({t:'Celebren lo que funciona', d:'Tienen una racha de '+Math.min(D.racha, Math.max(1, Math.round(A.spanDays)))+' días seguidos hablando. Eso merece un plan juntos.'});
+  R.push({t:'Jueguen el modo pareja', d:'Adivinen quién escribe más y quién dijo "te amo" primero. Lo mejor es lo que hablan después.'});
+  return R.slice(0, 3);
+}
+function lecturaHTML(A, full){
+  const inv = inversion(A), recs = recomendaciones(A);
+  let h = '<section class="card lectura"><div class="lect-de">✓✓ La lectura de tu chat</div><p class="lect-txt">'+esc(lectura(A))+'</p></section>';
+  if (inv){
+    h += '<section class="card"><h2>'+(TIPO === 'ex' ? '¿Quién ponía más?' : '¿Quién pone más?')+'</h2><p class="sub">Combina quién escribe más, quién empieza, quién responde rápido, quién pregunta y quién escribe más largo.</p>';
+    h += '<div class="inv"><div style="width:'+inv.me+'%"><span>'+esc(A.me)+' '+inv.me+'%</span></div><div style="width:'+inv.pa+'%"><span>'+esc(A.pa)+' '+inv.pa+'%</span></div></div></section>';
+  }
+  const rc = r => '<div class="rec"><b>'+esc(r.t)+'</b><p>'+esc(r.d)+'</p></div>';
+  h += '<section class="card"><h2>3 recomendaciones para ustedes</h2><p class="sub">Según lo que muestran sus datos.</p>';
+  h += full ? recs.map(rc).join('') : rc(recs[0]) + lock(recs.slice(1).map(rc).join(''), 'Tus otras 2 recomendaciones');
+  return h + '</section>';
+}
+
 function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 const LV = {estable:'Estable', moderado:'Cambio moderado', fuerte:'Cambio marcado', mejora:'Mejoró', nd:'Sin datos suficientes'};
 function fmtV(v, f){ if (v===null||v===undefined||isNaN(v)) return 'sin datos'; if (f==='min') return fmtMin(v); if (f==='pct') return Math.round(v)+'%'; if (f==='rate') return v.toFixed(1).replace('.',','); return v.toFixed(1).replace('.',','); }
@@ -948,8 +1127,9 @@ function render(A, demo){
   h += '<section class="card"><h2>Resumen</h2><p class="sub">Del '+d(A.first)+' al '+d(A.last)+'</p>';
   h += '<div class="grid3"><div class="kpi"><div class="v">'+A.total.toLocaleString('es-CO')+'</div><div class="l">mensajes</div></div><div class="kpi"><div class="v">'+Math.max(1,Math.round(A.spanDays)).toLocaleString('es-CO')+'</div><div class="l">días de conversación</div></div><div class="kpi"><div class="v">'+Math.round(A.total/Math.max(1,A.spanDays))+'</div><div class="l">mensajes por día</div></div></div>';
   h += '<div class="split"><div style="width:'+pMe+'%"></div><div style="width:'+(100-pMe)+'%"></div></div><div class="legend"><span><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+' (tú) '+pMe+'%</span><span>'+esc(A.pa)+' '+(100-pMe)+'%<i class="dot" style="background:var(--b);margin:0 0 0 6px"></i></span></div></section>';
+  h += lecturaHTML(A, full);
   h += historiasCTA();
-  h += parejaCTA();
+  if (TIPO !== 'ex') h += parejaCTA();
 
   h += '<section class="card"><div class="index"><div class="ring" style="background:conic-gradient('+idxColor+' '+(A.index*3.6)+'deg, var(--line) 0)"><div style="width:96px;height:96px;border-radius:50%;background:var(--card);display:grid;place-items:center"><div><b>'+A.index+'</b><small>de 100</small></div></div></div><div><h2>Índice de cambio: '+idxLabel+'</h2><p class="sub" style="margin:0">Mide cuánto ha cambiado la forma en que '+esc(A.pa)+' se comunica contigo, comparando '+cutTxt+'. No mide infidelidad: muestra cambios de patrón que vale la pena conversar.</p>'+(A.enough?'':'<p class="err">Hay pocos mensajes en alguno de los dos periodos, así que las señales son poco confiables.</p>')+'</div></div></section>';
 
@@ -1050,6 +1230,7 @@ async function gate(){
     let p = null; try{ p = await IDB.get('pendiente'); }catch(e){}
     if (p && p.file && Date.now()-p.t < 86400000){
       g.innerHTML = '<div class="badge" style="margin:0">✅ Pago confirmado. Abriendo tu informe completo...</div>'; c.hidden = false;
+      if (p.tipo) elegirTipo(p.tipo);
       await cargarArchivo(p.file, p.me); try{ await IDB.del('pendiente'); }catch(e){}
       return;
     }
@@ -1068,6 +1249,10 @@ function promoBanner(){
   el.hidden = false;
 }
 promoBanner();
+elegirTipo(TIPO);
+try{ const fl = document.getElementById('flot'), vis = {hero:true, cargar:false};
+  const io = new IntersectionObserver(es=>{ es.forEach(e=>{ vis[e.target.id === 'cargar' ? 'cargar' : 'hero'] = e.isIntersecting; }); fl.classList.toggle('on', !vis.hero && !vis.cargar && document.getElementById('res').hidden && EDICION !== 'completa'); }, {threshold:.05});
+  io.observe(document.querySelector('.hero')); io.observe(document.getElementById('cargar')); }catch(e){}
 try{ document.getElementById('waShare').href = 'https://wa.me/?text='+encodeURIComponent('Mira esto 👀 Te dice con datos cómo ha cambiado la comunicación con tu pareja, y el chat no sale del celular: https://medejoenvisto.com'); }catch(e){}
 gate();
 </script>
