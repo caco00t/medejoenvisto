@@ -146,6 +146,12 @@ h3{letter-spacing:-.01em}
 .tl li.good::before{border-color:var(--ok)}
 .tl .m{font-weight:700;font-size:14px;text-transform:capitalize}
 .tl .t{font-size:14px;color:var(--ink)}
+.paywall ul.caps,.caps{list-style:none;padding:0;margin:12px 0 16px;display:grid;gap:8px}
+.paywall .caps li,.caps li{background:var(--card);display:flex;gap:12px;align-items:center;border-radius:14px;padding:10px 14px;font-weight:600;font-size:15px}
+.caps li b{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#fff;font-size:13px}
+.guardado{color:var(--ink);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--soft);border:1.5px solid var(--accent);border-radius:18px;padding:12px 16px;margin:12px 0}
+.guardado b{font-size:15px}.guardado .acc{display:flex;gap:8px;flex-wrap:wrap}
+.guardado button.link{background:none;border:0;color:var(--mute);text-decoration:underline;font:inherit;font-size:13px;cursor:pointer}
 .niveles{background:linear-gradient(135deg,#1E0B33,#3A1466);color:#fff;border:0}
 .niveles h2{color:#fff}.niveles .sub{color:#D9CCF2}
 .nv-bar{height:12px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden;margin:6px 0 14px}
@@ -333,8 +339,13 @@ const PROMO_ON = PROMO.pay.startsWith('https://') && Date.now() < PROMO.hasta.ge
 const REFS = { /* 'nombre': { normal: 'https://checkout.wompi.co/l/XXXX', promo: 'https://checkout.wompi.co/l/YYYY' } */ };
 const REF = (()=>{ try{ const q = new URLSearchParams(location.search).get('ref'); if (q){ const k = q.toLowerCase().replace(/[^a-z0-9_-]/g,''); localStorage.setItem('mdv_ref', JSON.stringify({k, t:Date.now()})); return k; } const s = JSON.parse(localStorage.getItem('mdv_ref')||'null'); return (s && Date.now()-s.t < 30*86400000) ? s.k : null; }catch(e){ return null; } })();
 const REF_LINK = REF && REFS[REF] ? (PROMO_ON ? (REFS[REF].promo || REFS[REF].normal) : REFS[REF].normal) : null;
-const PAY_URL = REF_LINK || (PROMO_ON ? PROMO.pay : PAY_NORMAL);
-const PRECIO  = PROMO_ON ? PROMO.precio : PRECIO_NORMAL;
+/* Oferta única para quien dejó su WhatsApp y vuelve desde el último recordatorio (?oferta=wa): 24 horas en este celular */
+const OFERTA_WA = { precio: '$9.900', pay: 'https://checkout.wompi.co/l/CxTcuo' };
+const OFERTA_ON = (()=>{ try{ if (EDICION !== 'gratis') return false; const q = new URLSearchParams(location.search).get('oferta'); let h = +localStorage.getItem('mdv_oferta') || 0;
+  if (q === 'wa' && localStorage.getItem('mdv_wa') === '1' && !h){ h = Date.now() + 86400000; localStorage.setItem('mdv_oferta', String(h)); }
+  return h > Date.now(); }catch(e){ return false; } })();
+const PAY_URL = REF_LINK || (PROMO_ON ? PROMO.pay : OFERTA_ON ? OFERTA_WA.pay : PAY_NORMAL);
+const PRECIO  = PROMO_ON ? PROMO.precio : OFERTA_ON ? OFERTA_WA.precio : PRECIO_NORMAL;
 document.querySelectorAll('.precioTxt').forEach(e=>e.textContent=PRECIO);
 const WOMPI_API = 'https://production.wompi.co/v1/transactions/';
 const MONTO_MIN = 1490000;            // en centavos: 14.900 pesos
@@ -644,7 +655,29 @@ const IDB = {
   get(k){ return this.tx('readonly', st=>st.get(k)); },
   del(k){ return this.tx('readwrite', st=>st.delete(k)); }
 };
-(async()=>{ try{ const p = await IDB.get('pendiente'); if (p && Date.now()-p.t > 86400000) await IDB.del('pendiente'); }catch(e){} })();
+(async()=>{ try{ const p = await IDB.get('pendiente'); if (p && Date.now()-p.t > 86400000) await IDB.del('pendiente'); const g = await IDB.get('guardado'); if (g && Date.now()-g.t > GUARDA_MS) await IDB.del('guardado'); }catch(e){} })();
+/* Quien deja su WhatsApp conserva su chat 7 días, solo en este celular, para volver a su informe desde nuestro mensaje */
+const GUARDA_MS = 7*86400000;
+async function guardarInforme(){ try{ if (LAST_FILE && LAST_ME) await IDB.set('guardado', {file: LAST_FILE, me: LAST_ME, tipo: TIPO, t: Date.now()}); }catch(e){} }
+async function abrirGuardado(){ try{ const g = await IDB.get('guardado'); if (!g || !g.file || Date.now()-g.t > GUARDA_MS) return false; if (g.tipo) elegirTipo(g.tipo); ev('vuelve'); await cargarArchivo(g.file, g.me); return true; }catch(e){ return false; } }
+async function borrarGuardado(btn){ try{ await IDB.del('guardado'); }catch(e){} const b = btn && btn.closest('.guardado'); if (b) b.remove(); }
+async function avisoGuardado(){
+  if (EDICION !== 'gratis') return;
+  let g = null; try{ g = await IDB.get('guardado'); }catch(e){}
+  const mi = new URLSearchParams(location.search).get('mi') === '1';
+  if (!g || !g.file || Date.now()-g.t > GUARDA_MS){
+    if (!mi) return;
+    const el = document.createElement('div'); el.className = 'guardado noprint';
+    el.innerHTML = '<div><b>No encontramos tu informe en este navegador</b><div class="note">Ábrelo en el mismo navegador donde cargaste tu chat, o vuelve a cargarlo: toma un minuto.</div></div><div class="acc"><a class="btn" href="#cargar">Cargar mi chat</a></div>';
+    const h = document.querySelector('.heroIn'); if (h) h.parentNode.insertBefore(el, h); return;
+  }
+  if (new URLSearchParams(location.search).get('mi') === '1'){ abrirGuardado(); return; }
+  const d = Math.max(1, Math.ceil((g.t + GUARDA_MS - Date.now())/86400000));
+  const el = document.createElement('div'); el.className = 'guardado noprint';
+  el.innerHTML = '<div><b>Tu informe sigue guardado en este celular</b><div class="note">Se borra solo en '+d+' día'+(d>1?'s':'')+'.</div></div><div class="acc"><button class="btn" type="button" onclick="abrirGuardado()">Abrir mi informe</button><button class="link" type="button" onclick="borrarGuardado(this)">Borrar ahora</button></div>';
+  const h = document.querySelector('.heroIn'); if (h) h.parentNode.insertBefore(el, h);
+}
+window.addEventListener('load', avisoGuardado);
 /* ===== Embudo anónimo: solo cuenta pasos, sin datos del chat ni de la persona ===== */
 /* Origen anónimo: de qué publicación llegaste (ej. ?src=halloween). Se guarda solo en este dispositivo y se suma como un conteo total. */
 const META_ADS = false; // se activa cuando arranque la pauta (ver worker/index.js)
@@ -1084,6 +1117,25 @@ function lecturaHTML(A, full){
   return h + '</section>';
 }
 
+// Capítulos del informe completo con nombres y cifras del propio chat (todo se calcula en el celular)
+function capitulos(A){
+  const me = A.me, pa = A.pa, n = (A.ev||[]).length - 1;
+  const del = A.series.reduce((t,x)=>t + ((x.pa && x.pa.del) || 0), 0);
+  const aud = (A.H[me].audios||0) + (A.H[pa].audios||0);
+  const pas = TIPO === 'ex';
+  return [
+    n > 0 ? 'La historia de su chat: '+n+' momento'+(n>1?'s':'')+' que lo cambiaron' : 'La historia de su chat, mes a mes',
+    'Cuánto '+(pas?'tardaba':'tarda')+' '+pa+' en responderte, mes a mes',
+    'Quién '+(pas?'decía':'dice')+' más "te amo": '+me+' o '+pa,
+    'Quién '+(pas?'escribía':'escribe')+' de madrugada',
+    del > 0 ? pa+' borró '+del+' mensaje'+(del>1?'s':'')+': mira en qué meses' : null,
+    'Las emociones de '+pa+': alegría, cariño, celos y más',
+    aud > 0 ? 'Quién manda más audios y cuánto duran' : 'Llamadas, memes y fotos de cada uno',
+    'Las 15 palabras favoritas de cada uno'
+  ].filter(Boolean);
+}
+function senalesOcultas(A){ return A.S.slice(2).filter(x=>x.lv==='fuerte'||x.lv==='moderado').length; }
+
 // Niveles: resumen gratis → WhatsApp (muestra) → compartir (recomendación) → informe completo
 function gano(k){ try{ return localStorage.getItem('mdv_'+k) === '1'; }catch(e){ return false; } }
 function ganar(k){
@@ -1103,7 +1155,7 @@ function nivelesHTML(A){
     {ok:true, t:'Resumen y lectura', d:'Ya lo tienes', tag:'Listo'},
     {ok:wa, t:'El mes en que todo cambió', d:'Deja tu WhatsApp', tag:wa?'Listo':'Gratis', go:'#muestra'},
     {ok:comp, t:'Tu segunda recomendación', d:'Comparte tus historias o juega en pareja', tag:comp?'Listo':'Gratis', go:'#hist-cta'},
-    {ok:false, t:'Informe completo', d:'Señales, emociones, hábitos y toda la historia', tag:PRECIO, go:PAY_URL}];
+    {ok:false, t:'Informe completo', d:capitulos(A).length+' capítulos más sobre ti y '+esc(A.pa), tag:PRECIO, go:PAY_URL}];
   const n = pasos.filter(p=>p.ok).length, next = pasos.findIndex(p=>!p.ok);
   let h = '<section class="card niveles noprint"><h2>Tu informe va al '+[0,25,50,75][n]+'%</h2><p class="sub">'+(n>=3?'Ya desbloqueaste todo lo gratis. Lo demás está en tu informe completo.':'Desbloquea cada nivel. '+(n===1?'Los dos siguientes son gratis.':'El siguiente es gratis.'))+'</p><div class="nv-bar"><i style="width:'+[0,25,50,75][n]+'%"></i></div>';
   h += pasos.map((p,i)=>'<div class="nv'+(p.ok?' ok':i===next?' next':'')+'"><div class="ic">'+(p.ok?'✓':i+1)+'</div><div><b>'+p.t+'</b><small>'+p.d+'</small></div>'+(p.ok||!p.go?'<span class="tag">'+p.tag+'</span>':'<a class="tag" style="color:inherit;text-decoration:none" href="'+p.go+'"'+(p.go[0]==='#'?' onclick="event.preventDefault();var el=document.querySelector(\''+p.go+'\');if(el)el.scrollIntoView({behavior:\'smooth\',block:\'center\'})"':'')+'>'+p.tag+' →</a>')+'</div>').join('');
@@ -1136,6 +1188,7 @@ async function enviarWA(f){
       const r = await fetch('/api/wa', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({tel:t, ok:true, tipo:TIPO, src:SRC, ed:EDICION})});
       if (!r.ok) throw new Error('wa');
     }
+    await guardarInforme();
     ganar('wa');
   }catch(e){ b.disabled = false; b.textContent = 'Ver mi momento clave'; err.textContent = 'No pudimos guardar tu número. Revisa tu conexión e inténtalo otra vez.'; }
 }
@@ -1209,7 +1262,7 @@ function render(A, demo, quieto){
   h += '<section class="card"><h2>Resumen</h2><p class="sub">Del '+d(A.first)+' al '+d(A.last)+'</p>';
   h += '<div class="grid3"><div class="kpi"><div class="v">'+A.total.toLocaleString('es-CO')+'</div><div class="l">mensajes</div></div><div class="kpi"><div class="v">'+Math.max(1,Math.round(A.spanDays)).toLocaleString('es-CO')+'</div><div class="l">días de conversación</div></div><div class="kpi"><div class="v">'+Math.round(A.total/Math.max(1,A.spanDays))+'</div><div class="l">mensajes por día</div></div></div>';
   h += '<div class="split"><div style="width:'+pMe+'%"></div><div style="width:'+(100-pMe)+'%"></div></div><div class="legend"><span><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+' (tú) '+pMe+'%</span><span>'+esc(A.pa)+' '+(100-pMe)+'%<i class="dot" style="background:var(--b);margin:0 0 0 6px"></i></span></div></section>';
-  if (!full) h += nivelesHTML(A);
+  if (!full){ h += nivelesHTML(A); if (gano('wa') && !DEMO) guardarInforme(); }
   h += lecturaHTML(A, full);
   if (!full) h += muestraHTML(A);
   h += historiasCTA();
@@ -1221,7 +1274,7 @@ function render(A, demo, quieto){
   h += sigCard(sig[0]) + sigCard(sig[1]);
   if (full) h += sig.slice(2).map(sigCard).join('');
   h += '</div>';
-  if (!full) h += '<div style="margin-top:16px">'+lock('<div class="grid2">'+fakeSig('Tiempo de respuesta')+fakeSig('Expresiones de afecto')+fakeSig('Actividad nocturna')+fakeSig('Mensajes eliminados')+fakeSig('Intimidad')+fakeSig('Tono negativo')+'</div>','6 señales más')+'</div>';
+  if (!full) h += '<div style="margin-top:16px">'+lock('<div class="grid2">'+fakeSig('Tiempo de respuesta')+fakeSig('Expresiones de afecto')+fakeSig('Actividad nocturna')+fakeSig('Mensajes eliminados')+fakeSig('Intimidad')+fakeSig('Tono negativo')+'</div>', senalesOcultas(A) ? '6 señales más: '+senalesOcultas(A)+' con cambios' : '6 señales más')+'</div>';
   h += '</section>';
 
   h += chartBox('cVol','Mensajes por mes','Cuánto escribe cada uno, mes a mes.');
@@ -1240,14 +1293,14 @@ function render(A, demo, quieto){
     h += '<section class="card"><h2>La historia de tu chat</h2><p class="sub">Los momentos en que la comunicación cambió.</p><ul class="tl">'+A.ev.map(e=>'<li class="'+(e.good?'good':'')+'"><div class="m">'+monthLabel(e.k,true)+'</div><div class="t">'+esc(e.t)+'</div></li>').join('')+'</ul></section>';
   } else {
     h += emoTeaser(A) + wordsHTML(A, 5);
-    h += lock('<section class="card"><h2>Hábitos del chat</h2><table class="tbl"><tr><td>Audios enviados</td><td>000</td><td>000</td></tr><tr><td>Duración promedio de un audio</td><td>0 min</td><td>0 min</td></tr><tr><td>Llamadas</td><td>00</td><td>00</td></tr><tr><td>Stickers y GIF (memes)</td><td>000</td><td>000</td></tr></table></section><section class="card"><h2>Lugares más mencionados</h2><p>Casa 00</p><p>Oficina 00</p></section>', 'Emociones, audios, llamadas, memes y lugares');
-    h += '<section class="card paywall noprint"><h2>Tu informe completo</h2><p class="sub">Pago único de '+PRECIO+'. Se abre al instante y lo descargas en PDF.</p><ul><li>Tiempo de respuesta de cada uno, mes a mes</li><li>Evolución del afecto, la intimidad y la actividad nocturna</li><li>Mensajes eliminados</li><li>Las emociones de cada uno: alegría, cariño, deseo, enojo, tristeza, ansiedad y celos</li><li>Audios, llamadas, memes y lugares más mencionados</li><li>Las 15 palabras y emojis que más usa cada uno</li><li>La historia de tu chat: los meses en que todo cambió</li></ul><ol class="note" style="padding-left:20px;margin:0 0 14px"><li>Paga con Nequi, PSE o tarjeta.</li><li>Al aprobarse el pago, se abre tu informe completo automáticamente.</li><li>Tu informe se abre solo con este mismo chat. Si pagas desde otro navegador, vuelve a cargar el archivo.</li></ol><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="'+PAY_URL+'">Pagar '+PRECIO+'</a>'+(AYUDA_URL?'<a class="btn ghost" href="'+AYUDA_URL+'" target="_blank" rel="noopener">¿Problemas con el pago?</a>':'')+'</div><p class="note" style="margin-top:10px">Tu chat sigue sin salir de tu teléfono: lo guardamos solo en tu celular mientras pagas y lo borramos al abrir el informe.</p></section>';
+    h += lock('<section class="card"><h2>Hábitos del chat</h2><table class="tbl"><tr><td>Audios enviados</td><td>000</td><td>000</td></tr><tr><td>Duración promedio de un audio</td><td>0 min</td><td>0 min</td></tr><tr><td>Llamadas</td><td>00</td><td>00</td></tr><tr><td>Stickers y GIF (memes)</td><td>000</td><td>000</td></tr></table></section><section class="card"><h2>Lugares más mencionados</h2><p>Casa 00</p><p>Oficina 00</p></section>', 'Las emociones de '+esc(A.pa)+', sus audios, llamadas y lugares');
+    h += '<section class="card paywall noprint"><h2>Te faltan '+capitulos(A).length+' capítulos</h2><p class="sub">Pago único de '+PRECIO+'. Se abre al instante y lo descargas en PDF.</p><ul class="caps">'+capitulos(A).map((c,i)=>'<li><b>'+(i+1)+'</b>'+esc(c)+'</li>').join('')+'</ul><ol class="note" style="padding-left:20px;margin:0 0 14px"><li>Paga con Nequi, PSE o tarjeta.</li><li>Al aprobarse el pago, se abre tu informe completo automáticamente.</li><li>Tu informe se abre solo con este mismo chat. Si pagas desde otro navegador, vuelve a cargar el archivo.</li></ol><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="'+PAY_URL+'">Pagar '+PRECIO+'</a>'+(AYUDA_URL?'<a class="btn ghost" href="'+AYUDA_URL+'" target="_blank" rel="noopener">¿Problemas con el pago?</a>':'')+'</div><p class="note" style="margin-top:10px">Tu chat sigue sin salir de tu teléfono: lo guardamos solo en tu celular mientras pagas y lo borramos al abrir el informe.</p></section>';
   }
   h += '<section class="card close"><h2>Antes de sacar conclusiones</h2><p>Estos datos muestran patrones, no intenciones. Un cambio puede deberse a trabajo, cansancio, salud, estrés o simple rutina. Si algo te inquieta, conversa con tu pareja con calma, desde lo que sientes y no desde un puntaje. Si la situación te está afectando, buscar apoyo en terapia de pareja o con un psicólogo es una decisión valiente.</p></section>';
   if (!full && !DEMO) h += '<section class="card noprint" style="text-align:center;border:2px dashed var(--accent)"><h2>🎁 Gana el informe completo gratis</h2><p class="sub" style="margin:6px 0 0">Toca <b>Crear mis historias</b>, súbelas a tu Instagram y etiqueta a <b>@medejoenvisto.app</b>. Te enviamos el acceso completo por mensaje. Válido para las primeras 30 personas.</p></section>';
   h += '<div class="noprint" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'+(full && !DEMO ? '<button class="btn" onclick="descargarPDF(this)">Descargar informe en PDF</button>' : '')+'<button class="btn ghost" onclick="abrirHistorias()">✨ Crear mis historias</button></div>';
 
-  $('#res').innerHTML = h; $('#res').hidden = false;
+  $('#res').innerHTML = h; $('#res').hidden = false; { const fl = document.getElementById('flot'); if (fl) fl.classList.remove('on'); }
   charts.forEach(c=>c.destroy()); charts = [];
   const L = A.series.map(s=>monthLabel(s.k));
   const ca = css('--a'), cb = css('--b'), grid = css('--line'), ink = css('--mute');
@@ -1315,7 +1368,7 @@ async function gate(){
     if (p && p.file && Date.now()-p.t < 86400000){
       g.innerHTML = '<div class="badge" style="margin:0">✅ Pago confirmado. Abriendo tu informe completo...</div>'; c.hidden = false;
       if (p.tipo) elegirTipo(p.tipo);
-      await cargarArchivo(p.file, p.me); try{ await IDB.del('pendiente'); }catch(e){}
+      await cargarArchivo(p.file, p.me); try{ await IDB.del('pendiente'); await IDB.del('guardado'); }catch(e){}
       return;
     }
     g.innerHTML = '<div class="badge" style="margin:0">✅ Pago confirmado. Carga tu chat para ver el informe completo.</div>'; c.hidden = false; return; }
@@ -1328,7 +1381,9 @@ async function gate(){
   g.innerHTML = '<h2>'+msg[0]+'</h2><p class="sub">'+msg[1]+'</p><div style="display:flex;gap:10px;flex-wrap:wrap">'+((st==='none'||st==='usado'||st==='invalido')?'<a class="btn" href="'+PAY_URL+'">Pagar '+PRECIO+'</a>':'<button class="btn" onclick="gate()">Reintentar</button>')+''+(AYUDA_URL?'<a class="btn ghost" href="'+AYUDA_URL+'" target="_blank" rel="noopener">Pedir ayuda</a>':'')+'</div>';
 }
 function promoBanner(){
-  const el = document.getElementById('promo'); if (!PROMO_ON){ el.hidden = true; return; }
+  const el = document.getElementById('promo');
+  if (!PROMO_ON && OFERTA_ON){ let h = 0; try{ h = +localStorage.getItem('mdv_oferta'); }catch(e){} const hr = Math.max(1, Math.ceil((h - Date.now())/3600000)); el.innerHTML = '🎁 Tu oferta por dejar tu WhatsApp: <b>'+OFERTA_WA.precio+'</b> <s style="opacity:.75">'+PRECIO_NORMAL+'</s> · vence en '+hr+' hora'+(hr>1?'s':''); el.hidden = false; return; }
+  if (!PROMO_ON){ el.hidden = true; return; }
   el.innerHTML = '🎉 Precio de lanzamiento: <b>'+PROMO.precio+'</b> <s style="opacity:.75">'+PRECIO_NORMAL+'</s> · solo para las primeras 10 compras';
   el.hidden = false;
 }
