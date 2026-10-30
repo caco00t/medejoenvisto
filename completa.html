@@ -146,6 +146,31 @@ h3{letter-spacing:-.01em}
 .tl li.good::before{border-color:var(--ok)}
 .tl .m{font-weight:700;font-size:14px;text-transform:capitalize}
 .tl .t{font-size:14px;color:var(--ink)}
+.niveles{background:linear-gradient(135deg,#1E0B33,#3A1466);color:#fff;border:0}
+.niveles h2{color:#fff}.niveles .sub{color:#D9CCF2}
+.nv-bar{height:12px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden;margin:6px 0 14px}
+.nv-bar i{display:block;height:100%;background:linear-gradient(90deg,#7FB6FF,#E8336D);border-radius:999px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.nv{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid rgba(255,255,255,.1)}
+.nv .ic{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:rgba(255,255,255,.12)}
+.nv.ok .ic{background:#7FB6FF;color:#1E0B33}.nv.next .ic{background:#E8336D;animation:latido 1.6s infinite}
+.nv b{display:block;font-size:15.5px}.nv small{color:#CBBCE6;font-size:13px}
+.nv .tag{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12);white-space:nowrap}
+.nv.ok .tag{background:#7FB6FF;color:#1E0B33}
+@keyframes latido{0%,100%{box-shadow:0 0 0 0 rgba(232,51,109,.6)}50%{box-shadow:0 0 0 8px rgba(232,51,109,0)}}
+.muestra{border:2px solid var(--accent)}
+.wa-f{display:grid;gap:10px;margin-top:12px}
+.wa-f .tel{display:flex;border:1.5px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg)}
+.wa-f .tel span{padding:13px 12px;font-weight:700;color:var(--mute);border-right:1.5px solid var(--line)}
+.wa-f input[type=tel]{flex:1;border:0;background:transparent;padding:13px 12px;font:inherit;font-size:17px;color:var(--ink);min-width:0}
+.wa-f input[type=tel]:focus{outline:none}.wa-f .tel:focus-within{border-color:var(--accent)}
+.wa-f label.ck{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--mute);line-height:1.45}
+.wa-f label.ck input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.wa-err{color:var(--bad);font-size:14px;margin:0;min-height:1em}
+.momento{background:var(--soft);border-radius:var(--burbuja);padding:16px 18px;margin-top:12px}
+.momento .m{font-weight:800;color:var(--accent);font-size:14px;text-transform:uppercase;letter-spacing:.04em}
+.momento .t{font-size:18px;font-weight:700;margin-top:4px;line-height:1.35}
+.ganado{animation:aparece .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes aparece{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
 .locked{position:relative;overflow:hidden;border-radius:14px}
 .locked .blur{filter:blur(6px);pointer-events:none;user-select:none;opacity:.7}
 .lockcta{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;background:linear-gradient(180deg,transparent,var(--card) 55%)}
@@ -802,7 +827,7 @@ function divertidosHTML(A){
   if (rows.length) h += '<table class="tbl"><tr><th></th><th><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+'</th><th><i class="dot" style="background:var(--b)"></i>'+esc(A.pa)+'</th></tr>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+(r[1]==='me'?'<b>'+r[2]+'</b>':r[2])+'</td><td>'+(r[1]==='pa'?'<b>'+r[3]+'</b>':r[3])+'</td></tr>').join('')+'</table>';
   return h + '</section>';
 }
-function historiasCTA(){ return '<section class="card noprint" style="text-align:center;background:linear-gradient(135deg,#c2185b,#4a148c);color:#fff;border:0"><h2 style="color:#fff">✨ Su chat en historias</h2><p style="margin:6px 0 14px;opacity:.9">Su récord, su racha, su hora y quién es quién, listo para subir a Instagram. Sin nada íntimo.</p><button class="btn" style="background:#fff;color:#8e1659" onclick="abrirHistorias()">Crear mis historias</button></section>'; }
+function historiasCTA(){ return '<section class="card noprint" id="hist-cta" style="text-align:center;background:linear-gradient(135deg,#c2185b,#4a148c);color:#fff;border:0"><h2 style="color:#fff">✨ Su chat en historias</h2><p style="margin:6px 0 14px;opacity:.9">Su récord, su racha, su hora y quién es quién, listo para subir a Instagram. Sin nada íntimo.</p><button class="btn" style="background:#fff;color:#8e1659" onclick="abrirHistorias()">Crear mis historias</button></section>'; }
 
 let HIST = {i:0, nombres:false, urls:[], blobs:[]};
 async function slidesHistorias(A, nombres){
@@ -885,7 +910,7 @@ function mostrarHist(){ const im = document.getElementById('himg'); im.src = HIS
 function pasoHist(d){ HIST.i = Math.max(0, Math.min(HIST.blobs.length-1, HIST.i + d)); mostrarHist(); }
 function cerrarHist(){ document.getElementById('hist').hidden = true; document.body.style.overflow = ''; }
 async function compartirHist(todas){
-  ev('historias_compartir');
+  ev('historias_compartir'); ganar('comp');
   const sel = todas ? HIST.blobs.map((b,i)=>[b,i]) : [[HIST.blobs[HIST.i], HIST.i]];
   const files = sel.map(([b,i])=>new File([b], 'mi-chat-'+(i+1)+'.png', {type:'image/png'}));
   try{ if (navigator.canShare && navigator.canShare({files})){ await navigator.share({files, text:'Nuestro chat en datos 👀 ¿Y el de ustedes? medejoenvisto.com'}); return; } }catch(e){ if (e && e.name === 'AbortError') return; }
@@ -973,7 +998,7 @@ async function compartirPareja(){
   x.font = F(800,52); x.fillText('medejoenvisto.com', 540, 1720);
   x.globalAlpha = .8; x.font = F(500,32); x.fillText('🔒 El chat nunca sale del celular', 540, 1800); x.globalAlpha = 1;
   const blob = await new Promise(r=>c.toBlob(r,'image/png')); const file = new File([blob], 'modo-pareja.png', {type:'image/png'});
-  ev('pareja_compartir');
+  ev('pareja_compartir'); ganar('comp');
   try{ if (navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], text:'¿Qué tanto conocen su relación? Jueguen gratis en medejoenvisto.com'}); return; } }catch(e){ if (e && e.name === 'AbortError') return; }
   const u = URL.createObjectURL(blob); const l = document.createElement('a'); l.href = u; l.download = 'modo-pareja.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000);
 }
@@ -1054,8 +1079,65 @@ function lecturaHTML(A, full){
   }
   const rc = r => '<div class="rec"><b>'+esc(r.t)+'</b><p>'+esc(r.d)+'</p></div>';
   h += '<section class="card"><h2>3 recomendaciones para ustedes</h2><p class="sub">Según lo que muestran sus datos.</p>';
-  h += full ? recs.map(rc).join('') : rc(recs[0]) + lock(recs.slice(1).map(rc).join(''), 'Tus otras 2 recomendaciones');
+  const extra = !full && gano('comp') ? 1 : 0;
+  h += full ? recs.map(rc).join('') : recs.slice(0, 1+extra).map(rc).join('') + (extra ? '' : '<p class="note" style="margin:4px 0 10px">🎁 Comparte tus historias o juega en pareja y desbloquea la segunda gratis.</p>') + lock(recs.slice(1+extra).map(rc).join(''), extra ? 'Tu tercera recomendación' : 'Tus otras 2 recomendaciones');
   return h + '</section>';
+}
+
+// Niveles: resumen gratis → WhatsApp (muestra) → compartir (recomendación) → informe completo
+function gano(k){ try{ return localStorage.getItem('mdv_'+k) === '1'; }catch(e){ return false; } }
+function ganar(k){
+  if (gano(k)) return; try{ localStorage.setItem('mdv_'+k, '1'); }catch(e){}
+  if (LAST && EDICION !== 'completa' && !DEMO){ const y = window.scrollY; render(LAST, false, true); window.scrollTo(0, y); }
+}
+function momentoClave(A){
+  const c = (A.ev||[]).slice(1); if (!c.length) return null;
+  const pct = e => { const m = e.t.match(/(\d+)%/); return m ? +m[1] : 0; };
+  const peso = e => pct(e) + (/afecto|intimidad|tardar|negativo/.test(e.t) ? 40 : 0) + (e.good ? -10 : 0);
+  const top = c.slice().sort((a,b)=>peso(b)-peso(a))[0];
+  return {e: top, resto: c.length - 1};
+}
+function nivelesHTML(A){
+  const wa = gano('wa'), comp = gano('comp');
+  const pasos = [
+    {ok:true, t:'Resumen y lectura', d:'Ya lo tienes', tag:'Listo'},
+    {ok:wa, t:'El mes en que todo cambió', d:'Deja tu WhatsApp', tag:wa?'Listo':'Gratis', go:'#muestra'},
+    {ok:comp, t:'Tu segunda recomendación', d:'Comparte tus historias o juega en pareja', tag:comp?'Listo':'Gratis', go:'#hist-cta'},
+    {ok:false, t:'Informe completo', d:'Señales, emociones, hábitos y toda la historia', tag:PRECIO, go:PAY_URL}];
+  const n = pasos.filter(p=>p.ok).length, next = pasos.findIndex(p=>!p.ok);
+  let h = '<section class="card niveles noprint"><h2>Tu informe va al '+[0,25,50,75][n]+'%</h2><p class="sub">'+(n>=3?'Ya desbloqueaste todo lo gratis. Lo demás está en tu informe completo.':'Desbloquea cada nivel. '+(n===1?'Los dos siguientes son gratis.':'El siguiente es gratis.'))+'</p><div class="nv-bar"><i style="width:'+[0,25,50,75][n]+'%"></i></div>';
+  h += pasos.map((p,i)=>'<div class="nv'+(p.ok?' ok':i===next?' next':'')+'"><div class="ic">'+(p.ok?'✓':i+1)+'</div><div><b>'+p.t+'</b><small>'+p.d+'</small></div>'+(p.ok||!p.go?'<span class="tag">'+p.tag+'</span>':'<a class="tag" style="color:inherit;text-decoration:none" href="'+p.go+'"'+(p.go[0]==='#'?' onclick="event.preventDefault();var el=document.querySelector(\''+p.go+'\');if(el)el.scrollIntoView({behavior:\'smooth\',block:\'center\'})"':'')+'>'+p.tag+' →</a>')+'</div>').join('');
+  return h + '</section>';
+}
+function muestraHTML(A){
+  const M = momentoClave(A), wa = gano('wa');
+  let h = '<section class="card muestra noprint'+(wa?' ganado':'')+'" id="muestra"><h2>📍 El mes en que todo cambió</h2>';
+  if (wa){
+    if (!M) return h + '<p class="sub">Buenas noticias: en tu chat no hay ningún mes con un cambio brusco. La comunicación ha sido pareja en el tiempo.</p></section>';
+    h += '<p class="sub">El momento con el cambio más fuerte de tu chat.</p><div class="momento"><div class="m">'+monthLabel(M.e.k,true)+'</div><div class="t">'+esc(M.e.t)+'</div></div>';
+    if (M.resto > 0) h += '<div style="margin-top:12px">'+lock('<ul class="tl"><li><div class="m">Mes 00</div><div class="t">Cambio en la forma de responder de los dos.</div></li><li><div class="m">Mes 00</div><div class="t">Cambio en el afecto del chat.</div></li><li><div class="m">Mes 00</div><div class="t">Cambio en la hora en que escriben.</div></li></ul>', 'Y '+M.resto+' momento'+(M.resto>1?'s':'')+' más en tu historia')+'</div>';
+    return h + '</section>';
+  }
+  h += '<p class="sub">Encontramos el mes en que la comunicación de tu chat cambió más. Déjanos tu WhatsApp y te lo mostramos ya, gratis.</p>';
+  h += '<div class="momento" style="filter:blur(5px);user-select:none" aria-hidden="true"><div class="m">Mes 0000</div><div class="t">Aquí aparece qué cambió y cuánto.</div></div>';
+  h += '<form class="wa-f" onsubmit="event.preventDefault();enviarWA(this)"><div class="tel"><span>+57</span><input type="tel" name="tel" inputmode="numeric" autocomplete="tel-national" placeholder="300 123 4567" maxlength="16" aria-label="Tu número de WhatsApp"></div>';
+  h += '<label class="ck"><input type="checkbox" name="ok"><span>Acepto recibir mensajes de Me Dejó en Visto por WhatsApp con novedades y promociones. Puedo pedir que no me escriban más en cualquier momento. <a href="/privacidad.html#whatsapp" target="_blank" rel="noopener">Aviso de privacidad</a></span></label>';
+  h += '<p class="wa-err" role="alert"></p><button class="btn" type="submit">Ver mi momento clave</button><p class="note" style="margin:0">Solo guardamos tu número. Tu chat sigue sin salir de tu celular.</p></form>';
+  return h + '</section>';
+}
+async function enviarWA(f){
+  const err = f.querySelector('.wa-err'); err.textContent = '';
+  let t = f.tel.value.replace(/\D/g,''); if (t.length === 12 && t.startsWith('57')) t = t.slice(2);
+  if (!/^3\d{9}$/.test(t)){ err.textContent = 'Escribe un celular de Colombia de 10 dígitos, por ejemplo 300 123 4567.'; f.tel.focus(); return; }
+  if (!f.ok.checked){ err.textContent = 'Para enviarte novedades necesitamos tu autorización.'; return; }
+  const b = f.querySelector('button'); b.disabled = true; b.textContent = 'Desbloqueando...';
+  try{
+    if (location.protocol.startsWith('http')){
+      const r = await fetch('/api/wa', {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({tel:t, ok:true, tipo:TIPO, src:SRC, ed:EDICION})});
+      if (!r.ok) throw new Error('wa');
+    }
+    ganar('wa');
+  }catch(e){ b.disabled = false; b.textContent = 'Ver mi momento clave'; err.textContent = 'No pudimos guardar tu número. Revisa tu conexión e inténtalo otra vez.'; }
 }
 
 function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
@@ -1112,7 +1194,7 @@ function fakeSig(t){ return '<div class="sig"><span class="pill p-moderado">Camb
 function lock(inner, msg){ return '<div class="locked"><div class="blur">'+inner+'</div><div class="lockcta"><b>🔒 '+msg+'</b><p>Inclúyelo en tu informe completo por '+PRECIO+'.</p><a class="btn" href="'+PAY_URL+'">Desbloquear informe</a></div></div>'; }
 function chartBox(id, title, sub){ return '<div class="card"><h2>'+title+'</h2><p class="sub">'+sub+'</p><div class="chart"><canvas id="'+id+'"></canvas></div></div>'; }
 
-function render(A, demo){
+function render(A, demo, quieto){
   LAST = A; DEMO = !!demo;
   if (!A.D) A.D = divertidos(A);
   const full = EDICION === 'completa' || DEMO;
@@ -1127,7 +1209,9 @@ function render(A, demo){
   h += '<section class="card"><h2>Resumen</h2><p class="sub">Del '+d(A.first)+' al '+d(A.last)+'</p>';
   h += '<div class="grid3"><div class="kpi"><div class="v">'+A.total.toLocaleString('es-CO')+'</div><div class="l">mensajes</div></div><div class="kpi"><div class="v">'+Math.max(1,Math.round(A.spanDays)).toLocaleString('es-CO')+'</div><div class="l">días de conversación</div></div><div class="kpi"><div class="v">'+Math.round(A.total/Math.max(1,A.spanDays))+'</div><div class="l">mensajes por día</div></div></div>';
   h += '<div class="split"><div style="width:'+pMe+'%"></div><div style="width:'+(100-pMe)+'%"></div></div><div class="legend"><span><i class="dot" style="background:var(--a)"></i>'+esc(A.me)+' (tú) '+pMe+'%</span><span>'+esc(A.pa)+' '+(100-pMe)+'%<i class="dot" style="background:var(--b);margin:0 0 0 6px"></i></span></div></section>';
+  if (!full) h += nivelesHTML(A);
   h += lecturaHTML(A, full);
+  if (!full) h += muestraHTML(A);
   h += historiasCTA();
   if (TIPO !== 'ex') h += parejaCTA();
 
@@ -1184,7 +1268,7 @@ function render(A, demo){
   mk2('cAud', s=>s.audios, 'bar');
   mk2('cEmo', s=>s.textN>=20 && s.balance!==null ? Math.round(s.balance) : null, 'line');
   mk2('cMeme', s=>s.memes, 'bar');
-  $('#res').scrollIntoView({behavior:'smooth'});
+  if (!quieto) $('#res').scrollIntoView({behavior:'smooth'});
 }
 
 async function codigoRegalo(){
