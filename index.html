@@ -1250,6 +1250,16 @@ function promoBanner(){
 }
 promoBanner();
 elegirTipo(TIPO);
+function irACargar(e){
+  if (e) e.preventDefault();
+  const c = document.getElementById('cargar'), g = document.getElementById('gate');
+  const t = !c.hidden ? c : (!g.hidden ? g : document.getElementById('res'));
+  if (t && !t.hidden) t.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
+}
+document.querySelectorAll('a[href="#cargar"]').forEach(a => {
+  a.addEventListener('click', irACargar);
+  if (EDICION === 'completa') a.textContent = a.closest('.top') ? 'Mi informe' : 'Abrir mi informe completo';
+});
 try{ const fl = document.getElementById('flot'), vis = {hero:true, cargar:false};
   const io = new IntersectionObserver(es=>{ es.forEach(e=>{ vis[e.target.id === 'cargar' ? 'cargar' : 'hero'] = e.isIntersecting; }); fl.classList.toggle('on', !vis.hero && !vis.cargar && document.getElementById('res').hidden && EDICION !== 'completa'); }, {threshold:.05});
   io.observe(document.querySelector('.hero')); io.observe(document.getElementById('cargar')); }catch(e){}
