@@ -152,6 +152,17 @@ h3{letter-spacing:-.01em}
 .guardado{color:var(--ink);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--soft);border:1.5px solid var(--accent);border-radius:18px;padding:12px 16px;margin:12px 0}
 .guardado b{font-size:15px}.guardado .acc{display:flex;gap:8px;flex-wrap:wrap}
 .guardado button.link{background:none;border:0;color:var(--mute);text-decoration:underline;font:inherit;font-size:13px;cursor:pointer}
+.gbars{display:grid;gap:8px;margin-top:14px}
+.gb{display:grid;grid-template-columns:minmax(70px,26%) 1fr 44px;gap:10px;align-items:center;font-size:14.5px}
+.gb span{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gb div{height:12px;border-radius:999px;background:var(--soft);overflow:hidden}.gb i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--a),var(--accent))}
+.gb b{text-align:right;font-size:13.5px;color:var(--mute)}
+.elenco{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:12px}
+.premio{display:flex;gap:14px;align-items:center;background:var(--soft);border-radius:var(--burbuja);padding:14px 16px}
+.premio .pi{font-size:34px;line-height:1;flex:none}
+.premio small{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+.premio b{display:block;font-size:19px;margin:2px 0}.premio p{margin:0;font-size:13.5px;color:var(--mute)}
+.premio.bloq{opacity:.75}.premio .oculto{filter:blur(6px);user-select:none}
 .niveles{background:linear-gradient(135deg,#1E0B33,#3A1466);color:#fff;border:0}
 .niveles h2{color:#fff}.niveles .sub{color:#D9CCF2}
 .nv-bar{height:12px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden;margin:6px 0 14px}
@@ -260,7 +271,7 @@ body.pdfmode .card,body.pdfmode .sig{break-inside:avoid}
     <p class="sub">Toma menos de dos minutos. Tu chat nunca sale de tu celular.</p>
     <ol class="pasos">
       <li><h3>¿Qué chat vas a analizar?</h3>
-        <div class="tipo" role="group" aria-label="Tipo de chat"><button type="button" data-t="pareja" onclick="elegirTipo('pareja')">💞 Pareja</button><button type="button" data-t="casi" onclick="elegirTipo('casi')">🌀 Casi algo</button><button type="button" data-t="ex" onclick="elegirTipo('ex')">💔 Ex</button><button type="button" disabled>😂 Grupo de amigos, muy pronto</button></div></li>
+        <div class="tipo" role="group" aria-label="Tipo de chat"><button type="button" data-t="pareja" onclick="elegirTipo('pareja')">💞 Pareja</button><button type="button" data-t="casi" onclick="elegirTipo('casi')">🌀 Casi algo</button><button type="button" data-t="ex" onclick="elegirTipo('ex')">💔 Ex</button><button type="button" data-t="grupo" onclick="elegirTipo('grupo')">😂 Grupo de amigos</button></div></li>
       <li><h3>Exporta el chat de WhatsApp</h3>
         <div class="steps">
           <div class="step"><b>Android</b>Abre el chat, toca los tres puntos, luego Más y Exportar chat.</div>
@@ -721,11 +732,18 @@ async function cargarArchivo(f, autoMe){
     }
     $('#status').textContent = '';
     if (DATA.people.length < 2 || DATA.msgs.length < 50) throw new Error('No encontramos suficientes mensajes entre dos personas. Revisa que sea el chat exportado de WhatsApp con al menos 50 mensajes.');
+    if (TIPO === 'grupo'){
+      if (DATA.people.length < 3) throw new Error('Este chat es entre dos personas. Elige Pareja, Casi algo o Ex arriba y vuelve a cargarlo.');
+      LAST_FILE = f; LAST_ME = '__grupo__';
+      ev(EDICION==='completa' ? 'informe' : 'resumen'); ev('grupo');
+      renderGrupo(analizarGrupo(DATA.msgs), EDICION === 'completa');
+      if (EDICION==='completa'){ const q = document.getElementById('encuesta'); if (q) q.hidden = false; }
+      return;
+    }
     const [p1,p2] = DATA.people;
     const third = DATA.people[2];
-    $('#quienSub').textContent = third && third[1] > 0.05*DATA.msgs.length
-      ? 'Parece un chat de grupo. Analizaremos a las dos personas que más escriben.'
-      : 'Encontramos '+DATA.msgs.length.toLocaleString('es-CO')+' mensajes. Elige tu nombre para comparar contigo a tu pareja.';
+    if (third && third[1] > 0.05*DATA.msgs.length) $('#quienSub').innerHTML = 'Parece un chat de grupo. <button class="btn" type="button" style="margin:8px 0" onclick="elegirTipo(\'grupo\');cargarArchivo(LAST_FILE)">😂 Verlo como grupo</button><br>O elige tu nombre para comparar solo a las dos personas que más escriben.';
+    else $('#quienSub').textContent = 'Encontramos '+DATA.msgs.length.toLocaleString('es-CO')+' mensajes. Elige tu nombre para comparar contigo a tu pareja.';
     $('#whoBtns').innerHTML = [p1,p2].map((p,i)=>'<button class="btn '+(i?'ghost':'')+'" data-i="'+i+'">'+esc(p[0])+'</button>').join('');
     LAST_FILE = f;
     document.querySelectorAll('#whoBtns button').forEach(b=>b.onclick=()=>{
@@ -1036,9 +1054,140 @@ async function compartirPareja(){
   const u = URL.createObjectURL(blob); const l = document.createElement('a'); l.href = u; l.download = 'modo-pareja.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000);
 }
 
+/* ========= MODO GRUPO: EL ELENCO DEL GRUPO (todo se calcula en el celular) ========= */
+let LAST_G = null;
+const RE_RISA = /(ja){2,}|(je){2,}|(ji){2,}|jsjs|😂|🤣/i;
+const PREMIOS = [
+  {k:'alma', i:'🗣️', t:'Alma del grupo', v:s=>s.n, d:(s,G)=>Math.round(100*s.n/G.total)+'% de todos los mensajes'},
+  {k:'visto', i:'👀', t:'Deja en visto', min:s=>s.respN>=5, v:s=>s.resp, d:s=>'tarda '+fmtMin(s.resp)+' en contestar'},
+  {k:'revive', i:'⚡', t:'Revive el grupo', min:s=>s.ini>=3, v:s=>s.ini, d:s=>'empezó '+s.ini+' conversaciones'},
+  {k:'buho', i:'🦉', t:'Búho nocturno', min:s=>s.n>=20 && s.night>=5, v:s=>s.night/s.n, d:s=>Math.round(100*s.night/s.n)+'% de sus mensajes de 11 p. m. a 5 a. m.'},
+  {k:'audios', i:'🎙️', t:'Audios eternos', min:s=>s.aud>=3, v:s=>s.aud, d:s=>s.aud+' audios'},
+  {k:'stickers', i:'🃏', t:'Stickers sin control', min:s=>s.stk>=3, v:s=>s.stk, d:s=>s.stk+' stickers y GIF'},
+  {k:'risa', i:'😂', t:'Risa fácil', min:s=>s.risa>=5, v:s=>s.risa, d:s=>s.risa+' jajajás'},
+  {k:'testamento', i:'📜', t:'Escribe testamentos', min:s=>s.txt>=20, v:s=>s.len/s.txt, d:s=>Math.round(s.len/s.txt)+' letras por mensaje'},
+  {k:'pregunta', i:'❓', t:'Pregunta todo', min:s=>s.q>=5, v:s=>s.q, d:s=>s.q+' preguntas'},
+  {k:'fotos', i:'📸', t:'Paparazzi', min:s=>s.img>=3, v:s=>s.img, d:s=>s.img+' fotos y videos'},
+  {k:'madruga', i:'🌅', t:'Madruga', min:s=>s.n>=20 && s.early>=5, v:s=>s.early/s.n, d:s=>Math.round(100*s.early/s.n)+'% de sus mensajes antes de las 9 a. m.'},
+  {k:'carino', i:'🥰', t:'Cariño puro', min:s=>s.aff>=3, v:s=>s.aff, d:s=>s.aff+' mensajes cariñosos'},
+  {k:'fantasma', i:'👻', t:'Fantasma', min:(s,G)=>G.miembros.length>=4, v:s=>-s.n, d:s=>'solo '+s.n+' mensajes'}
+];
+function nombreCorto(n){ const w = String(n).replace(/[^\p{L}\p{N}\s.'-]/gu,'').trim().split(/\s+/)[0]; return w || n; }
+function analizarGrupo(msgs){
+  const cnt = {}; msgs.forEach(m=>cnt[m.who]=(cnt[m.who]||0)+1);
+  const total = msgs.length, minN = Math.max(5, Math.round(total*0.005));
+  const nombres = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).filter(([,n])=>n>=minN).slice(0,12).map(([w])=>w);
+  const S = {}; nombres.forEach(w=>S[w] = {w, n:0, night:0, early:0, aud:0, stk:0, img:0, q:0, len:0, txt:0, risa:0, aff:0, ini:0, rl:[], del:0});
+  const pares = {}, dias = {}, horas = new Array(24).fill(0);
+  let prev = null;
+  for (const m of msgs){
+    const h = m.t.getHours(); horas[h]++;
+    const dk = m.t.getFullYear()+'-'+(m.t.getMonth()+1)+'-'+m.t.getDate(); dias[dk] = (dias[dk]||0)+1;
+    const s = S[m.who];
+    const gap = prev ? (m.t - prev.t)/60000 : Infinity;
+    if (s){
+      s.n++; if (h >= 23 || h < 5) s.night++; if (h >= 5 && h < 9) s.early++;
+      if (m.kind === 'audio') s.aud++; if (m.kind === 'sticker' || m.kind === 'gif') s.stk++; if (m.kind === 'image' || m.kind === 'video') s.img++;
+      if (m.del) s.del++;
+      if (m.kind === 'text' && !m.del){ s.txt++; s.len += m.text.length; if (m.text.includes('?')) s.q++; if (RE_RISA.test(m.text)) s.risa++; if (RE_AFF.test(m.text)) s.aff++; }
+      if (prev && gap >= 360) s.ini++;
+      if (prev && prev.who !== m.who && gap <= 720){ s.rl.push(gap); if (S[prev.who]){ const k = [prev.who, m.who].sort().join('|'); pares[k] = (pares[k]||0)+1; } }
+    }
+    prev = m;
+  }
+  nombres.forEach(w=>{ const s = S[w]; s.respN = s.rl.length; s.resp = median(s.rl); });
+  const G = {total, miembros: nombres.map(w=>S[w]), first: msgs[0].t, last: msgs[msgs.length-1].t};
+  G.spanDays = Math.max(1, (G.last - G.first)/86400000);
+  const dr = Object.entries(dias).sort((a,b)=>b[1]-a[1])[0]; G.record = dr ? {k:dr[0], n:dr[1]} : null;
+  G.hora = horas.indexOf(Math.max(...horas));
+  const pr = Object.entries(pares).sort((a,b)=>b[1]-a[1])[0]; G.par = pr ? {a:pr[0].split('|')[0], b:pr[0].split('|')[1], n:pr[1]} : null;
+  // premios: siempre para quien de verdad tiene el valor más alto; si esa persona ya tiene 2, el premio no se entrega
+  const cuenta = {}; G.premios = [];
+  for (const P of PREMIOS){
+    const c = G.miembros.filter(s=>!P.min || P.min(s, G)).filter(s=>P.v(s) !== null && !isNaN(P.v(s))).sort((a,b)=>P.v(b)-P.v(a));
+    if (!c.length) continue;
+    const g = c[0]; if ((cuenta[g.w]||0) >= 2) continue; cuenta[g.w] = (cuenta[g.w]||0) + 1;
+    G.premios.push({k:P.k, i:P.i, t:P.t, w:g.w, d:P.d(g, G)});
+  }
+  return G;
+}
+function premiosVisibles(G, full){ return full ? G.premios.length : Math.min(G.premios.length, 3 + (gano('wa')?1:0) + (gano('comp')?1:0)); }
+function horaTxt(h){ return h === 0 ? '12 a. m.' : h < 12 ? h+' a. m.' : h === 12 ? '12 m.' : (h-12)+' p. m.'; }
+function diaTxt(k){ const [y,mo,d] = k.split('-').map(Number); return d+' de '+['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][mo-1]+' de '+y; }
+function renderGrupo(G, full, quieto){
+  LAST_G = G; LAST = null;
+  const vis = premiosVisibles(G, full), faltan = G.premios.length - vis;
+  const nm = w => esc(nombreCorto(w));
+  let h = '<div class="pdfhead"><b>✓✓ Me Dejó en Visto</b><div class="note">El elenco del grupo</div></div>';
+  h += '<section class="card"><h2>El grupo en números</h2><p class="sub">'+G.miembros.length+' personas activas, del '+G.first.getDate()+' '+MES[G.first.getMonth()]+' '+G.first.getFullYear()+' al '+G.last.getDate()+' '+MES[G.last.getMonth()]+' '+G.last.getFullYear()+'</p>';
+  h += '<div class="grid3"><div class="kpi"><div class="v">'+G.total.toLocaleString('es-CO')+'</div><div class="l">mensajes</div></div><div class="kpi"><div class="v">'+Math.round(G.spanDays).toLocaleString('es-CO')+'</div><div class="l">días</div></div><div class="kpi"><div class="v">'+Math.round(G.total/G.spanDays)+'</div><div class="l">mensajes por día</div></div></div>';
+  const mx = G.miembros[0].n;
+  h += '<div class="gbars">'+G.miembros.slice(0,8).map(s=>'<div class="gb"><span>'+nm(s.w)+'</span><div><i style="width:'+Math.max(3,100*s.n/mx)+'%"></i></div><b>'+Math.round(100*s.n/G.total)+'%</b></div>').join('')+'</div></section>';
+  if (!full){
+    const wa = gano('wa'), comp = gano('comp');
+    const pasos = [{ok:true, t:'El grupo en números y 3 premios', d:'Ya lo tienes'}, {ok:wa, t:'Un premio más', d:'Deja tu WhatsApp', go:'#g-wa'}, {ok:comp, t:'Otro premio', d:'Comparte el elenco', go:'#g-share'}, {ok:false, t:'El elenco completo', d:'Todos los premios, la pareja del grupo y el día récord', go:PAY_URL, tag:PRECIO}];
+    const n = pasos.filter(p=>p.ok).length, next = pasos.findIndex(p=>!p.ok);
+    h += '<section class="card niveles noprint"><h2>Tu elenco va al '+[0,25,50,75][n]+'%</h2><p class="sub">Desbloquea premios. Los dos siguientes son gratis.</p><div class="nv-bar"><i style="width:'+[0,25,50,75][n]+'%"></i></div>';
+    h += pasos.map((p,i)=>'<div class="nv'+(p.ok?' ok':i===next?' next':'')+'"><div class="ic">'+(p.ok?'✓':i+1)+'</div><div><b>'+p.t+'</b><small>'+p.d+'</small></div>'+(p.ok?'<span class="tag">Listo</span>':'<a class="tag" style="color:inherit;text-decoration:none" href="'+p.go+'">'+(p.tag||'Gratis')+' →</a>')+'</div>').join('')+'</section>';
+  }
+  h += '<section class="card"><h2>🏆 El elenco del grupo</h2><p class="sub">Quién es quién, según los datos del chat.</p><div class="elenco">';
+  h += G.premios.map((p,i)=> i < vis
+    ? '<div class="premio'+(i>=3?' ganado':'')+'"><div class="pi">'+p.i+'</div><div><small>'+esc(p.t)+'</small><b>'+nm(p.w)+'</b><p>'+esc(p.d)+'</p></div></div>'
+    : '<div class="premio bloq"><div class="pi">'+p.i+'</div><div><small>'+esc(p.t)+'</small><b class="oculto">██████</b><p>🔒 Bloqueado</p></div></div>').join('');
+  h += '</div></section>';
+  if (!full && !gano('wa')){
+    h += '<section class="card muestra noprint" id="g-wa"><h2>👀 Desbloquea un premio más, gratis</h2><p class="sub">Déjanos tu WhatsApp y te mostramos quién se lleva el siguiente premio.</p>';
+    h += '<form class="wa-f" onsubmit="event.preventDefault();enviarWA(this)"><div class="tel"><span>+57</span><input type="tel" name="tel" inputmode="numeric" autocomplete="tel-national" placeholder="300 123 4567" maxlength="16" aria-label="Tu número de WhatsApp"></div>';
+    h += '<label class="ck"><input type="checkbox" name="ok"><span>Acepto recibir mensajes de Me Dejó en Visto por WhatsApp con novedades y promociones. Puedo pedir que no me escriban más en cualquier momento. <a href="/privacidad.html#whatsapp" target="_blank" rel="noopener">Aviso de privacidad</a></span></label>';
+    h += '<p class="wa-err" role="alert"></p><button class="btn" type="submit">Ver el siguiente premio</button><p class="note" style="margin:0">Solo guardamos tu número. Tu chat sigue sin salir de tu celular.</p></form></section>';
+  }
+  h += '<section class="card noprint" id="g-share" style="text-align:center;background:linear-gradient(135deg,#E8336D,#4A148C);color:#fff;border:0"><h2 style="color:#fff">📲 Mándalo al grupo</h2><p style="margin:6px 0 14px;opacity:.92">Una imagen con el elenco para el grupo o tus estados. Solo primeros nombres, nada de los mensajes.'+(!full && !gano('comp') ? ' Al compartirla desbloqueas otro premio.' : '')+'</p><button class="btn" style="background:#fff;color:#8e1659" onclick="compartirGrupo()">Compartir el elenco</button></section>';
+  if (full){
+    h += '<section class="card"><h2>Lo que más los une</h2><div class="grid3">';
+    if (G.par) h += '<div class="kpi"><div class="l">💞 La pareja del grupo</div><div class="v" style="font-size:20px">'+nm(G.par.a)+' y '+nm(G.par.b)+'</div><div class="l">se responden '+G.par.n.toLocaleString('es-CO')+' veces</div></div>';
+    if (G.record) h += '<div class="kpi"><div class="l">🔥 El día récord</div><div class="v" style="font-size:20px">'+diaTxt(G.record.k)+'</div><div class="l">'+G.record.n.toLocaleString('es-CO')+' mensajes en un día</div></div>';
+    h += '<div class="kpi"><div class="l">⏰ La hora pico</div><div class="v" style="font-size:20px">'+horaTxt(G.hora)+'</div><div class="l">cuando más escriben</div></div></div></section>';
+    h += '<section class="card"><h2>El ranking completo</h2><table class="tbl"><tr><th></th><th>Mensajes</th><th>Audios</th><th>Stickers</th><th>Responde en</th></tr>'+G.miembros.map(s=>'<tr><td>'+nm(s.w)+'</td><td>'+s.n.toLocaleString('es-CO')+'</td><td>'+s.aud+'</td><td>'+s.stk+'</td><td>'+(s.resp!==null?fmtMin(s.resp):'sin datos')+'</td></tr>').join('')+'</table></section>';
+  } else {
+    h += '<section class="card paywall noprint"><h2>'+(faltan ? 'Te faltan '+faltan+' premio'+(faltan>1?'s':'')+' y 3 capítulos' : 'Te faltan 3 capítulos')+'</h2><p class="sub">Pago único de '+PRECIO+'. Se abre al instante.</p><ul class="caps">'+['Todos los premios del elenco', 'La pareja del grupo: quiénes se responden más', 'El día récord y la hora pico', 'El ranking completo de cada persona'].map((c,i)=>'<li><b>'+(i+1)+'</b>'+c+'</li>').join('')+'</ul><a class="btn" href="'+PAY_URL+'">Ver el elenco completo por '+PRECIO+'</a><p class="note" style="margin-top:10px">Tu chat sigue sin salir de tu teléfono.</p></section>';
+  }
+  h += '<section class="card close"><h2>Es un juego</h2><p>Los premios salen de contar mensajes, horas y tipos de mensaje. Muestran hábitos del chat, no cómo es cada persona.</p></section>';
+  if (full && !DEMO) h += '<div class="noprint" style="display:flex;justify-content:center"><button class="btn" onclick="descargarPDF(this)">Descargar en PDF</button></div>';
+  $('#res').innerHTML = h; $('#res').hidden = false; { const fl = document.getElementById('flot'); if (fl) fl.classList.remove('on'); }
+  if (!full && gano('wa') && !DEMO) guardarInforme();
+  if (!quieto) $('#res').scrollIntoView({behavior:'smooth'});
+}
+async function compartirGrupo(){
+  const G = LAST_G; if (!G) return;
+  const full = EDICION === 'completa' || DEMO, vis = premiosVisibles(G, full), P = G.premios.slice(0, vis), faltan = G.premios.length - vis;
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const x = c.getContext('2d');
+  const F = (w,sz)=>w+' '+sz+'px "Bricolage Grotesque", Inter, system-ui, sans-serif';
+  const gr = x.createLinearGradient(0,0,1080,1920); gr.addColorStop(0,'#1E0B33'); gr.addColorStop(1,'#4A148C'); x.fillStyle = gr; x.fillRect(0,0,1080,1920);
+  x.textAlign = 'center'; x.fillStyle = '#7FB6FF'; x.font = F(700,40); x.fillText('✓✓ ME DEJÓ EN VISTO', 540, 150);
+  x.fillStyle = '#fff'; x.font = F(800,92); x.fillText('El elenco', 540, 280); x.fillText('del grupo', 540, 380);
+  const n = Math.min(P.length, 7), rowH = 170, bloque = n*rowH + (G.premios.length > vis ? 90 : 0), y0 = Math.max(450, 440 + (1180 - bloque)/2);
+  for (let i = 0; i < n; i++){
+    const p = P[i], y = y0 + i*rowH;
+    x.fillStyle = 'rgba(255,255,255,.1)'; rrect(x, 90, y, 900, 146, 38); x.fill();
+    x.fillStyle = '#fff'; x.textAlign = 'center'; x.font = F(400,70); x.fillText(p.i, 175, y + 98);
+    x.textAlign = 'left'; x.fillStyle = '#CBBCE6'; x.font = F(600,34); x.fillText(p.t.toUpperCase(), 255, y + 60);
+    x.fillStyle = '#fff'; x.font = F(800,50); x.fillText(nombreCorto(p.w).slice(0,18), 255, y + 118);
+  }
+  x.textAlign = 'center';
+  const yb = y0 + n*rowH + 40;
+  if (faltan > 0){ x.fillStyle = '#E8336D'; x.font = F(700,44); x.fillText('y '+faltan+' premio'+(faltan>1?'s':'')+' más 🔒', 540, yb + 20); }
+  x.fillStyle = '#fff'; x.globalAlpha = .9; x.font = F(500,40); x.fillText('¿Y en tu grupo quién deja en visto?', 540, 1690); x.globalAlpha = 1;
+  x.font = F(800,56); x.fillText('medejoenvisto.com', 540, 1770);
+  x.globalAlpha = .8; x.font = F(500,32); x.fillText('🔒 El chat nunca sale del celular', 540, 1840); x.globalAlpha = 1;
+  const blob = await new Promise(r=>c.toBlob(r,'image/png')); const file = new File([blob], 'elenco-del-grupo.png', {type:'image/png'});
+  ev('grupo_compartir'); ganar('comp');
+  try{ if (navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], text:'El elenco de nuestro grupo 😂 Hagan el suyo gratis en medejoenvisto.com'}); return; } }catch(e){ if (e && e.name === 'AbortError') return; }
+  const u = URL.createObjectURL(blob); const l = document.createElement('a'); l.href = u; l.download = 'elenco-del-grupo.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000);
+}
+
 /* ========= TIPO DE CHAT, QUIÉN PONE MÁS, LECTURA Y RECOMENDACIONES ========= */
 let TIPO = (()=>{ try{ return localStorage.getItem('mdv_tipo') || 'pareja'; }catch(e){ return 'pareja'; } })();
-const TIPOS = {pareja:'Pareja', casi:'Casi algo', ex:'Ex'};
+const TIPOS = {pareja:'Pareja', casi:'Casi algo', ex:'Ex', grupo:'Grupo'};
 function elegirTipo(t){ TIPO = t; try{ localStorage.setItem('mdv_tipo', t); }catch(e){} document.querySelectorAll('.tipo button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.t === t)); }
 function inversion(A){
   const D = A.D, me = A.me, pa = A.pa, a = A.E[me], b = A.E[pa];
@@ -1140,7 +1289,7 @@ function senalesOcultas(A){ return A.S.slice(2).filter(x=>x.lv==='fuerte'||x.lv=
 function gano(k){ try{ return localStorage.getItem('mdv_'+k) === '1'; }catch(e){ return false; } }
 function ganar(k){
   if (gano(k)) return; try{ localStorage.setItem('mdv_'+k, '1'); }catch(e){}
-  if (LAST && EDICION !== 'completa' && !DEMO){ const y = window.scrollY; render(LAST, false, true); window.scrollTo(0, y); }
+  if (EDICION !== 'completa' && !DEMO){ const y = window.scrollY; if (TIPO === 'grupo' && LAST_G) renderGrupo(LAST_G, false, true); else if (LAST) render(LAST, false, true); window.scrollTo(0, y); }
 }
 function momentoClave(A){
   const c = (A.ev||[]).slice(1); if (!c.length) return null;
